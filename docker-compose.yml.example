@@ -1,0 +1,33 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: invoice-master-app
+    volumes:
+       - ./:/var/www/html:cached
+       - vendor:/var/www/html/vendor
+    ports:
+      - "8083:80"
+    depends_on:
+      - db
+    environment:
+      APACHE_DOCUMENT_ROOT: /var/www/html/public
+
+  db:
+    image: mysql:8.0
+    container_name: invoice-master-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: Admin@321!
+      MYSQL_DATABASE: invoice-master-data
+      MYSQL_USER: invoice-master
+      MYSQL_PASSWORD: invoicepass
+    ports:
+      - "3307:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+
+volumes:
+  dbdata:
+  vendor:
