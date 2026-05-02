@@ -7,12 +7,23 @@
                         <i class="fa fa-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#6c757d;pointer-events:none;"></i>
                         <input type="search" wire:model.live.debounce.300ms="search" class="form-control form-control-sm" style="padding-left:34px;" placeholder="Search design/lot...">
                     </div>
-                    <select class="form-control form-control-sm" style="width: 200px;" wire:model.live="lotFilterId">
-                        <option value="">All Lots</option>
-                        @foreach($slotOptions as $slot)
-                            <option value="{{ $slot->id }}">{{ $slot->slot_name }}</option>
-                        @endforeach
-                    </select>
+                    <div id="ruhi-gs-lots-anchor-lot-filter" class="d-none" data-s2-value="{{ $lotFilterId ?? '' }}"></div>
+                    <input type="hidden" wire:model.live="lotFilterId" id="ruhi-gs-lots-hidden-lot-filter">
+                    <div wire:ignore class="d-inline-block" style="width: 200px;">
+                        <select
+                            id="ruhi-gs-lots-select-lot-filter"
+                            class="form-control form-control-sm js-ruhi-master-select2"
+                            style="width: 100%; min-width: 200px;"
+                            data-s2-hidden="#ruhi-gs-lots-hidden-lot-filter"
+                            data-s2-anchor="#ruhi-gs-lots-anchor-lot-filter"
+                            data-s2-placeholder="All Lots"
+                        >
+                            <option value="">All Lots</option>
+                            @foreach($slotOptions as $slot)
+                                <option value="{{ $slot->id }}">{{ $slot->slot_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
                 <div class="d-flex flex-wrap align-items-center" style="gap:8px;">
                 <button type="button" class="btn btn-primary btn-sm" wire:click="openAddLotModal">
@@ -158,12 +169,24 @@
                                 <div class="col-md-3">
                                     <div class="form-group mb-0">
                                         @if($i === 0)<label class="mb-1">Select Design</label>@endif
-                                        <select class="form-control form-control-sm @error('addLotRows.'.$i.'.design_id') is-invalid @enderror" wire:model.defer="addLotRows.{{ $i }}.design_id">
-                                            <option value="">Select Design</option>
-                                            @foreach($designs as $design)
-                                                <option value="{{ $design->id }}">{{ $design->design_name }}</option>
-                                            @endforeach
-                                        </select>
+                                        <div id="ruhi-gs-lot-add-anchor-{{ $i }}" class="d-none" data-s2-value="{{ $row['design_id'] ?? '' }}"></div>
+                                        <input type="hidden" wire:model.defer="addLotRows.{{ $i }}.design_id" id="ruhi-gs-lot-add-hidden-{{ $i }}" class="@error('addLotRows.'.$i.'.design_id') is-invalid @enderror">
+                                        <div wire:ignore class="w-100">
+                                            <select
+                                                id="ruhi-gs-lot-add-select-{{ $i }}"
+                                                class="form-control form-control-sm js-ruhi-master-select2 @error('addLotRows.'.$i.'.design_id') is-invalid @enderror"
+                                                data-s2-hidden="#ruhi-gs-lot-add-hidden-{{ $i }}"
+                                                data-s2-anchor="#ruhi-gs-lot-add-anchor-{{ $i }}"
+                                                data-s2-placeholder="Select Design"
+                                                data-s2-dropdown-parent="modal"
+                                                data-s2-dropdown-class="design-product-select2-dropdown"
+                                            >
+                                                <option value="">Select Design</option>
+                                                @foreach($designs as $design)
+                                                    <option value="{{ $design->id }}">{{ $design->design_name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
                                         @error('addLotRows.'.$i.'.design_id') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                     </div>
                                 </div>
@@ -231,12 +254,25 @@
                             <div class="col-md-3">
                                 <div class="form-group mb-0">
                                     <label class="mb-1">Select Lot <span class="text-danger">*</span></label>
-                                    <select class="form-control form-control-sm @error('selectedLotId') is-invalid @enderror" wire:model.defer="selectedLotId">
-                                        <option value="">Select Lot</option>
-                                        @foreach($slotOptions as $slot)
-                                            <option value="{{ $slot->id }}">{{ $slot->slot_name }}</option>
-                                        @endforeach
-                                    </select>
+                                    <div id="ruhi-gs-item-modal-anchor-lot" class="d-none" data-s2-value="{{ $selectedLotId ?? '' }}"></div>
+                                    <input type="hidden" wire:model.defer="selectedLotId" id="ruhi-gs-item-modal-hidden-lot" class="@error('selectedLotId') is-invalid @enderror">
+                                    <div wire:ignore class="w-100">
+                                        <select
+                                            id="ruhi-gs-item-modal-select-lot"
+                                            class="form-control form-control-sm js-ruhi-master-select2 @error('selectedLotId') is-invalid @enderror"
+                                            data-s2-hidden="#ruhi-gs-item-modal-hidden-lot"
+                                            data-s2-anchor="#ruhi-gs-item-modal-anchor-lot"
+                                            data-s2-placeholder="Select Lot"
+                                            data-s2-dropdown-parent="modal"
+                                            data-s2-dropdown-class="design-product-select2-dropdown"
+                                            required
+                                        >
+                                            <option value="">Select Lot</option>
+                                            @foreach($slotOptions as $slot)
+                                                <option value="{{ $slot->id }}">{{ $slot->slot_name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                     @error('selectedLotId') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                 </div>
                             </div>
@@ -247,12 +283,24 @@
                                 <div class="col-md-3">
                                     <div class="form-group mb-0">
                                         @if($i === 0)<label class="mb-1">Select Design</label>@endif
-                                        <select class="form-control form-control-sm @error('addItemRows.'.$i.'.design_id') is-invalid @enderror" wire:model.defer="addItemRows.{{ $i }}.design_id">
-                                            <option value="">Select Design</option>
-                                            @foreach($designs as $design)
-                                                <option value="{{ $design->id }}">{{ $design->design_name }}</option>
-                                            @endforeach
-                                        </select>
+                                        <div id="ruhi-gs-item-add-anchor-{{ $i }}" class="d-none" data-s2-value="{{ $row['design_id'] ?? '' }}"></div>
+                                        <input type="hidden" wire:model.defer="addItemRows.{{ $i }}.design_id" id="ruhi-gs-item-add-hidden-{{ $i }}" class="@error('addItemRows.'.$i.'.design_id') is-invalid @enderror">
+                                        <div wire:ignore class="w-100">
+                                            <select
+                                                id="ruhi-gs-item-add-select-{{ $i }}"
+                                                class="form-control form-control-sm js-ruhi-master-select2 @error('addItemRows.'.$i.'.design_id') is-invalid @enderror"
+                                                data-s2-hidden="#ruhi-gs-item-add-hidden-{{ $i }}"
+                                                data-s2-anchor="#ruhi-gs-item-add-anchor-{{ $i }}"
+                                                data-s2-placeholder="Select Design"
+                                                data-s2-dropdown-parent="modal"
+                                                data-s2-dropdown-class="design-product-select2-dropdown"
+                                            >
+                                                <option value="">Select Design</option>
+                                                @foreach($designs as $design)
+                                                    <option value="{{ $design->id }}">{{ $design->design_name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
                                         @error('addItemRows.'.$i.'.design_id') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                     </div>
                                 </div>
@@ -339,12 +387,24 @@
                             <div class="col-md-3">
                                 <div class="form-group mb-0">
                                     <label class="mb-1">Design</label>
-                                    <select class="form-control form-control-sm @error('editDesignId') is-invalid @enderror" wire:model.defer="editDesignId">
-                                        <option value="">Select Design</option>
-                                        @foreach($designs as $design)
-                                            <option value="{{ $design->id }}">{{ $design->design_name }}</option>
-                                        @endforeach
-                                    </select>
+                                    <div id="ruhi-gs-edit-design-anchor" class="d-none" data-s2-value="{{ $editDesignId }}"></div>
+                                    <input type="hidden" wire:model.defer="editDesignId" id="ruhi-gs-edit-design-hidden" class="@error('editDesignId') is-invalid @enderror">
+                                    <div wire:ignore class="w-100">
+                                        <select
+                                            id="ruhi-gs-edit-design-select"
+                                            class="form-control form-control-sm js-ruhi-master-select2 @error('editDesignId') is-invalid @enderror"
+                                            data-s2-hidden="#ruhi-gs-edit-design-hidden"
+                                            data-s2-anchor="#ruhi-gs-edit-design-anchor"
+                                            data-s2-placeholder="Select Design"
+                                            data-s2-dropdown-parent="modal"
+                                            data-s2-dropdown-class="design-product-select2-dropdown"
+                                        >
+                                            <option value="">Select Design</option>
+                                            @foreach($designs as $design)
+                                                <option value="{{ $design->id }}">{{ $design->design_name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                     @error('editDesignId') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                 </div>
                             </div>
@@ -393,4 +453,13 @@
             </div>
         </div>
     </div>
+
+    <style>
+        .select2-dropdown.design-product-select2-dropdown .select2-search--dropdown {
+            display: block !important;
+        }
+        .modal .js-ruhi-master-select2 + .select2-container {
+            width: 100% !important;
+        }
+    </style>
 </div>

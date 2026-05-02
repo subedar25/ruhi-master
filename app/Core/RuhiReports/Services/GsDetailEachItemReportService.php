@@ -1,0 +1,324 @@
+<?php
+
+namespace App\Core\RuhiReports\Services;
+
+use App\Core\RuhiReports\ReportNameSort;
+use App\Models\RuhiDesign;
+use App\Models\RuhiDesignProduct;
+use App\Models\RuhiGs;
+use App\Models\RuhiGsOrderByColor;
+use App\Models\RuhiProduct;
+use Illuminate\Support\Collection;
+
+class GsDetailEachItemReportService
+{
+    /** Default `r_product.product_type` filter set (Collet, AD Full, Polki Full, Kundan Full, Drop). */
+    public const DEFAULT_PRODUCT_TYPES = [3, 4, 5, 6, 8];
+
+    private const DROP_ITEM_TYPE_ID = 8;
+
+    public function listGsForDropdown(): Collection
+    {
+        return RuhiGs::query()
+            ->whereNull('deleted_at')
+            ->orderBy('name')
+            ->get(['id', 'name']);
+    }
+
+    /**
+     * Designs that appear on the selected GS (from `r_gs_order_by_color`).
+     *
+     * @return Collection<int, RuhiDesign>
+     */
+    public function listDesignsForGs(int $gsId): Collection
+    {
+        $designIds = RuhiGsOrderByColor::query()
+            ->where('gs_id', $gsId)
+            ->distinct()
+            ->pluck('design_id')
+            ->all();
+
+        if ($designIds === []) {
+            return collect();
+        }
+
+        return RuhiDesign::query()
+            ->withTrashed()
+            ->whereIn('id', $designIds)
+            ->get(['id', 'design_name'])
+            ->sort(function (RuhiDesign $a, RuhiDesign $b): int {
+                $ta = ReportNameSort::hyphenNameTuple((string) $a->design_name);
+                $tb = ReportNameSort::hyphenNameTuple((string) $b->design_name);
+
+                return ReportNameSort::compareTuples($ta, $tb);
+            })
+            ->values();
+    }
+
+    /**
+     * Distinct products used on the selected designs, restricted by product types (master `product_type`).
+     *
+     * @param  array<int>  $designIds
+     * @param  array<int>  $productTypes
+     * @return Collection<int, RuhiProduct>
+     */
+    public function listProductsForDesignsAndTypes(array $designIds, array $productTypes): Collection
+    {
+        if ($designIds === [] || $productTypes === []) {
+            return collect();
+        }
+
+        $productIds = RuhiDesignProduct::query()
+            ->whereIn('design_id', $designIds)
+            ->whereHas('product', function ($q) use ($productTypes): void {
+                $q->whereIn('product_type', $productTypes);
+            })
+            ->distinct()
+            ->pluck('product_id')
+            ->all();
+
+        if ($productIds === []) {
+            return collect();
+        }
+
+        return RuhiProduct::query()
+            ->withTrashed()
+            ->whereIn('id', $productIds)
+            ->whereIn('product_type', $productTypes)
+            ->get(['id', 'product_name', 'product_type'])
+            ->sort(function (RuhiProduct $a, RuhiProduct $b): int {
+                $ta = ReportNameSort::hyphenNameTuple((string) $a->product_name);
+                $tb = ReportNameSort::hyphenNameTuple((string) $b->product_name);
+
+                return ReportNameSort::compareTuples($ta, $tb);
+            })
+            ->values();
+    }
+
+    /**
+     * @param  array<int>  $productTypes
+     * @param  array<int>  $designIds  Designs to include (must exist on GS); empty = all designs on GS
+     * @param  array<int>  $productIds  Empty = all products matching types & designs
+     * @param  ''|'1'|'2'  $nameFilter  Collate Item rows only: '' = all names; '1' = name does not contain "(s)"; '2' = name contains "(s)" (literal brackets). Drop Item rows ignore this filter.
+     * @return array{
+     *     gs_name: string,
+     *     blocks: array<int, array{
+     *         design_id: int,
+     *         design_name: string,
+     *         header: array{color_qty: int|string, collate_qty: string, zumka: string, uf: string, note: string},
+     *         order_footer: array{color_count: int, red: int, red_green: int, green: int, white: int},
+     *         collate_rows: array<int, array{item: string, total_qty: int, red: int, green: int, white: int}>,
+     *         collate_column_totals: array{total_qty: int, red: int, green: int, white: int},
+     *         drop_rows: array<int, array{item: string, total_qty: int, red: int, green: int, white: int}>,
+     *         drop_column_totals: array{total_qty: int, red: int, green: int, white: int}
+     *     }>
+     * }
+     */
+    public function buildReport(
+        int $gsId,
+        array $productTypes,
+        array $designIds,
+        array $productIds,
+        string $nameFilter,
+    ): array {
+        $gs = RuhiGs::query()->whereNull('deleted_at')->find($gsId);
+        $gsName = (string) ($gs->name ?? '');
+
+        $productTypes = array_values(array_unique(array_map('intval', $productTypes)));
+        sort($productTypes);
+
+        $designIds = array_values(array_unique(array_map('intval', $designIds)));
+        sort($designIds);
+
+        $productIds = array_values(array_unique(array_map('intval', $productIds)));
+
+        $allGsDesignIds = RuhiGsOrderByColor::query()
+            ->where('gs_id', $gsId)
+            ->distinct()
+            ->pluck('design_id')
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->sort()
+            ->values()
+            ->all();
+
+        if ($designIds === []) {
+            $designIds = $allGsDesignIds;
+        } else {
+            $designIds = array_values(array_intersect($designIds, $allGsDesignIds));
+        }
+
+        $blocks = [];
+
+        foreach ($designIds as $designId) {
+            $design = RuhiDesign::query()->withTrashed()->find($designId);
+            if (! $design) {
+                continue;
+            }
+
+            $scale = (int) RuhiGsOrderByColor::query()
+                ->where('gs_id', $gsId)
+                ->where('design_id', $designId)
+                ->sum('design_qty');
+
+            $orderFooter = RuhiGsOrderByColor::query()
+                ->where('gs_id', $gsId)
+                ->where('design_id', $designId)
+                ->selectRaw('COALESCE(SUM(design_qty),0) as dq')
+                ->selectRaw('COALESCE(SUM(design_red_qty),0) as dr')
+                ->selectRaw('COALESCE(SUM(design_red_green_qty),0) as drg')
+                ->selectRaw('COALESCE(SUM(design_green_qty),0) as dg')
+                ->selectRaw('COALESCE(SUM(white_qty),0) as dw')
+                ->first();
+
+            $colorCount = (int) ($orderFooter->dq ?? 0);
+            $footerRed = (int) ($orderFooter->dr ?? 0);
+            $footerRedGreen = (int) ($orderFooter->drg ?? 0);
+            $footerGreen = (int) ($orderFooter->dg ?? 0);
+            $footerWhite = (int) ($orderFooter->dw ?? 0);
+
+            $collateRows = [];
+            $dropRows = [];
+
+            $dps = RuhiDesignProduct::query()
+                ->where('design_id', $designId)
+                ->with([
+                    'product' => fn ($q) => $q->withTrashed(),
+                    'itemType',
+                    'collateByColors',
+                ])
+                ->get();
+
+            foreach ($dps as $dp) {
+                $product = $dp->product;
+                if (! $product) {
+                    continue;
+                }
+                if (! in_array((int) $product->product_type, $productTypes, true)) {
+                    continue;
+                }
+                if ($productIds !== [] && ! in_array((int) $product->id, $productIds, true)) {
+                    continue;
+                }
+
+                $itemType = $dp->itemType;
+                $isDrop = (int) $dp->item_type_id === self::DROP_ITEM_TYPE_ID;
+                $isCollate = $itemType && strcasecmp(trim((string) $itemType->type_by_color), 'Yes') === 0;
+
+                if ($isCollate && ! $this->matchesNameFilter((string) $product->product_name, $nameFilter)) {
+                    continue;
+                }
+
+                $baseQty = (int) $dp->quantity * max($scale, 0);
+                $cc = $dp->collateByColors;
+                $sumOnlyRed = (int) $cc->sum('only_red_qty');
+                $sumRed = (int) $cc->sum('red_qty');
+                $sumGreen = (int) $cc->sum('green_qty');
+                $sumOnlyGreen = (int) $cc->sum('only_green_qty');
+                $sumWhite = (int) $cc->sum('white_qty');
+
+                $redScaled = (int) round(($sumOnlyRed + $sumRed) * max($scale, 0));
+                $greenScaled = (int) round(($sumGreen + $sumOnlyGreen) * max($scale, 0));
+                $whiteScaled = (int) round($sumWhite * max($scale, 0));
+
+                if ($isDrop) {
+                    $dropRows[] = [
+                        'item' => (string) $product->product_name,
+                        'total_qty' => $baseQty,
+                        'red' => $redScaled,
+                        'green' => $greenScaled,
+                        'white' => $whiteScaled,
+                    ];
+                } elseif ($isCollate) {
+                    $collateRows[] = [
+                        'item' => (string) $product->product_name,
+                        'total_qty' => $baseQty,
+                        'red' => $redScaled,
+                        'green' => $greenScaled,
+                        'white' => $whiteScaled,
+                    ];
+                }
+            }
+
+            usort($collateRows, fn (array $a, array $b): int => ReportNameSort::compareTuples(
+                ReportNameSort::hyphenNameTuple($a['item']),
+                ReportNameSort::hyphenNameTuple($b['item'])
+            ));
+            usort($dropRows, fn (array $a, array $b): int => ReportNameSort::compareTuples(
+                ReportNameSort::hyphenNameTuple($a['item']),
+                ReportNameSort::hyphenNameTuple($b['item'])
+            ));
+
+            $blocks[] = [
+                'design_id' => $designId,
+                'design_name' => (string) $design->design_name,
+                'header' => [
+                    'color_qty' => $colorCount,
+                    'collate_qty' => (string) ($design->dubby_qty ?? ''),
+                    'zumka' => (string) ($design->zumka_qty ?? ''),
+                    'uf' => (string) ($design->uf ?? ''),
+                    'note' => (string) ($design->note ?? ''),
+                ],
+                'order_footer' => [
+                    'color_count' => $colorCount,
+                    'red' => $footerRed,
+                    'red_green' => $footerRedGreen,
+                    'green' => $footerGreen,
+                    'white' => $footerWhite,
+                ],
+                'collate_rows' => array_values($collateRows),
+                'collate_column_totals' => $this->sumQtyCols($collateRows),
+                'drop_rows' => array_values($dropRows),
+                'drop_column_totals' => $this->sumQtyCols($dropRows),
+            ];
+        }
+
+        return [
+            'gs_name' => $gsName,
+            'blocks' => $blocks,
+        ];
+    }
+
+    /**
+     * @param  array<int, array{item: string, total_qty: int, red: int, green: int, white: int}>  $rows
+     * @return array{total_qty: int, red: int, green: int, white: int}
+     */
+    private function sumQtyCols(array $rows): array
+    {
+        $t = ['total_qty' => 0, 'red' => 0, 'green' => 0, 'white' => 0];
+        foreach ($rows as $r) {
+            $t['total_qty'] += (int) $r['total_qty'];
+            $t['red'] += (int) $r['red'];
+            $t['green'] += (int) $r['green'];
+            $t['white'] += (int) $r['white'];
+        }
+
+        return $t;
+    }
+
+    /**
+     * Collate-only product name rule (caller passes only for collate rows).
+     * Matches the literal substring "(s)" with brackets — no stripping of brackets or names.
+     *
+     * @param  ''|'1'|'2'|'all'  $mode  ''|'all' include all; '1' without "(s)" in name; '2' only if name contains "(s)"
+     */
+    private function matchesNameFilter(string $productName, string $mode): bool
+    {
+        $mode = trim($mode);
+        if ($mode === '' || $mode === 'all') {
+            return true;
+        }
+
+        $hasBracketS = stripos($productName, '(s)') !== false;
+
+        if ($mode === '1') {
+            return ! $hasBracketS;
+        }
+
+        if ($mode === '2') {
+            return $hasBracketS;
+        }
+
+        return true;
+    }
+}

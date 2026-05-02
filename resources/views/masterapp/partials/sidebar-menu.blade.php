@@ -58,8 +58,8 @@
         </li>
     </ul>
 </li>
-<li class="nav-item has-treeview">
-    <a href="#" class="nav-link">
+<li class="nav-item has-treeview {{ request()->routeIs('masterapp.ruhi-reports.*') ? 'menu-open' : '' }}">
+    <a href="#" class="nav-link {{ request()->routeIs('masterapp.ruhi-reports.*') ? 'active' : '' }}">
         <i class="nav-icon fas fa-chart-bar"></i>
         <p>
             Ruhi Report
@@ -67,18 +67,78 @@
         </p>
     </a>
     <ul class="nav nav-treeview nav-treeview-inset ml-2" style="padding-right: 1.25rem;">
-        <li class="nav-item"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Gs-Lot Wise Items</p></a></li>
-        <li class="nav-item"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Gs Casting</p></a></li>
-        <li class="nav-item"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Gs Casting Details</p></a></li>
-        <li class="nav-item"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Dubby</p></a></li>
-        <li class="nav-item"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Gs Wise Collet</p></a></li>
-        <li class="nav-item"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Gs Full</p></a></li>
-        <li class="nav-item"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Gs Die</p></a></li>
-        <li class="nav-item"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Gs Detail of each Items</p></a></li>
-        <li class="nav-item"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Gs Color for collet</p></a></li>
-        <li class="nav-item"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Gs Wise Drop</p></a></li>
-        <li class="nav-item"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Gs Collor Full</p></a></li>
-        <li class="nav-item"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Gs Collet KStone</p></a></li>
+        <li class="nav-item">
+            <a href="{{ route('masterapp.ruhi-reports.gs-lot-wise-items') }}" class="nav-link {{ request()->routeIs('masterapp.ruhi-reports.gs-lot-wise-items') ? 'active' : '' }}">
+                <i class="fas fa-layer-group nav-icon"></i>
+                <p>Gs-Lot Wise Items</p>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ route('masterapp.ruhi-reports.gs-wise-casting-report') }}" class="nav-link {{ request()->routeIs('masterapp.ruhi-reports.gs-wise-casting-report') ? 'active' : '' }}">
+                <i class="fas fa-flask nav-icon"></i>
+                <p>Gs Wise Casting Report</p>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ route('masterapp.ruhi-reports.gs-wise-casting-detail-report') }}" class="nav-link {{ request()->routeIs('masterapp.ruhi-reports.gs-wise-casting-detail-report') ? 'active' : '' }}">
+                <i class="fas fa-list-ul nav-icon"></i>
+                <p>Gs Wise Casting Detail Report</p>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ route('masterapp.ruhi-reports.gs-wise-dubby-report') }}" class="nav-link {{ request()->routeIs('masterapp.ruhi-reports.gs-wise-dubby-report') ? 'active' : '' }}">
+                <i class="fas fa-cubes nav-icon"></i>
+                <p>GS Wise Dubby Report</p>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ route('masterapp.ruhi-reports.gs-wise-collet-report') }}" class="nav-link {{ request()->routeIs('masterapp.ruhi-reports.gs-wise-collet-report') ? 'active' : '' }}">
+                <i class="fas fa-link nav-icon"></i>
+                <p>GS Wise Collet Report</p>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ route('masterapp.ruhi-reports.gs-full-report') }}" class="nav-link {{ request()->routeIs('masterapp.ruhi-reports.gs-full-report') ? 'active' : '' }}">
+                <i class="fas fa-border-all nav-icon"></i>
+                <p>GS Full Report</p>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ route('masterapp.ruhi-reports.gs-die-report') }}" class="nav-link {{ request()->routeIs('masterapp.ruhi-reports.gs-die-report') ? 'active' : '' }}">
+                <i class="fas fa-tools nav-icon"></i>
+                <p>GS Die Report</p>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ route('masterapp.ruhi-reports.gs-detail-each-item-report') }}" class="nav-link {{ request()->routeIs('masterapp.ruhi-reports.gs-detail-each-item-report') ? 'active' : '' }}">
+                <i class="fas fa-list-alt nav-icon"></i>
+                <p>GS Detail of Each Item</p>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ route('masterapp.ruhi-reports.gs-color-collet-report') }}" class="nav-link {{ request()->routeIs('masterapp.ruhi-reports.gs-color-collet-report') ? 'active' : '' }}">
+                <i class="fas fa-palette nav-icon"></i>
+                <p>GS Color Collet Report</p>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ route('masterapp.ruhi-reports.gs-wise-drop-report') }}" class="nav-link {{ request()->routeIs('masterapp.ruhi-reports.gs-wise-drop-report') ? 'active' : '' }}">
+                <i class="fas fa-tint nav-icon"></i>
+                <p>GS Wise Drop Report</p>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ route('masterapp.ruhi-reports.gs-color-full-report') }}" class="nav-link {{ request()->routeIs('masterapp.ruhi-reports.gs-color-full-report') ? 'active' : '' }}">
+                <i class="fas fa-fill-drip nav-icon"></i>
+                <p>GS Color Full Report</p>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ route('masterapp.ruhi-reports.gs-collet-kstone-color-report') }}" class="nav-link {{ request()->routeIs('masterapp.ruhi-reports.gs-collet-kstone-color-report') ? 'active' : '' }}">
+                <i class="fas fa-gem nav-icon"></i>
+                <p>GS Wise Collet Kstone Color Report</p>
+            </a>
+        </li>
     </ul>
 </li>
 <!-- Invoices -->

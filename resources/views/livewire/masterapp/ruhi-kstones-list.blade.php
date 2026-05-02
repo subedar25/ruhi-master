@@ -5,12 +5,23 @@
         <div class="card-body p-0">
             <div id="kstoneTableToolbar" class="d-flex flex-wrap align-items-center justify-content-between gap-2 px-3 pt-3 pb-2 border-bottom">
                 <div class="d-flex flex-wrap align-items-center" style="gap: .5rem;">
-                    <select wire:model.live="colorFilterId" class="form-control form-control-sm" style="min-width: 200px;">
-                        <option value="">All colors</option>
-                        @foreach($colors as $c)
-                            <option value="{{ $c->id }}">{{ $c->name }}</option>
-                        @endforeach
-                    </select>
+                    <div id="ruhi-kstones-anchor-color-filter" class="d-none" data-s2-value="{{ $colorFilterId }}"></div>
+                    <input type="hidden" wire:model.live="colorFilterId" id="ruhi-kstones-hidden-color-filter">
+                    <div wire:ignore class="d-inline-block" style="min-width: 200px;">
+                        <select
+                            id="ruhi-kstones-select-color-filter"
+                            class="form-control form-control-sm js-ruhi-master-select2"
+                            style="width: 100%; min-width: 200px;"
+                            data-s2-hidden="#ruhi-kstones-hidden-color-filter"
+                            data-s2-anchor="#ruhi-kstones-anchor-color-filter"
+                            data-s2-placeholder="All colors"
+                        >
+                            <option value="">All colors</option>
+                            @foreach($colors as $c)
+                                <option value="{{ $c->id }}">{{ $c->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
                 <div class="search-input-wrapper flex-grow-1" style="max-width: 18rem; min-width: 9rem; position: relative;">
                     <i class="fa fa-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#6c757d;pointer-events:none;"></i>

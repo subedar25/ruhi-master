@@ -5,12 +5,23 @@
         <div class="card-body p-0">
             <div id="designTableToolbar" class="d-flex flex-wrap align-items-center justify-content-between gap-2 px-3 pt-3 pb-2 border-bottom">
                 <div class="d-flex flex-wrap align-items-center" style="gap: .5rem;">
-                    <select wire:model.live="categoryId" class="form-control form-control-sm" style="min-width: 220px;">
-                        <option value="">All Design Categories</option>
-                        @foreach($categories as $category)
-                            <option value="{{ $category->id }}">{{ $category->category_name }}</option>
-                        @endforeach
-                    </select>
+                    <div id="ruhi-designs-anchor-category" class="d-none" data-s2-value="{{ $categoryId }}"></div>
+                    <input type="hidden" wire:model.live="categoryId" id="ruhi-designs-hidden-category">
+                    <div wire:ignore class="d-inline-block" style="min-width: 220px;">
+                        <select
+                            id="ruhi-designs-select-category"
+                            class="form-control form-control-sm js-ruhi-master-select2"
+                            style="width: 100%; min-width: 220px;"
+                            data-s2-hidden="#ruhi-designs-hidden-category"
+                            data-s2-anchor="#ruhi-designs-anchor-category"
+                            data-s2-placeholder="All Design Categories"
+                        >
+                            <option value="">All Design Categories</option>
+                            @foreach($categories as $category)
+                                <option value="{{ $category->id }}">{{ $category->category_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
 
                 <div class="search-input-wrapper flex-grow-1" style="max-width: 18rem; min-width: 9rem; position: relative;">

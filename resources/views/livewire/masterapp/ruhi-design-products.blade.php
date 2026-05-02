@@ -159,12 +159,25 @@
                                     <div class="col-md-3">
                                         <div class="form-group mb-0">
                                             @if($i === 0)<label class="mb-1">Item Name <span class="text-danger">*</span></label>@endif
-                                            <select class="form-control form-control-sm js-design-product-select @error('createRows.'.$i.'.product_id') is-invalid @enderror" data-placeholder="Select Item" wire:model.defer="createRows.{{ $i }}.product_id" required>
-                                                <option value="">Select Item</option>
-                                                @foreach($productsForActiveType as $product)
-                                                    <option value="{{ $product->id }}">{{ $product->product_name }}</option>
-                                                @endforeach
-                                            </select>
+                                            <div id="ruhi-dp-create-anchor-{{ $i }}" class="d-none" data-s2-value="{{ $row['product_id'] ?? '' }}"></div>
+                                            <input type="hidden" wire:model.defer="createRows.{{ $i }}.product_id" id="ruhi-dp-create-hidden-{{ $i }}" class="@error('createRows.'.$i.'.product_id') is-invalid @enderror">
+                                            <div wire:ignore class="w-100">
+                                                <select
+                                                    id="ruhi-dp-create-select-{{ $i }}"
+                                                    class="form-control form-control-sm js-ruhi-master-select2 @error('createRows.'.$i.'.product_id') is-invalid @enderror"
+                                                    data-s2-hidden="#ruhi-dp-create-hidden-{{ $i }}"
+                                                    data-s2-anchor="#ruhi-dp-create-anchor-{{ $i }}"
+                                                    data-s2-placeholder="Select Item"
+                                                    data-s2-dropdown-parent="modal"
+                                                    data-s2-dropdown-class="design-product-select2-dropdown"
+                                                    required
+                                                >
+                                                    <option value="">Select Item</option>
+                                                    @foreach($productsForActiveType as $product)
+                                                        <option value="{{ $product->id }}">{{ $product->product_name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
                                             @error('createRows.'.$i.'.product_id') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
@@ -228,12 +241,25 @@
                                     <div class="col-md-5">
                                         <div class="form-group mb-0">
                                             @if($i === 0)<label class="mb-1">Item Name <span class="text-danger">*</span></label>@endif
-                                            <select class="form-control form-control-sm js-design-product-select @error('createRows.'.$i.'.product_id') is-invalid @enderror" data-placeholder="Select Item" wire:model.defer="createRows.{{ $i }}.product_id" required>
-                                                <option value="">Select Item</option>
-                                                @foreach($productsForActiveType as $product)
-                                                    <option value="{{ $product->id }}">{{ $product->product_name }}</option>
-                                                @endforeach
-                                            </select>
+                                            <div id="ruhi-dp-create-anchor-{{ $i }}" class="d-none" data-s2-value="{{ $row['product_id'] ?? '' }}"></div>
+                                            <input type="hidden" wire:model.defer="createRows.{{ $i }}.product_id" id="ruhi-dp-create-hidden-{{ $i }}" class="@error('createRows.'.$i.'.product_id') is-invalid @enderror">
+                                            <div wire:ignore class="w-100">
+                                                <select
+                                                    id="ruhi-dp-create-select-{{ $i }}"
+                                                    class="form-control form-control-sm js-ruhi-master-select2 @error('createRows.'.$i.'.product_id') is-invalid @enderror"
+                                                    data-s2-hidden="#ruhi-dp-create-hidden-{{ $i }}"
+                                                    data-s2-anchor="#ruhi-dp-create-anchor-{{ $i }}"
+                                                    data-s2-placeholder="Select Item"
+                                                    data-s2-dropdown-parent="modal"
+                                                    data-s2-dropdown-class="design-product-select2-dropdown"
+                                                    required
+                                                >
+                                                    <option value="">Select Item</option>
+                                                    @foreach($productsForActiveType as $product)
+                                                        <option value="{{ $product->id }}">{{ $product->product_name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
                                             @error('createRows.'.$i.'.product_id') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
@@ -281,12 +307,25 @@
                                 <div class="col-md-3">
                                     <div class="form-group mb-0">
                                         <label class="mb-1">Item Name <span class="text-danger">*</span></label>
-                                        <select class="form-control form-control-sm js-design-product-select @error('product_id') is-invalid @enderror" data-placeholder="Select Item" data-selected="{{ $product_id }}" wire:model.defer="product_id" required>
-                                            <option value="">Select Item</option>
-                                            @foreach($productsForActiveType as $product)
-                                                <option value="{{ $product->id }}" @selected((string) $product->id === (string) $product_id)>{{ $product->product_name }}</option>
-                                            @endforeach
-                                        </select>
+                                        <div id="ruhi-dp-edit-anchor" class="d-none" data-s2-value="{{ $product_id }}"></div>
+                                        <input type="hidden" wire:model.defer="product_id" id="ruhi-dp-edit-hidden" class="@error('product_id') is-invalid @enderror">
+                                        <div wire:ignore class="w-100">
+                                            <select
+                                                id="ruhi-dp-edit-select"
+                                                class="form-control form-control-sm js-ruhi-master-select2 @error('product_id') is-invalid @enderror"
+                                                data-s2-hidden="#ruhi-dp-edit-hidden"
+                                                data-s2-anchor="#ruhi-dp-edit-anchor"
+                                                data-s2-placeholder="Select Item"
+                                                data-s2-dropdown-parent="modal"
+                                                data-s2-dropdown-class="design-product-select2-dropdown"
+                                                required
+                                            >
+                                                <option value="">Select Item</option>
+                                                @foreach($productsForActiveType as $product)
+                                                    <option value="{{ $product->id }}">{{ $product->product_name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
                                         @error('product_id') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                     </div>
                                 </div>
@@ -343,12 +382,25 @@
                                 <div class="col-md-5">
                                     <div class="form-group mb-0">
                                         <label class="mb-1">Item Name <span class="text-danger">*</span></label>
-                                        <select class="form-control form-control-sm js-design-product-select @error('product_id') is-invalid @enderror" data-placeholder="Select Item" data-selected="{{ $product_id }}" wire:model.defer="product_id" required>
-                                            <option value="">Select Item</option>
-                                            @foreach($productsForActiveType as $product)
-                                                <option value="{{ $product->id }}" @selected((string) $product->id === (string) $product_id)>{{ $product->product_name }}</option>
-                                            @endforeach
-                                        </select>
+                                        <div id="ruhi-dp-edit-anchor" class="d-none" data-s2-value="{{ $product_id }}"></div>
+                                        <input type="hidden" wire:model.defer="product_id" id="ruhi-dp-edit-hidden" class="@error('product_id') is-invalid @enderror">
+                                        <div wire:ignore class="w-100">
+                                            <select
+                                                id="ruhi-dp-edit-select"
+                                                class="form-control form-control-sm js-ruhi-master-select2 @error('product_id') is-invalid @enderror"
+                                                data-s2-hidden="#ruhi-dp-edit-hidden"
+                                                data-s2-anchor="#ruhi-dp-edit-anchor"
+                                                data-s2-placeholder="Select Item"
+                                                data-s2-dropdown-parent="modal"
+                                                data-s2-dropdown-class="design-product-select2-dropdown"
+                                                required
+                                            >
+                                                <option value="">Select Item</option>
+                                                @foreach($productsForActiveType as $product)
+                                                    <option value="{{ $product->id }}">{{ $product->product_name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
                                         @error('product_id') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                     </div>
                                 </div>
@@ -379,65 +431,8 @@
             min-width: 0;
             max-width: 78px;
         }
-        .js-design-product-select + .select2-container {
+        .modal .js-ruhi-master-select2 + .select2-container {
             width: 100% !important;
         }
     </style>
-    <script>
-        (function () {
-            if (window.__ruhiDesignProductSelectInit) {
-                return;
-            }
-            window.__ruhiDesignProductSelectInit = true;
-
-            function initDesignProductSelects(context) {
-                if (!window.jQuery || !$.fn.select2) return;
-                var $ctx = context ? $(context) : $(document);
-
-                $ctx.find('.js-design-product-select').each(function () {
-                    var $el = $(this);
-                    var $modal = $el.closest('.modal');
-                    var currentValue = $el.data('selected') !== undefined && $el.data('selected') !== null && $el.data('selected') !== ''
-                        ? String($el.data('selected'))
-                        : ($el.val() || '');
-
-                    if ($el.hasClass('select2-hidden-accessible')) {
-                        $el.select2('destroy');
-                    }
-
-                    $el.select2({
-                        width: '100%',
-                        placeholder: $el.data('placeholder') || 'Select Item',
-                        allowClear: true,
-                        minimumResultsForSearch: 0,
-                        dropdownCssClass: 'design-product-select2-dropdown',
-                        dropdownParent: $modal.length ? $modal : $(document.body),
-                    });
-
-                    $el.val(currentValue).trigger('change.select2');
-
-                    $el.off('change.designProductSelect').on('change.designProductSelect', function () {
-                    $el.trigger('input');
-                    });
-                });
-            }
-
-            document.addEventListener('livewire:init', function () {
-                if (window.Livewire && Livewire.hook) {
-                    Livewire.hook('message.processed', function (_message, component) {
-                        var root = component && component.el ? component.el : null;
-                        setTimeout(function () {
-                            initDesignProductSelects(root);
-                        }, 0);
-                    });
-                }
-            });
-
-            document.addEventListener('shown.bs.modal', function (event) {
-                if (event.target) {
-                    initDesignProductSelects(event.target);
-                }
-            });
-        })();
-    </script>
 </div>

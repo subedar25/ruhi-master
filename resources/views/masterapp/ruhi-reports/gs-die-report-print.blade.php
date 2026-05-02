@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GS Die Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; color: #222; margin: 18px; font-size: 11px; }
+        .actions { margin-bottom: 12px; }
+        .print-btn { padding: 6px 10px; border: 1px solid #444; background: #fff; cursor: pointer; }
+        .title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+        .subtitle { margin-bottom: 14px; color: #555; }
+        table { width: 100%; max-width: 72rem; border-collapse: collapse; font-size: 10px; table-layout: fixed; }
+        th, td { border: 1px solid #ddd; padding: 4px 6px; }
+        th { background: #fafafa; font-weight: 700; text-align: left; }
+        .col-name { max-width: 14rem; word-break: break-word; white-space: normal; }
+        .num { text-align: left; white-space: nowrap; }
+        tfoot td { font-weight: 700; background: #f5f5f5; }
+        @media print {
+            .actions { display: none; }
+            body { margin: 8mm; }
+        }
+    </style>
+</head>
+<body>
+    <div class="actions">
+        <button type="button" class="print-btn" onclick="window.print()">Print / Save PDF</button>
+    </div>
+
+    <div class="title">GS Die Report</div>
+    <div class="subtitle">
+        GS Wise Die Report
+        @if($report['gs_name'] !== '')
+            ({{ $report['gs_name'] }})
+        @endif
+        &nbsp;|&nbsp; Date: {{ now()->format('d-m-Y') }}
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th class="col-name">K Stone Name</th>
+                <th class="num">K Stone Quantity</th>
+                <th class="num">Weight</th>
+                <th class="num">Die Weight</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($report['rows'] as $r)
+                <tr>
+                    <td class="col-name">{{ $r['kstone_name'] }}</td>
+                    <td class="num">{{ number_format((int) $r['kstone_quantity'], 0, '.', '') }}</td>
+                    <td class="num">{{ number_format((float) $r['weight'], 3, '.', '') }}</td>
+                    <td class="num">{{ number_format((float) $r['die_weight'], 3, '.', '') }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="4" style="text-align: center; color: #666;">No die lines for this GS.</td>
+                </tr>
+            @endforelse
+        </tbody>
+        @if(count($report['rows']) > 0)
+            <tfoot>
+                <tr>
+                    <td>Grand Total</td>
+                    <td class="num">{{ number_format((int) $report['grand_kstone_quantity'], 0, '.', '') }}</td>
+                    <td class="num">{{ number_format((float) $report['grand_weight'], 3, '.', '') }}</td>
+                    <td class="num">{{ number_format((float) $report['grand_die_weight'], 3, '.', '') }}</td>
+                </tr>
+            </tfoot>
+        @endif
+    </table>
+</body>
+</html>
