@@ -1603,7 +1603,7 @@ class Invoices extends Component
     private function processFileUploads($invoice)
     {
         if (!empty($this->uploaded_files)) {
-            $rootDir = public_path('invoice_files');
+            $rootDir = public_path('organization/' . (int) $invoice->organization_id . '/invoices_file');
             $baseDir = $rootDir . '/' . $invoice->id;
 
             $this->ensureInvoiceDirectoryExists($rootDir);
@@ -1624,9 +1624,11 @@ class Invoices extends Component
                 File::put($destinationPath, File::get($file->getRealPath()));
                 @chmod($destinationPath, 0644);
                 
+                $relativePath = 'organization/' . (int) $invoice->organization_id . '/invoices_file/' . $invoice->id . '/' . $filename;
+
                 $this->invoice()->createInvoiceFile([
                     'invoice_id' => $invoice->id,
-                    'filename' => $filename,
+                    'filename' => $relativePath,
                     'created_at' => now(),
                 ]);
             }
@@ -1639,7 +1641,7 @@ class Invoices extends Component
     {
         $fileRec = $this->invoice()->findInvoiceFile((int) $fileId);
         if ($fileRec) {
-            $filePath = public_path('invoice_files/' . $fileRec->invoice_id . '/' . $fileRec->filename);
+            $filePath = $this->resolveInvoiceFileDiskPath($fileRec->filename, (int) $fileRec->invoice_id);
             if (File::exists($filePath)) {
                 File::delete($filePath);
             }
@@ -1668,6 +1670,24 @@ class Invoices extends Component
         }
 
         @chmod($path, 0775);
+    }
+
+    public function resolveInvoiceFileAssetPath(?string $storedFilename, ?int $invoiceId = null): string
+    {
+        if (!empty($storedFilename) && str_contains($storedFilename, '/')) {
+            return asset($storedFilename);
+        }
+
+        return asset('invoice_files/' . (int) $invoiceId . '/' . (string) $storedFilename);
+    }
+
+    private function resolveInvoiceFileDiskPath(?string $storedFilename, int $invoiceId): string
+    {
+        if (!empty($storedFilename) && str_contains($storedFilename, '/')) {
+            return public_path($storedFilename);
+        }
+
+        return public_path('invoice_files/' . $invoiceId . '/' . (string) $storedFilename);
     }
 
     private function normalizeStatus(?string $status): string

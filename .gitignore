@@ -43,6 +43,7 @@ routes.txt
 .package.json
 
 public/users/
+public/organization/
 public/invoice_files/
 public/images/
 public/uploads/

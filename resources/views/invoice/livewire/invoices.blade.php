@@ -529,7 +529,7 @@
                                 <div class="text-uppercase text-muted small font-weight-bold mb-2">Already attached</div>
                                 @foreach($existing_files as $file)
                                     <div class="d-flex align-items-center justify-content-between invoice-file-row rounded px-3 py-2 mb-2" wire:key="existing-file-{{ $file['id'] }}">
-                                        <a href="{{ asset('invoice_files/' . $file['invoice_id'] . '/' . $file['filename']) }}" target="_blank" rel="noopener" class="text-truncate pr-3 d-flex align-items-center text-body">
+                                        <a href="{{ $this->resolveInvoiceFileAssetPath($file['filename'] ?? null, (int) ($file['invoice_id'] ?? 0)) }}" target="_blank" rel="noopener" class="text-truncate pr-3 d-flex align-items-center text-body">
                                             <i class="fa fa-external-link text-primary mr-2 flex-shrink-0" aria-hidden="true"></i>
                                             {{ $file['filename'] }}
                                         </a>
@@ -709,7 +709,7 @@
                 @else
                     @foreach($viewFiles as $file)
                         <div class="d-flex align-items-center justify-content-between border rounded bg-white px-3 py-2 mb-2">
-                            <a href="{{ asset('invoice_files/' . $file->invoice_id . '/' . $file->filename) }}" target="_blank" class="text-truncate pr-3">
+                            <a href="{{ $this->resolveInvoiceFileAssetPath($file->filename, (int) $file->invoice_id) }}" target="_blank" class="text-truncate pr-3">
                                 {{ $file->filename }}
                             </a>
                         </div>

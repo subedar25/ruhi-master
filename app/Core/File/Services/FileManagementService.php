@@ -2,6 +2,7 @@
 
 namespace App\Core\File\Services;
 
+use App\Support\CurrentOrganization;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
 
@@ -14,9 +15,10 @@ class FileManagementService
      * @param string $path
      * @return string
      */
-    public function upload(UploadedFile $file, string $path): string
+    public function upload(UploadedFile $file, string $path, ?int $organizationId = null): string
     {
-        $destinationPath = public_path($path);
+        $resolvedPath = $this->organizationPath($path, $organizationId);
+        $destinationPath = public_path($resolvedPath);
         if (!File::isDirectory($destinationPath)) {
             File::makeDirectory($destinationPath, 0775, true, true);
         }
@@ -32,7 +34,7 @@ class FileManagementService
         }
         // @unlink($file->getRealPath()); // Removing primitive unlink to prevent Ignition file not found errors when an exception is thrown. PHP/Livewire garbage collects automatically.
 
-        return $path . '/' . $fileName;
+        return $resolvedPath . '/' . $fileName;
     }
 
     /**
@@ -47,5 +49,24 @@ class FileManagementService
             return File::delete(public_path($path));
         }
         return false;
+    }
+
+    public function organizationPath(string $path, ?int $organizationId = null): string
+    {
+        $path = trim($path, '/');
+        if ($path === '') {
+            return $path;
+        }
+
+        if (str_starts_with($path, 'organization/')) {
+            return $path;
+        }
+
+        $orgId = $organizationId ?: CurrentOrganization::id();
+        if (! $orgId) {
+            return $path;
+        }
+
+        return "organization/{$orgId}/{$path}";
     }
 }

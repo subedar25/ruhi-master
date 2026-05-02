@@ -186,14 +186,15 @@ class OrganizationController extends Controller
             $data['restaurant_meal_ids']
         );
 
-        if ($request->hasFile('logo')) {
-            $data['logo'] = $this->storeLogoFile($request->file('logo'));
-        } else {
-            $data['logo'] = null;
-        }
+        $logoFile = $request->file('logo');
+        $data['logo'] = null;
 
         $data['seasons_open'] = array_values(array_map('intval', (array) ($data['seasons_open'] ?? [])));
         $organization = $service->create($data);
+        if ($logoFile) {
+            $organization->logo = $this->fileService->upload($logoFile, 'logo', (int) $organization->id);
+            $organization->save();
+        }
         $this->syncLocationLinks($organization->id, $physicalLocationId, $mailingLocationId);
         $this->syncClientAmenities($organization->id, $amenityIds);
         $this->syncRestaurantMeals($organization->id, $restaurantMealIds);
@@ -268,7 +269,7 @@ class OrganizationController extends Controller
             $this->fileService->delete($client?->logo);
         } elseif ($request->hasFile('logo')) {
             $this->fileService->delete($client?->logo);
-            $data['logo'] = $this->fileService->upload($request->file('logo'), 'organization');
+            $data['logo'] = $this->fileService->upload($request->file('logo'), 'logo', (int) $id);
         } else {
             unset($data['logo']);
         }

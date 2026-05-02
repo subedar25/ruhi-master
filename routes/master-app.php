@@ -15,6 +15,16 @@ use App\Http\Controllers\MasterApp\SettingsController;
 use App\Http\Controllers\MasterApp\LocationController;
 use App\Http\Controllers\MasterApp\OrganizationController;
 use App\Http\Controllers\MasterApp\OrganizationContextController;
+use App\Http\Controllers\MasterApp\RuhiDesignCategoryController;
+use App\Http\Controllers\MasterApp\RuhiDesignController;
+use App\Http\Controllers\MasterApp\RuhiDesignProductController;
+use App\Http\Controllers\MasterApp\RuhiDesignProductItemKstoneController;
+use App\Http\Controllers\MasterApp\RuhiGsController;
+use App\Http\Controllers\MasterApp\RuhiGsLotController;
+use App\Http\Controllers\MasterApp\RuhiKstoneController;
+use App\Http\Controllers\MasterApp\RuhiItemColletKStoneController;
+use App\Http\Controllers\MasterApp\RuhiItemController;
+use App\Http\Controllers\MasterApp\RuhiItemTypeController;
 use App\Http\Controllers\ProfileController;
 
 Route::get('/', function () {
@@ -34,6 +44,34 @@ Route::prefix('master-app')
     {
         Route::get('/dashboard', [DashboardController::class, 'index'])
             ->name('dashboard');
+        Route::prefix('ruhi-items')->name('ruhi-items.')->group(function () {
+            Route::get('/', [RuhiItemController::class, 'index'])->name('index');
+            Route::get('/create', [RuhiItemController::class, 'create'])->name('create');
+            Route::post('/', [RuhiItemController::class, 'store'])->name('store');
+            Route::get('/{product}/collet-k-stones', [RuhiItemColletKStoneController::class, 'index'])->name('collet-k-stones');
+            Route::get('/{id}/edit', [RuhiItemController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [RuhiItemController::class, 'update'])->name('update');
+        });
+        Route::prefix('ruhi-designs')->name('ruhi-designs.')->group(function () {
+            Route::get('/', [RuhiDesignController::class, 'index'])->name('index');
+            Route::get('/{design}/products', [RuhiDesignProductController::class, 'index'])->name('products');
+            Route::get('/{design}/products/print', [RuhiDesignProductController::class, 'print'])->name('products.print');
+            Route::get('/{design}/products/{product}/kstones', [RuhiDesignProductItemKstoneController::class, 'index'])->name('products.kstones');
+            Route::get('/{design}/products/{product}/kstones/print', [RuhiDesignProductItemKstoneController::class, 'print'])->name('products.kstones.print');
+        });
+        Route::prefix('ruhi-design-categories')->name('ruhi-design-categories.')->group(function () {
+            Route::get('/', [RuhiDesignCategoryController::class, 'index'])->name('index');
+        });
+        Route::prefix('ruhi-item-types')->name('ruhi-item-types.')->group(function () {
+            Route::get('/', [RuhiItemTypeController::class, 'index'])->name('index');
+        });
+        Route::prefix('ruhi-gs')->name('ruhi-gs.')->group(function () {
+            Route::get('/', [RuhiGsController::class, 'index'])->name('index');
+            Route::get('/{gs}/lots', [RuhiGsLotController::class, 'index'])->name('lots');
+        });
+        Route::prefix('ruhi-kstones')->name('ruhi-kstones.')->group(function () {
+            Route::get('/', [RuhiKstoneController::class, 'index'])->name('index');
+        });
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::get('/changepassword', [ProfileController::class, 'changepassword'])->name('profile.changepassword');
         Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

@@ -148,20 +148,20 @@ class Organization extends Component
             throw $e;
         }
 
-        $logoPath = null;
-        if ($this->logo) {
-            $logoPath = $this->fileService->upload($this->logo, 'organization');
-        }
-
-        OrganizationModel::create([
+        $organization = OrganizationModel::create([
             'name' => $this->name,
             'address' => $this->address !== '' ? $this->address : null,
             'description' => $this->description ?: null,
             'invoice_prefix' => $this->invoice_prefix ?: null,
-            'logo' => $logoPath,
+            'logo' => null,
             'status' => $this->status,
             'theme' => $this->theme,
         ]);
+
+        if ($this->logo) {
+            $organization->logo = $this->fileService->upload($this->logo, 'logo', (int) $organization->id);
+            $organization->save();
+        }
 
         $this->dispatch('formResult', type: 'success', message: 'Organization created successfully.');
         $this->closeModals();
@@ -192,7 +192,7 @@ class Organization extends Component
             if ($record->logo) {
                 $this->fileService->delete($record->logo);
             }
-            $data['logo'] = $this->fileService->upload($this->logo, 'organization');
+            $data['logo'] = $this->fileService->upload($this->logo, 'logo', (int) $record->id);
         } elseif ($this->logoRemoved) {
             if ($record->logo) {
                 $this->fileService->delete($record->logo);

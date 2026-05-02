@@ -92,13 +92,14 @@ class UserController extends Controller
         $data['photo'] = null;
         $data['other_documents_data'] = [];
         $user = $service->create($data);
+        $organizationId = $this->resolveOrganizationIdForUserFiles($user);
 
         if ($request->hasFile('photo')) {
-            $user->photo = $this->fileService->upload($request->file('photo'), "users/{$user->id}/photo");
+            $user->photo = $this->fileService->upload($request->file('photo'), "users/{$user->id}/photo", $organizationId);
             $user->save();
         }
 
-        $otherDocumentsData = $this->storeUserDocuments($request, $user);
+        $otherDocumentsData = $this->storeUserDocuments($request, $user, $organizationId);
         if (!empty($otherDocumentsData)) {
             $user->userDocuments()->createMany($otherDocumentsData);
         }
@@ -168,16 +169,17 @@ class UserController extends Controller
         $user = $service->get($id);
         $this->ensureNotSystemUser($user);
         $oldRoles = $user->roles->pluck('name')->toArray();
+        $organizationId = $this->resolveOrganizationIdForUserFiles($user);
 
         if ($request->hasFile('photo')) {
             $this->fileService->delete($user->photo);
-            $data['photo'] = $this->fileService->upload($request->file('photo'), "users/{$user->id}/photo");
+            $data['photo'] = $this->fileService->upload($request->file('photo'), "users/{$user->id}/photo", $organizationId);
         } elseif ($request->boolean('remove_photo')) {
             $this->fileService->delete($user->photo);
             $data['photo'] = null;
         }
 
-        $data['other_documents_data'] = $this->storeUserDocuments($request, $user);
+        $data['other_documents_data'] = $this->storeUserDocuments($request, $user, $organizationId);
 
         if ($request->has('remove_documents')) {
             $docsToDelete = \App\Models\UserDocument::whereIn('id', $request->input('remove_documents'))
@@ -385,7 +387,7 @@ class UserController extends Controller
         $this->emailService->send($user->email, $subject, $view, $data, $options);
     }
 
-    private function storeUserDocuments(Request $request, User $user): array
+    private function storeUserDocuments(Request $request, User $user, ?int $organizationId = null): array
     {
         $documents = [];
 
@@ -396,7 +398,7 @@ class UserController extends Controller
 
             $documents[] = [
                 'file_name' => $file->getClientOriginalName(),
-                'file_path' => $this->fileService->upload($file, "users/{$user->id}/documents"),
+                'file_path' => $this->fileService->upload($file, "users/{$user->id}/documents", $organizationId),
             ];
         }
 
@@ -417,6 +419,24 @@ class UserController extends Controller
         $currentOrgId = (int) session('current_organization_id', 0);
         $authUser = auth()->user();
         return $service->getDesignationsForUserContext($authUser, $currentOrgId);
+    }
+
+    private function resolveOrganizationIdForUserFiles(?User $user = null): ?int
+    {
+        $current = CurrentOrganization::id();
+        if ($current) {
+            return (int) $current;
+        }
+
+        if ($user) {
+            $user->loadMissing('organizations:id');
+            $firstOrganizationId = (int) ($user->organizations->first()->id ?? 0);
+            if ($firstOrganizationId > 0) {
+                return $firstOrganizationId;
+            }
+        }
+
+        return null;
     }
 
     /**
