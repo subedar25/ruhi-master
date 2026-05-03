@@ -173,6 +173,12 @@ class ModuleAndPermissionSeeder extends Seeder
                     ['name' => 'dashboard-pending-invoice', 'display_name' => 'Dashboard Pending Invoice', 'slug' => 'dashboard-pending-invoice'],
                     ['name' => 'dashboard-in-process-invoice', 'display_name' => 'Dashboard In Process Invoice', 'slug' => 'dashboard-in-process-invoice'],
                     ['name' => 'dashboard-approved-invoice', 'display_name' => 'Dashboard Approved Invoice', 'slug' => 'dashboard-approved-invoice'],
+                    ['name' => 'dashboard-manage-gs', 'display_name' => 'Dashboard Manage GS', 'slug' => 'dashboard-manage-gs'],
+                    ['name' => 'dashboard-manage-design', 'display_name' => 'Dashboard Manage Design', 'slug' => 'dashboard-manage-design'],
+                    ['name' => 'dashboard-manage-items', 'display_name' => 'Dashboard Manage Items', 'slug' => 'dashboard-manage-items'],
+                    ['name' => 'dashboard-manage-kstone', 'display_name' => 'Dashboard Manage Kstone', 'slug' => 'dashboard-manage-kstone'],
+                    ['name' => 'dashboard-manage-design-category', 'display_name' => 'Dashboard Manage Design Category', 'slug' => 'dashboard-manage-design-category'],
+                    ['name' => 'dashboard-manage-item-category', 'display_name' => 'Dashboard Manage Item Category', 'slug' => 'dashboard-manage-item-category'],
                 ],
                 'slug' => 'dashboard'
             ],
@@ -274,7 +280,72 @@ class ModuleAndPermissionSeeder extends Seeder
                     
                 ],
                 'slug' => 'master-management'
-            ]
+            ],
+            'Ruhi Masters' => [
+                'permissions' => [
+                    ['name' => 'list-ruhi-items', 'display_name' => 'View Ruhi Items', 'slug' => 'list-ruhi-items'],
+                    ['name' => 'create-ruhi-item', 'display_name' => 'Create Ruhi Item', 'slug' => 'create-ruhi-item'],
+                    ['name' => 'edit-ruhi-item', 'display_name' => 'Edit Ruhi Item', 'slug' => 'edit-ruhi-item'],
+                    ['name' => 'delete-ruhi-item', 'display_name' => 'Delete Ruhi Item', 'slug' => 'delete-ruhi-item'],
+
+                    ['name' => 'list-ruhi-collet-kstones', 'display_name' => 'View Collet K-Stones', 'slug' => 'list-ruhi-collet-kstones'],
+                    ['name' => 'create-ruhi-collet-kstone', 'display_name' => 'Create Collet K-Stone', 'slug' => 'create-ruhi-collet-kstone'],
+                    ['name' => 'edit-ruhi-collet-kstone', 'display_name' => 'Edit Collet K-Stone', 'slug' => 'edit-ruhi-collet-kstone'],
+                    ['name' => 'delete-ruhi-collet-kstone', 'display_name' => 'Delete Collet K-Stone', 'slug' => 'delete-ruhi-collet-kstone'],
+
+                    ['name' => 'list-ruhi-designs', 'display_name' => 'View Ruhi Designs', 'slug' => 'list-ruhi-designs'],
+                    ['name' => 'create-ruhi-design', 'display_name' => 'Create Ruhi Design', 'slug' => 'create-ruhi-design'],
+                    ['name' => 'edit-ruhi-design', 'display_name' => 'Edit Ruhi Design', 'slug' => 'edit-ruhi-design'],
+                    ['name' => 'delete-ruhi-design', 'display_name' => 'Delete Ruhi Design', 'slug' => 'delete-ruhi-design'],
+
+                    ['name' => 'list-ruhi-design-products', 'display_name' => 'View Design Products', 'slug' => 'list-ruhi-design-products'],
+                    ['name' => 'create-ruhi-design-product', 'display_name' => 'Create Design Product', 'slug' => 'create-ruhi-design-product'],
+                    ['name' => 'edit-ruhi-design-product', 'display_name' => 'Edit Design Product', 'slug' => 'edit-ruhi-design-product'],
+                    ['name' => 'delete-ruhi-design-product', 'display_name' => 'Delete Design Product', 'slug' => 'delete-ruhi-design-product'],
+
+                    ['name' => 'list-ruhi-gs', 'display_name' => 'View Ruhi GS', 'slug' => 'list-ruhi-gs'],
+                    ['name' => 'create-ruhi-gs', 'display_name' => 'Create Ruhi GS', 'slug' => 'create-ruhi-gs'],
+                    ['name' => 'edit-ruhi-gs', 'display_name' => 'Edit Ruhi GS', 'slug' => 'edit-ruhi-gs'],
+                    ['name' => 'delete-ruhi-gs', 'display_name' => 'Delete Ruhi GS', 'slug' => 'delete-ruhi-gs'],
+
+                    ['name' => 'list-ruhi-gs-lots', 'display_name' => 'View GS Lots', 'slug' => 'list-ruhi-gs-lots'],
+                    ['name' => 'create-ruhi-gs-lot', 'display_name' => 'Create GS Lot', 'slug' => 'create-ruhi-gs-lot'],
+                    ['name' => 'edit-ruhi-gs-lot', 'display_name' => 'Edit GS Lot', 'slug' => 'edit-ruhi-gs-lot'],
+                    ['name' => 'delete-ruhi-gs-lot', 'display_name' => 'Delete GS Lot', 'slug' => 'delete-ruhi-gs-lot'],
+
+                    ['name' => 'list-ruhi-kstones', 'display_name' => 'View K Stones', 'slug' => 'list-ruhi-kstones'],
+                    ['name' => 'create-ruhi-kstone', 'display_name' => 'Create K Stone', 'slug' => 'create-ruhi-kstone'],
+                    ['name' => 'edit-ruhi-kstone', 'display_name' => 'Edit K Stone', 'slug' => 'edit-ruhi-kstone'],
+                    ['name' => 'delete-ruhi-kstone', 'display_name' => 'Delete K Stone', 'slug' => 'delete-ruhi-kstone'],
+
+                    ['name' => 'list-ruhi-design-categories', 'display_name' => 'View Design Categories', 'slug' => 'list-ruhi-design-categories'],
+                    ['name' => 'create-ruhi-design-category', 'display_name' => 'Create Design Category', 'slug' => 'create-ruhi-design-category'],
+                    ['name' => 'edit-ruhi-design-category', 'display_name' => 'Edit Design Category', 'slug' => 'edit-ruhi-design-category'],
+                    ['name' => 'delete-ruhi-design-category', 'display_name' => 'Delete Design Category', 'slug' => 'delete-ruhi-design-category'],
+
+                    ['name' => 'list-ruhi-item-types', 'display_name' => 'View Item Categories', 'slug' => 'list-ruhi-item-types'],
+                    ['name' => 'create-ruhi-item-type', 'display_name' => 'Create Item Category', 'slug' => 'create-ruhi-item-type'],
+                    ['name' => 'edit-ruhi-item-type', 'display_name' => 'Edit Item Category', 'slug' => 'edit-ruhi-item-type'],
+                    ['name' => 'delete-ruhi-item-type', 'display_name' => 'Delete Item Category', 'slug' => 'delete-ruhi-item-type'],
+                ],
+                'slug' => 'ruhi-masters',
+            ],
+            'Ruhi Reports' => [
+                'permissions' => [
+                    ['name' => 'view-ruhi-report-gs-wise-casting', 'display_name' => 'GS Wise Casting Report', 'slug' => 'view-ruhi-report-gs-wise-casting'],
+                    ['name' => 'view-ruhi-report-gs-wise-casting-detail', 'display_name' => 'GS Wise Casting Detail Report', 'slug' => 'view-ruhi-report-gs-wise-casting-detail'],
+                    ['name' => 'view-ruhi-report-gs-wise-dubby', 'display_name' => 'GS Wise Dubby Report', 'slug' => 'view-ruhi-report-gs-wise-dubby'],
+                    ['name' => 'view-ruhi-report-gs-wise-collet', 'display_name' => 'GS Wise Collet Report', 'slug' => 'view-ruhi-report-gs-wise-collet'],
+                    ['name' => 'view-ruhi-report-gs-full', 'display_name' => 'GS Full Report', 'slug' => 'view-ruhi-report-gs-full'],
+                    ['name' => 'view-ruhi-report-gs-die', 'display_name' => 'GS Die Report', 'slug' => 'view-ruhi-report-gs-die'],
+                    ['name' => 'view-ruhi-report-gs-detail-each-item', 'display_name' => 'GS Wise Detail Report of Each Item', 'slug' => 'view-ruhi-report-gs-detail-each-item'],
+                    ['name' => 'view-ruhi-report-gs-color-collet', 'display_name' => 'GS Color Collet Report', 'slug' => 'view-ruhi-report-gs-color-collet'],
+                    ['name' => 'view-ruhi-report-gs-wise-drop', 'display_name' => 'GS Wise Drop Report', 'slug' => 'view-ruhi-report-gs-wise-drop'],
+                    ['name' => 'view-ruhi-report-gs-color-full', 'display_name' => 'GS Color Full Report', 'slug' => 'view-ruhi-report-gs-color-full'],
+                    ['name' => 'view-ruhi-report-gs-collet-kstone-color', 'display_name' => 'GS Wise Collet Kstone Color Report', 'slug' => 'view-ruhi-report-gs-collet-kstone-color'],
+                ],
+                'slug' => 'ruhi-reports',
+            ],
             ];
           
 

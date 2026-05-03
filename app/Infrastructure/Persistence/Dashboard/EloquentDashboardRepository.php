@@ -5,6 +5,12 @@ namespace App\Infrastructure\Persistence\Dashboard;
 use App\Core\Dashboard\Contracts\DashboardRepository;
 use App\Models\Invoice;
 use App\Models\Outlet;
+use App\Models\RuhiDesign;
+use App\Models\RuhiDesignCategory;
+use App\Models\RuhiGs;
+use App\Models\RuhiItemType;
+use App\Models\RuhiKstone;
+use App\Models\RuhiProduct;
 use App\Models\User;
 use App\Models\Vendor;
 use App\Support\InvoiceDepartmentAuthorization;
@@ -30,6 +36,12 @@ class EloquentDashboardRepository implements DashboardRepository
                 'pending_invoice' => 0,
                 'in_process_invoice' => 0,
                 'approved_invoice' => 0,
+                'ruhi_gs' => 0,
+                'ruhi_designs' => 0,
+                'ruhi_products' => 0,
+                'ruhi_kstones' => 0,
+                'ruhi_design_categories' => 0,
+                'ruhi_item_types' => 0,
             ];
         }
 
@@ -147,6 +159,13 @@ class EloquentDashboardRepository implements DashboardRepository
             ? (clone $baseInvoiceQuery)->whereIn('status', ['Approve', 'approved', 'Approved'])->count()
             : 0;
 
+        $ruhiGsCount = $visibility['ruhi_gs'] ? RuhiGs::query()->count() : 0;
+        $ruhiDesignsCount = $visibility['ruhi_designs'] ? RuhiDesign::query()->count() : 0;
+        $ruhiProductsCount = $visibility['ruhi_products'] ? RuhiProduct::query()->count() : 0;
+        $ruhiKstonesCount = $visibility['ruhi_kstones'] ? RuhiKstone::query()->count() : 0;
+        $ruhiDesignCategoriesCount = $visibility['ruhi_design_categories'] ? RuhiDesignCategory::query()->count() : 0;
+        $ruhiItemTypesCount = $visibility['ruhi_item_types'] ? RuhiItemType::query()->count() : 0;
+
         return [
             'operational_general_manager' => $operationalGeneralManagerCount,
             'general_manager' => $generalManagerCount,
@@ -159,6 +178,12 @@ class EloquentDashboardRepository implements DashboardRepository
             'pending_invoice' => $pendingInvoiceCount,
             'in_process_invoice' => $inProcessInvoiceCount,
             'approved_invoice' => $approvedInvoiceCount,
+            'ruhi_gs' => $ruhiGsCount,
+            'ruhi_designs' => $ruhiDesignsCount,
+            'ruhi_products' => $ruhiProductsCount,
+            'ruhi_kstones' => $ruhiKstonesCount,
+            'ruhi_design_categories' => $ruhiDesignCategoriesCount,
+            'ruhi_item_types' => $ruhiItemTypesCount,
         ];
     }
 
@@ -179,6 +204,12 @@ class EloquentDashboardRepository implements DashboardRepository
             'pending_invoice',
             'in_process_invoice',
             'approved_invoice',
+            'ruhi_gs',
+            'ruhi_designs',
+            'ruhi_products',
+            'ruhi_kstones',
+            'ruhi_design_categories',
+            'ruhi_item_types',
         ];
 
         if (! $authUser) {
@@ -203,6 +234,12 @@ class EloquentDashboardRepository implements DashboardRepository
             'pending_invoice' => 'dashboard-pending-invoice',
             'in_process_invoice' => 'dashboard-in-process-invoice',
             'approved_invoice' => 'dashboard-approved-invoice',
+            'ruhi_gs' => 'dashboard-manage-gs',
+            'ruhi_designs' => 'dashboard-manage-design',
+            'ruhi_products' => 'dashboard-manage-items',
+            'ruhi_kstones' => 'dashboard-manage-kstone',
+            'ruhi_design_categories' => 'dashboard-manage-design-category',
+            'ruhi_item_types' => 'dashboard-manage-item-category',
         ];
 
         $visibility = [];

@@ -5,12 +5,15 @@
 
 @auth
 <!-- Dashboard -->
+@if(\App\Support\OrganizationModule::sidebarShow('dashboard'))
 <li class="nav-item">
     <a href="{{ route('masterapp.dashboard') }}" class="nav-link {{ request()->routeIs('masterapp.dashboard') ? 'active' : '' }}">
         <i class="nav-icon fas fa-tachometer-alt"></i>
         <p>Dashboard</p>
     </a>
 </li>
+@endif
+@if(\App\Support\OrganizationModule::sidebarShow('ruhi-masters'))
 <li class="nav-item has-treeview {{ request()->routeIs('masterapp.ruhi-items.*', 'masterapp.ruhi-designs.*', 'masterapp.ruhi-design-categories.*', 'masterapp.ruhi-item-types.*', 'masterapp.ruhi-gs.*', 'masterapp.ruhi-kstones.*') ? 'menu-open' : '' }}">
     <a href="#" class="nav-link {{ request()->routeIs('masterapp.ruhi-items.*', 'masterapp.ruhi-designs.*', 'masterapp.ruhi-design-categories.*', 'masterapp.ruhi-item-types.*', 'masterapp.ruhi-gs.*', 'masterapp.ruhi-kstones.*') ? 'active' : '' }}">
         <i class="nav-icon fas fa-cubes"></i>
@@ -58,6 +61,8 @@
         </li>
     </ul>
 </li>
+@endif
+@if(\App\Support\OrganizationModule::sidebarShow('ruhi-reports'))
 <li class="nav-item has-treeview {{ request()->routeIs('masterapp.ruhi-reports.*') ? 'menu-open' : '' }}">
     <a href="#" class="nav-link {{ request()->routeIs('masterapp.ruhi-reports.*') ? 'active' : '' }}">
         <i class="nav-icon fas fa-chart-bar"></i>
@@ -141,17 +146,21 @@
         </li>
     </ul>
 </li>
+@endif
 <!-- Invoices -->
 @can('list-invoices')
+@if(\App\Support\OrganizationModule::sidebarShow('invoice-management'))
 <li class="nav-item">
     <a href="{{ route('invoice.index') }}" class="nav-link {{ request()->routeIs('invoice.*') ? 'active' : '' }}">
         <i class="nav-icon fas fa-file-invoice-dollar"></i>
         <p>Invoices</p>
     </a>
 </li>
+@endif
 @endcan
 <!-- Users -->
 @canany(['list-users'])
+@if(\App\Support\OrganizationModule::sidebarShow('user-management'))
 <li class="nav-item has-treeview {{ request()->routeIs('masterapp.users.*', 'masterapp.entity.*') ? 'menu-open' : '' }}">
     <a href="#" class="nav-link {{ request()->routeIs('masterapp.users.*', 'masterapp.entity.*') ? 'active' : '' }}">
         <i class="nav-icon fas fa-users-cog"></i>
@@ -171,6 +180,7 @@
         @endcan
     </ul>
 </li>
+@endif
 @endcanany
 @can('list-timesheets')
 <!-- <li class="nav-item">
@@ -193,38 +203,46 @@
 
 
 @can('list-role')
+@if(\App\Support\OrganizationModule::sidebarShow('roles-management'))
 <li class="nav-item">
     <a href="{{ route('masterapp.roles.index') }}" class="nav-link {{ request()->routeIs('masterapp.roles.*') ? 'active' : '' }}">
         <i class="nav-icon fas fa-user-tag"></i>
         <p>Manage Role</p>
     </a>
 </li>
+@endif
 @endcan
 
 @can('list-modules')
+@if(\App\Support\OrganizationModule::sidebarShow('modules-management'))
 <li class="nav-item">
     <a href="{{ route('masterapp.modules.index') }}" class="nav-link {{ request()->routeIs('masterapp.modules.*') ? 'active' : '' }}">
         <i class="nav-icon fas fa-layer-group"></i>
         <p>Manage Modules</p>
     </a>
 </li>
+@endif
 @endcan
 
 @can('list-permission')
+@if(\App\Support\OrganizationModule::sidebarShow('permission-management'))
 <li class="nav-item">
     <a href="{{ route('masterapp.permissions.index') }}" class="nav-link {{ request()->routeIs('masterapp.permissions.*') ? 'active' : '' }}">
         <i class="nav-icon fas fa-key"></i>
         <p>Manage Permissions</p>
     </a>
 </li>
+@endif
 @endcan
 @can('list-master')
+@if(\App\Support\OrganizationModule::sidebarShow('master-management'))
 <li class="nav-item">
     <a href="{{ route('masterapp.masters') }}" class="nav-link {{ request()->routeIs('masterapp.masters') ? 'active' : '' }}">
         <i class="nav-icon fas fa-database"></i>
         <p>Masters</p>
     </a>
 </li>
+@endif
 @endcan
 @endauth
 

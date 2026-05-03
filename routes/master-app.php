@@ -44,7 +44,10 @@ Route::prefix('master-app')
     ->group(function ()
     {
         Route::get('/dashboard', [DashboardController::class, 'index'])
-            ->name('dashboard');
+            ->name('dashboard')
+            ->middleware('org.module:dashboard');
+
+        Route::middleware('org.module:ruhi-masters')->group(function () {
         Route::prefix('ruhi-items')->name('ruhi-items.')->group(function () {
             Route::get('/', [RuhiItemController::class, 'index'])->name('index');
             Route::get('/create', [RuhiItemController::class, 'create'])->name('create');
@@ -73,6 +76,9 @@ Route::prefix('master-app')
         Route::prefix('ruhi-kstones')->name('ruhi-kstones.')->group(function () {
             Route::get('/', [RuhiKstoneController::class, 'index'])->name('index');
         });
+        });
+
+        Route::middleware('org.module:ruhi-reports')->group(function () {
         Route::prefix('ruhi-reports')->name('ruhi-reports.')->group(function () {
             Route::get('/gs-lot-wise-items', [RuhiReportController::class, 'gsLotWiseItems'])->name('gs-lot-wise-items');
             Route::get('/gs-lot-wise-items/print', [RuhiReportController::class, 'gsLotWiseItemsPrint'])->name('gs-lot-wise-items.print');
@@ -98,6 +104,7 @@ Route::prefix('master-app')
             Route::get('/gs-die-report/print', [RuhiReportController::class, 'gsDieReportPrint'])->name('gs-die-report.print');
             Route::get('/gs-detail-each-item-report', [RuhiReportController::class, 'gsDetailEachItemReport'])->name('gs-detail-each-item-report');
             Route::get('/gs-detail-each-item-report/print', [RuhiReportController::class, 'gsDetailEachItemReportPrint'])->name('gs-detail-each-item-report.print');
+        });
         });
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::get('/changepassword', [ProfileController::class, 'changepassword'])->name('profile.changepassword');

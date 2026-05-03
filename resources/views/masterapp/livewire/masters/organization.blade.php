@@ -90,6 +90,28 @@
                 </div>
 
                 <div class="form-group">
+                    <label>Modules</label>
+                    <p class="text-muted small mb-2">Enable application modules for this organization (navigation and routes follow this selection).</p>
+                    <div class="border rounded p-3 bg-light" style="max-height: 280px; overflow-y: auto;">
+                        @forelse($allModules ?? [] as $module)
+                            <div class="custom-control custom-checkbox mb-2">
+                                <input
+                                    type="checkbox"
+                                    class="custom-control-input"
+                                    id="org_mod_{{ $module->id }}"
+                                    wire:model.live="enabledModuleIds"
+                                    value="{{ $module->id }}"
+                                >
+                                <label class="custom-control-label" for="org_mod_{{ $module->id }}">{{ $module->name }}</label>
+                            </div>
+                        @empty
+                            <p class="text-muted small mb-0">No active modules found.</p>
+                        @endforelse
+                    </div>
+                    @error('enabledModuleIds') <span class="text-danger small d-block">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="form-group">
                     <label for="org_logo">Logo</label>
                     <input type="file" id="org_logo" class="form-control-file @error('logo') is-invalid @enderror" wire:model="logo">
                     <div wire:loading wire:target="logo" class="text-primary small mt-1">Uploading...</div>
@@ -125,7 +147,7 @@
         @endcomponent
     @endif
 
-    @if($showViewModal && ($viewRecord = \App\Models\Organization::withTrashed()->find($viewId)))
+    @if($showViewModal && ($viewRecord = \App\Models\Organization::withTrashed()->with('modules')->find($viewId)))
         @component('masterapp.livewire.masters.components.view-card', ['viewTitle' => 'View Organization'])
             <dl class="row mb-0">
                 <dt class="col-sm-3">Name</dt>
@@ -154,6 +176,19 @@
 
                 <dt class="col-sm-3">Active</dt>
                 <dd class="col-sm-9">{{ $viewRecord->status ? 'Yes' : 'No' }}</dd>
+
+                <dt class="col-sm-3">Modules</dt>
+                <dd class="col-sm-9">
+                    @if($viewRecord->modules->isNotEmpty())
+                        <ul class="mb-0 pl-3">
+                            @foreach($viewRecord->modules->sortBy('name') as $mod)
+                                <li>{{ $mod->name }}</li>
+                            @endforeach
+                        </ul>
+                    @else
+                        —
+                    @endif
+                </dd>
 
                 <dt class="col-sm-3">Created</dt>
                 <dd class="col-sm-9">{{ $viewRecord->created_date ? $viewRecord->created_date->format('M j, Y g:i A') : '—' }}</dd>

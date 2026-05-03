@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire\MasterApp\Masters;
 
+use App\Models\Module;
 use App\Models\Organization as OrganizationModel;
 use App\Core\File\Services\FileManagementService;
 use App\Support\UiTheme;
@@ -50,6 +51,9 @@ class Organization extends Component
     /** @var string Public theme folder: dark_theam | blue_theam */
     public string $theme = '';
 
+    /** @var list<int> */
+    public array $enabledModuleIds = [];
+
     protected $queryString = [
         'search' => ['except' => ''],
     ];
@@ -69,6 +73,8 @@ class Organization extends Component
             'logo' => ['nullable', 'image', 'max:2048'],
             'status' => ['boolean'],
             'theme' => ['required', 'string', Rule::in(array_keys(UiTheme::options()))],
+            'enabledModuleIds' => ['nullable', 'array'],
+            'enabledModuleIds.*' => ['integer', 'exists:modules,id'],
         ];
     }
 
@@ -80,6 +86,13 @@ class Organization extends Component
     public function openCreateModal(): void
     {
         $this->resetForm();
+        $this->enabledModuleIds = Module::query()
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->values()
+            ->all();
         $this->showCreateModal = true;
         $this->showEditModal = false;
         $this->showViewModal = false;
@@ -102,6 +115,19 @@ class Organization extends Component
         $this->theme = in_array($raw, UiTheme::allowedFolders(), true)
             ? $raw
             : UiTheme::DEFAULT_FOLDER;
+
+        $moduleIds = $record->modules()
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->values()
+            ->all();
+        $this->enabledModuleIds = $moduleIds !== [] ? $moduleIds : Module::query()
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->values()
+            ->all();
 
         $this->showEditModal = true;
         $this->showCreateModal = false;
@@ -163,6 +189,10 @@ class Organization extends Component
             $organization->save();
         }
 
+        $organization->modules()->sync(
+            collect($this->enabledModuleIds ?? [])->map(fn ($id) => (int) $id)->filter(fn ($id) => $id > 0)->values()->all()
+        );
+
         $this->dispatch('formResult', type: 'success', message: 'Organization created successfully.');
         $this->closeModals();
     }
@@ -201,6 +231,10 @@ class Organization extends Component
         }
 
         $record->update($data);
+
+        $record->modules()->sync(
+            collect($this->enabledModuleIds ?? [])->map(fn ($id) => (int) $id)->filter(fn ($id) => $id > 0)->values()->all()
+        );
 
         $this->dispatch('formResult', type: 'success', message: 'Organization updated successfully.');
         $this->closeModals();
@@ -246,6 +280,7 @@ class Organization extends Component
         return view('masterapp.livewire.masters.organization', [
             'items' => $query->orderBy($this->sortField, $this->sortDirection)->paginate(15),
             'themeOptions' => UiTheme::options(),
+            'allModules' => Module::query()->where('is_active', true)->orderBy('name')->get(),
         ]);
     }
 
@@ -257,6 +292,7 @@ class Organization extends Component
         $this->logoRemoved = false;
         $this->status = true;
         $this->theme = UiTheme::DEFAULT_FOLDER;
+        $this->enabledModuleIds = [];
         $this->resetValidation();
     }
 }

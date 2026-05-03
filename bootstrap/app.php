@@ -21,6 +21,10 @@ return Application::configure(basePath: dirname(__DIR__))
             // CheckUserRoleStatus::class,
         ]);
 
+        $middleware->alias([
+            'org.module' => \App\Http\Middleware\EnsureOrganizationHasModule::class,
+        ]);
+
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

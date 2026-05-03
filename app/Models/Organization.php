@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
@@ -80,6 +81,11 @@ class Organization extends Model implements AuditableContract
     public function products(): HasMany
     {
         return $this->hasMany(Product::class, 'organization_id');
+    }
+
+    public function modules(): BelongsToMany
+    {
+        return $this->belongsToMany(Module::class, 'organization_module');
     }
 
     public function transformAudit(array $data): array

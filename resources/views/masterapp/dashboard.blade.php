@@ -8,11 +8,17 @@
     $vendorsUrl = route('masterapp.masters', ['tab' => 'vendor']);
     $outletsUrl = route('masterapp.masters', ['tab' => 'outlet']);
     $invoiceUrl = route('invoice.index');
+    $ruhiGsUrl = route('masterapp.ruhi-gs.index');
+    $ruhiDesignsUrl = route('masterapp.ruhi-designs.index');
+    $ruhiItemsUrl = route('masterapp.ruhi-items.index');
+    $ruhiKstonesUrl = route('masterapp.ruhi-kstones.index');
+    $ruhiDesignCategoriesUrl = route('masterapp.ruhi-design-categories.index');
+    $ruhiItemTypesUrl = route('masterapp.ruhi-item-types.index');
     $dashboardVisibility = $dashboardVisibility ?? [];
 @endphp
-<div class="row mt-5 justify-content-center dashboard-stats-row">
+<div class="row mt-4 justify-content-center dashboard-stats-row">
     @if(!empty($dashboardVisibility['total_invoice']))
-    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-10 mb-3">
+    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-10 mb-2">
         <a href="{{ $invoiceUrl }}" class="dashboard-stat-card-link">
         <div class="dashboard-stat-card dashboard-stat-card--indigo">
             <div class="dashboard-stat-card__content">
@@ -26,7 +32,7 @@
     @endif
 
     @if(!empty($dashboardVisibility['pending_invoice']))
-    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-10 mb-3">
+    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-10 mb-2">
         <a href="{{ $invoiceUrl }}" class="dashboard-stat-card-link">
         <div class="dashboard-stat-card dashboard-stat-card--red">
             <div class="dashboard-stat-card__content">
@@ -40,7 +46,7 @@
     @endif
 
     @if(!empty($dashboardVisibility['in_process_invoice']))
-    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-10 mb-3">
+    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-10 mb-2">
         <a href="{{ $invoiceUrl }}" class="dashboard-stat-card-link">
         <div class="dashboard-stat-card dashboard-stat-card--amber">
             <div class="dashboard-stat-card__content">
@@ -54,7 +60,7 @@
     @endif
 
     @if(!empty($dashboardVisibility['approved_invoice']))
-    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-10 mb-3">
+    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-10 mb-2">
         <a href="{{ $invoiceUrl }}" class="dashboard-stat-card-link">
         <div class="dashboard-stat-card dashboard-stat-card--sky">
             <div class="dashboard-stat-card__content">
@@ -68,7 +74,7 @@
     @endif
 
     @if(!empty($dashboardVisibility['outlets']))
-    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-10 mb-3">
+    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-10 mb-2">
         <a href="{{ $outletsUrl }}" class="dashboard-stat-card-link">
         <div class="dashboard-stat-card dashboard-stat-card--teal">
             <div class="dashboard-stat-card__content">
@@ -82,7 +88,7 @@
     @endif
 
     @if(!empty($dashboardVisibility['vendors']))
-    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-10 mb-3">
+    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-10 mb-2">
         <a href="{{ $vendorsUrl }}" class="dashboard-stat-card-link">
         <div class="dashboard-stat-card dashboard-stat-card--slate">
             <div class="dashboard-stat-card__content">
@@ -96,7 +102,7 @@
     @endif
 
     @if(!empty($dashboardVisibility['accountant']))
-    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-10 mb-3">
+    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-10 mb-2">
         <a href="{{ $usersUrl }}" class="dashboard-stat-card-link">
         <div class="dashboard-stat-card dashboard-stat-card--orange">
             <div class="dashboard-stat-card__content">
@@ -110,7 +116,7 @@
     @endif
 
     @if(!empty($dashboardVisibility['area_manager']))
-    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-10 mb-3">
+    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-10 mb-2">
         <a href="{{ $usersUrl }}" class="dashboard-stat-card-link">
         <div class="dashboard-stat-card dashboard-stat-card--green">
             <div class="dashboard-stat-card__content">
@@ -124,7 +130,7 @@
     @endif
 
     @if(!empty($dashboardVisibility['general_manager']))
-    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-10 mb-3">
+    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-10 mb-2">
         <a href="{{ $usersUrl }}" class="dashboard-stat-card-link">
         <div class="dashboard-stat-card dashboard-stat-card--violet">
             <div class="dashboard-stat-card__content">
@@ -138,7 +144,7 @@
     @endif
 
     @if(!empty($dashboardVisibility['operational_general_manager']))
-    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-10 mb-3">
+    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-10 mb-2">
         <a href="{{ $usersUrl }}" class="dashboard-stat-card-link">
         <div class="dashboard-stat-card dashboard-stat-card--blue">
             <div class="dashboard-stat-card__content">
@@ -152,7 +158,7 @@
     @endif
 
     @if(!empty($dashboardVisibility['completed_invoice']))
-    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-10 mb-3">
+    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-10 mb-2">
         <a href="{{ $invoiceUrl }}" class="dashboard-stat-card-link">
         <div class="dashboard-stat-card dashboard-stat-card--emerald">
             <div class="dashboard-stat-card__content">
@@ -160,6 +166,90 @@
                 <div class="dashboard-stat-card__label">Completed Invoice</div>
             </div>
             <div class="dashboard-stat-card__icon"><i class="fas fa-check-circle"></i></div>
+        </div>
+        </a>
+    </div>
+    @endif
+
+    @if(!empty($dashboardVisibility['ruhi_gs']))
+    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-10 mb-2">
+        <a href="{{ $ruhiGsUrl }}" class="dashboard-stat-card-link">
+        <div class="dashboard-stat-card dashboard-stat-card--ruby">
+            <div class="dashboard-stat-card__content">
+                <h2 class="dashboard-stat-card__count mb-1">{{ (int) ($dashboardCounts['ruhi_gs'] ?? 0) }}</h2>
+                <div class="dashboard-stat-card__label">Manage GS</div>
+            </div>
+            <div class="dashboard-stat-card__icon"><i class="fas fa-layer-group"></i></div>
+        </div>
+        </a>
+    </div>
+    @endif
+
+    @if(!empty($dashboardVisibility['ruhi_designs']))
+    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-10 mb-2">
+        <a href="{{ $ruhiDesignsUrl }}" class="dashboard-stat-card-link">
+        <div class="dashboard-stat-card dashboard-stat-card--gold">
+            <div class="dashboard-stat-card__content">
+                <h2 class="dashboard-stat-card__count mb-1">{{ (int) ($dashboardCounts['ruhi_designs'] ?? 0) }}</h2>
+                <div class="dashboard-stat-card__label">Manage Design</div>
+            </div>
+            <div class="dashboard-stat-card__icon"><i class="fas fa-palette"></i></div>
+        </div>
+        </a>
+    </div>
+    @endif
+
+    @if(!empty($dashboardVisibility['ruhi_products']))
+    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-10 mb-2">
+        <a href="{{ $ruhiItemsUrl }}" class="dashboard-stat-card-link">
+        <div class="dashboard-stat-card dashboard-stat-card--copper">
+            <div class="dashboard-stat-card__content">
+                <h2 class="dashboard-stat-card__count mb-1">{{ (int) ($dashboardCounts['ruhi_products'] ?? 0) }}</h2>
+                <div class="dashboard-stat-card__label">Manage Items</div>
+            </div>
+            <div class="dashboard-stat-card__icon"><i class="fas fa-box-open"></i></div>
+        </div>
+        </a>
+    </div>
+    @endif
+
+    @if(!empty($dashboardVisibility['ruhi_kstones']))
+    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-10 mb-2">
+        <a href="{{ $ruhiKstonesUrl }}" class="dashboard-stat-card-link">
+        <div class="dashboard-stat-card dashboard-stat-card--amethyst">
+            <div class="dashboard-stat-card__content">
+                <h2 class="dashboard-stat-card__count mb-1">{{ (int) ($dashboardCounts['ruhi_kstones'] ?? 0) }}</h2>
+                <div class="dashboard-stat-card__label">Manage Kstone</div>
+            </div>
+            <div class="dashboard-stat-card__icon"><i class="fas fa-gem"></i></div>
+        </div>
+        </a>
+    </div>
+    @endif
+
+    @if(!empty($dashboardVisibility['ruhi_design_categories']))
+    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-10 mb-2">
+        <a href="{{ $ruhiDesignCategoriesUrl }}" class="dashboard-stat-card-link">
+        <div class="dashboard-stat-card dashboard-stat-card--mint">
+            <div class="dashboard-stat-card__content">
+                <h2 class="dashboard-stat-card__count mb-1">{{ (int) ($dashboardCounts['ruhi_design_categories'] ?? 0) }}</h2>
+                <div class="dashboard-stat-card__label">Manage Design Category</div>
+            </div>
+            <div class="dashboard-stat-card__icon"><i class="fas fa-folder-open"></i></div>
+        </div>
+        </a>
+    </div>
+    @endif
+
+    @if(!empty($dashboardVisibility['ruhi_item_types']))
+    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-10 mb-2">
+        <a href="{{ $ruhiItemTypesUrl }}" class="dashboard-stat-card-link">
+        <div class="dashboard-stat-card dashboard-stat-card--coral">
+            <div class="dashboard-stat-card__content">
+                <h2 class="dashboard-stat-card__count mb-1">{{ (int) ($dashboardCounts['ruhi_item_types'] ?? 0) }}</h2>
+                <div class="dashboard-stat-card__label">Manage Item Category</div>
+            </div>
+            <div class="dashboard-stat-card__icon"><i class="fas fa-tags"></i></div>
         </div>
         </a>
     </div>
@@ -177,14 +267,14 @@
     }
 
     .dashboard-stat-card {
-        border-radius: 14px;
-        min-height: 148px;
-        padding: 1.3rem 1.4rem;
+        border-radius: 10px;
+        min-height: 0;
+        padding: 0.75rem 0.95rem;
         display: flex;
         align-items: center;
         justify-content: space-between;
         color: #fff;
-        box-shadow: 0 10px 24px rgba(16, 24, 40, 0.14);
+        box-shadow: 0 6px 16px rgba(16, 24, 40, 0.1);
     }
 
     .dashboard-stat-card-link {
@@ -195,8 +285,8 @@
 
     .dashboard-stat-card-link:hover .dashboard-stat-card,
     .dashboard-stat-card-link:focus .dashboard-stat-card {
-        transform: translateY(-2px);
-        box-shadow: 0 14px 28px rgba(16, 24, 40, 0.18);
+        transform: translateY(-1px);
+        box-shadow: 0 8px 20px rgba(16, 24, 40, 0.14);
     }
 
     .dashboard-stat-card--blue {
@@ -244,26 +334,50 @@
     }
 
     .dashboard-stat-card__count {
-        font-size: 2.15rem;
-        line-height: 1;
+        font-size: 1.5rem;
+        line-height: 1.1;
         font-weight: 700;
         color: #ffffff;
     }
 
     .dashboard-stat-card__label {
-        font-size: 1.22rem;
-        line-height: 1.25;
+        font-size: 0.85rem;
+        line-height: 1.2;
         font-weight: 500;
-        letter-spacing: 0.1px;
-        max-width: 80%;
+        letter-spacing: 0.02px;
+        max-width: 90%;
     }
 
     .dashboard-stat-card__icon {
-        font-size: 3rem;
+        font-size: 1.75rem;
         line-height: 1;
-        color: rgba(255, 255, 255, 0.48);
-        margin-left: 0.8rem;
+        color: rgba(255, 255, 255, 0.45);
+        margin-left: 0.45rem;
         flex-shrink: 0;
+    }
+
+    .dashboard-stat-card--ruby {
+        background: linear-gradient(135deg, #e85d7a 0%, #c73e5a 100%);
+    }
+
+    .dashboard-stat-card--gold {
+        background: linear-gradient(135deg, #e8c06b 0%, #c4933a 100%);
+    }
+
+    .dashboard-stat-card--copper {
+        background: linear-gradient(135deg, #d4a574 0%, #b0784a 100%);
+    }
+
+    .dashboard-stat-card--amethyst {
+        background: linear-gradient(135deg, #b565d8 0%, #8e44ad 100%);
+    }
+
+    .dashboard-stat-card--mint {
+        background: linear-gradient(135deg, #5ee7c5 0%, #2eb88f 100%);
+    }
+
+    .dashboard-stat-card--coral {
+        background: linear-gradient(135deg, #ff9b8a 0%, #e86b5c 100%);
     }
 </style>
 @endpush
