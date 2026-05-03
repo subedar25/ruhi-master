@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
+#
+# Linux/macOS: the shell does not run scripts from the current directory by name.
+# Use one of:
+#   cd olddb && bash import_all_inserts.sh
+#   cd olddb && chmod +x import_all_inserts.sh && ./import_all_inserts.sh
+# From repo root:
+#   bash olddb/import_all_inserts.sh
+#
 
 set -euo pipefail
 
