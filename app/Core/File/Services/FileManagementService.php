@@ -17,24 +17,48 @@ class FileManagementService
      */
     public function upload(UploadedFile $file, string $path, ?int $organizationId = null): string
     {
-        $resolvedPath = $this->organizationPath($path, $organizationId);
-        $destinationPath = public_path($resolvedPath);
-        if (!File::isDirectory($destinationPath)) {
-            File::makeDirectory($destinationPath, 0775, true, true);
-        }
+        $resolvedPath = trim($this->organizationPath($path, $organizationId), '/');
+        $destinationDir = public_path($resolvedPath);
 
-        $fileName = time() . '_' . $file->getClientOriginalName();
-        $destinationFile = $destinationPath . '/' . $fileName;
+        $this->ensureWritableUploadDirectory($destinationDir);
+
+        $fileName = time().'_'.basename($file->getClientOriginalName());
+        $destinationFile = $destinationDir.DIRECTORY_SEPARATOR.$fileName;
+
+        $sourcePath = $file->getRealPath();
+        if (! $sourcePath || ! is_file($sourcePath)) {
+            $sourcePath = $file->getPathname();
+        }
+        if (! is_readable($sourcePath)) {
+            throw new \RuntimeException('Uploaded file is missing or not readable (Livewire temp path). Try again.');
+        }
 
         // We use copy() instead of $file->move() because move() internally uses rename(),
         // which often fails in Docker environments when the source (storage/app/livewire-tmp)
-        // and destination (public/organization) are on different partitions or mount points.
-        if (!File::copy($file->getRealPath(), $destinationFile)) {
-            throw new \RuntimeException("Could not move the file to destination: {$destinationFile}");
+        // and the destination (public/...) are on different filesystems or mount points.
+        if (! File::copy($sourcePath, $destinationFile)) {
+            throw new \RuntimeException("Could not copy file to: {$destinationFile}");
         }
-        // @unlink($file->getRealPath()); // Removing primitive unlink to prevent Ignition file not found errors when an exception is thrown. PHP/Livewire garbage collects automatically.
 
-        return $resolvedPath . '/' . $fileName;
+        return $resolvedPath.'/'.$fileName;
+    }
+
+    /**
+     * Ensure destination exists and is a directory (recursive). Servers/Docker often lack organization/* dirs until first upload.
+     */
+    private function ensureWritableUploadDirectory(string $absoluteDir): void
+    {
+        if (File::isDirectory($absoluteDir)) {
+            return;
+        }
+
+        File::makeDirectory($absoluteDir, 0775, true, true);
+
+        if (! File::isDirectory($absoluteDir)) {
+            throw new \RuntimeException(
+                'Cannot create upload directory '.$absoluteDir.'. Ensure the web user can write to public/ (e.g. mkdir public/organization && chown -R www-data:www-data public/organization).'
+            );
+        }
     }
 
     /**
