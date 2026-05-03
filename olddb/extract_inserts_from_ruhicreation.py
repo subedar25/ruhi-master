@@ -5,6 +5,7 @@ Only overwrites files listed in JOBS (existing import bundle).
 """
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -29,6 +30,27 @@ JOBS: list[tuple[str, str, str]] = [
     ("slot", "r_slot_inserts.sql", "r_slot"),
     ("gs_order_by_color", "r_gs_order_by_color_inserts.sql", "r_gs_order_by_color"),
 ]
+
+# Must match database/migrations/*create_r_collate_by_color_table.php column order.
+_COLLATE_BY_COLOR_COLS = (
+    "`id`, `design_product_id`, `color_id`, `only_red_qty`, `red_qty`, "
+    "`green_qty`, `only_green_qty`, `white_qty`"
+)
+
+
+def ensure_collate_explicit_columns(block: str, target: str) -> str:
+    """
+    Legacy dumps often use INSERT INTO t VALUES (...). Values are bound to the *current*
+    table column order. If the old server had a different order than our migration,
+    MySQL errors (wrong column count / type). Adding an explicit list ties VALUES to our schema.
+    """
+    if target != "r_collate_by_color":
+        return block
+    pattern = re.compile(
+        rf"(INSERT INTO `{re.escape(target)}`)\s+VALUES\s",
+        re.IGNORECASE,
+    )
+    return pattern.sub(rf"\1 ({_COLLATE_BY_COLOR_COLS}) VALUES ", block, count=1)
 
 
 def extract_insert_blocks(lines: list[str], source_table: str) -> list[list[str]]:
@@ -74,7 +96,9 @@ def main() -> None:
         rewritten: list[str] = []
         for block_lines in blocks:
             first = block_lines[0].replace(f"`{source}`", f"`{target}`", 1)
-            rewritten.append("\n".join([first] + block_lines[1:]))
+            block_text = "\n".join([first] + block_lines[1:])
+            block_text = ensure_collate_explicit_columns(block_text, target)
+            rewritten.append(block_text)
 
         body = "\n\n".join(rewritten)
         header = f"-- Insert statements for table `{target}`\n\n"
