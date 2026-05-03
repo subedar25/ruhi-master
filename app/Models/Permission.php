@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission as SpatiePermission;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 use OwenIt\Auditing\Auditable as AuditableTrait;
@@ -79,12 +80,36 @@ class Permission extends SpatiePermission implements AuditableContract
         });
     }
 
-    public static function assignablePermissionIdsFor(?User $user = null): array
+    /**
+     * Limit permissions to modules enabled for the organization (organization_module pivot).
+     */
+    public function scopeForEnabledModulesInOrganization(Builder $query, int $organizationId): Builder
     {
-        return static::query()
+        $moduleIds = DB::table('organization_module')
+            ->where('organization_id', $organizationId)
+            ->pluck('module_id');
+
+        if ($moduleIds->isEmpty()) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->whereIn('permissions.module_id', $moduleIds->all());
+    }
+
+    /**
+     * @param  int|null  $organizationId  When set, only permissions belonging to modules linked to this organization are included.
+     */
+    public static function assignablePermissionIdsFor(?User $user = null, ?int $organizationId = null): array
+    {
+        $query = static::query()
             ->assignableForViewer($user)
-            ->where('is_active', true)
-            ->pluck('id')
+            ->where('is_active', true);
+
+        if ($organizationId !== null) {
+            $query->forEnabledModulesInOrganization($organizationId);
+        }
+
+        return $query->pluck('id')
             ->map(fn ($id) => (int) $id)
             ->values()
             ->all();

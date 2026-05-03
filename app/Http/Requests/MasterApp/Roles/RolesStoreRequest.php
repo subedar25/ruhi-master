@@ -129,7 +129,7 @@ class RolesStoreRequest extends FormRequest
      */
     public function rules(): array
     {
-        $assignable = Permission::assignablePermissionIdsFor(auth()->user());
+        $assignable = Permission::assignablePermissionIdsFor(auth()->user(), CurrentOrganization::id());
 
         $deptExists = Rule::exists('departments', 'id')->where(function ($query) {
             $orgId = CurrentOrganization::id();

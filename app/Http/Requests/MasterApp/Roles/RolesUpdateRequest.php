@@ -196,19 +196,14 @@ class RolesUpdateRequest extends FormRequest
 
         $base = array_merge($base, $invoiceScopeRules);
 
+        $assignable = Permission::assignablePermissionIdsFor($user, CurrentOrganization::id());
+
         if ($user && $user->isSystemUser()) {
             $base['permissions'] = ['required', 'array', 'min:1'];
-            $base['permissions.*'] = [
-                'integer',
-                Rule::exists('permissions', 'id')->where(function ($query) {
-                    return $query->where('is_active', 1);
-                }),
-            ];
+            $base['permissions.*'] = ['integer', Rule::in($assignable)];
 
             return $base;
         }
-
-        $assignable = Permission::assignablePermissionIdsFor($user);
 
         $base['permissions'] = [
             'required',

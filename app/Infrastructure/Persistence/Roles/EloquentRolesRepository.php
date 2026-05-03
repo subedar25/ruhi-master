@@ -37,7 +37,7 @@ class EloquentRolesRepository implements RolesRepository
             ]);
 
             $viewer = Auth::user();
-            $assignableIds = Permission::assignablePermissionIdsFor($viewer);
+            $assignableIds = Permission::assignablePermissionIdsFor($viewer, CurrentOrganization::id());
             $ids = array_values(array_intersect(
                 array_map('intval', $data['permissions']),
                 $assignableIds
@@ -81,7 +81,7 @@ class EloquentRolesRepository implements RolesRepository
 
             if (array_key_exists('permissions', $data) && is_array($data['permissions'])) {
                 $viewer = Auth::user();
-                $assignableIds = Permission::assignablePermissionIdsFor($viewer);
+                $assignableIds = Permission::assignablePermissionIdsFor($viewer, CurrentOrganization::id());
                 $submitted = array_map('intval', $data['permissions']);
 
                 if ($viewer instanceof User && $viewer->isSystemUser()) {
@@ -208,11 +208,16 @@ class EloquentRolesRepository implements RolesRepository
 
     public function getActiveAssignablePermissions(?User $viewer): Collection
     {
-        return Permission::with('module')
+        $query = Permission::with('module')
             ->where('is_active', true)
-            ->assignableForViewer($viewer)
-            ->orderBy('name')
-            ->get();
+            ->assignableForViewer($viewer);
+
+        $orgId = CurrentOrganization::id();
+        if ($orgId !== null) {
+            $query->forEnabledModulesInOrganization($orgId);
+        }
+
+        return $query->orderBy('name')->get();
     }
 
     public function toggleActive(int $id): Role

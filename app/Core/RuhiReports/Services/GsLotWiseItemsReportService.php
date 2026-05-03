@@ -16,9 +16,29 @@ class GsLotWiseItemsReportService
     {
         $slots = RuhiSlot::query()
             ->where('gs_id', $gsId)
-            ->orderBy('slot_name')
-            ->orderBy('id')
-            ->get();
+            ->get()
+            ->all();
+        usort($slots, function (RuhiSlot $a, RuhiSlot $b): int {
+            [$aPrefix, $aHasNum, $aNum, $aName] = $this->slotSortTuple((string) $a->slot_name);
+            [$bPrefix, $bHasNum, $bNum, $bName] = $this->slotSortTuple((string) $b->slot_name);
+
+            // Number-first: if both contain a number, compare by numeric value first.
+            if ($aHasNum !== $bHasNum) {
+                return $aHasNum <=> $bHasNum;
+            }
+            if ($aNum !== $bNum) {
+                return $aNum <=> $bNum;
+            }
+            if ($aPrefix !== $bPrefix) {
+                return $aPrefix <=> $bPrefix;
+            }
+            if ($aName !== $bName) {
+                return $aName <=> $bName;
+            }
+
+            return ((int) $a->id) <=> ((int) $b->id);
+        });
+        $slots = collect($slots);
 
         return $slots->map(function (RuhiSlot $slot) use ($gsId) {
             $rows = RuhiGsOrderByColor::query()
@@ -73,23 +93,40 @@ class GsLotWiseItemsReportService
      */
     private function designNameSortTuple(string $designName): array
     {
-        $pos = strpos($designName, '-');
-        if ($pos === false) {
-            $leading = '';
-            $afterHyphen = $designName;
-        } else {
-            $mysqlLocate = $pos + 1;
-            $leading = substr($designName, 0, $mysqlLocate);
-            $afterHyphen = substr($designName, $mysqlLocate);
+        return $this->naturalNameSortTuple($designName);
+    }
+
+    /**
+     * Natural sort tuple:
+     * - numeric suffix (e.g. Lot-10) sorted by number
+     * - non-numeric names sorted alphabetically
+     */
+    private function naturalNameSortTuple(string $name): array
+    {
+        $name = trim($name);
+        if (preg_match('/^(.*?)(?:-)?(\d+)\s*$/', $name, $m)) {
+            return [mb_strtolower(trim($m[1])), 0, (int) $m[2]];
         }
 
-        if (preg_match('/^\s*(-?\d+)/', $afterHyphen, $m)) {
-            $num = (int) $m[1];
-        } else {
-            $num = 0;
-        }
+        return [mb_strtolower($name), 1, 0];
+    }
 
-        return [$leading, $num];
+    private function slotSortTuple(string $name): array
+    {
+        $name = trim($name);
+        $num = 0;
+        $hasNum = 1;
+        if (preg_match('/(\d+)\s*$/', $name, $numMatch) === 1) {
+            $num = (int) $numMatch[1];
+            $hasNum = 0;
+        } elseif (preg_match_all('/\d+/', $name, $allNums) === 1 && !empty($allNums[0])) {
+            $num = (int) end($allNums[0]);
+            $hasNum = 0;
+        }
+        $prefix = mb_strtolower(trim((string) preg_replace('/\d+/', '', $name)));
+        $normalizedName = mb_strtolower($name);
+
+        return [$prefix, $hasNum, $num, $normalizedName];
     }
 
     public function listGsForDropdown(): Collection

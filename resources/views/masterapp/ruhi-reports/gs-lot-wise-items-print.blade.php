@@ -60,8 +60,45 @@
     @if($blocks->isEmpty())
         <p>No lots found for this GS.</p>
     @else
+        @php
+            $sortedBlocks = $blocks->sort(function ($a, $b) {
+                $aName = trim((string) (($a['lot']->slot_name ?? '')));
+                $bName = trim((string) (($b['lot']->slot_name ?? '')));
+
+                preg_match('/(\d+)\s*$/', $aName, $aNumMatch) || preg_match_all('/\d+/', $aName, $aAllNumMatch);
+                preg_match('/(\d+)\s*$/', $bName, $bNumMatch) || preg_match_all('/\d+/', $bName, $bAllNumMatch);
+                $aHasNum = isset($aNumMatch[1]);
+                $bHasNum = isset($bNumMatch[1]);
+                $aNum = $aHasNum ? (int) $aNumMatch[1] : (isset($aAllNumMatch[0]) && !empty($aAllNumMatch[0]) ? (int) end($aAllNumMatch[0]) : 0);
+                $bNum = $bHasNum ? (int) $bNumMatch[1] : (isset($bAllNumMatch[0]) && !empty($bAllNumMatch[0]) ? (int) end($bAllNumMatch[0]) : 0);
+                $aHasAnyNum = $aHasNum || (isset($aAllNumMatch[0]) && !empty($aAllNumMatch[0]));
+                $bHasAnyNum = $bHasNum || (isset($bAllNumMatch[0]) && !empty($bAllNumMatch[0]));
+
+                $aPrefix = mb_strtolower(trim(preg_replace('/\d+\s*$/', '', $aName)));
+                $bPrefix = mb_strtolower(trim(preg_replace('/\d+\s*$/', '', $bName)));
+                if ($aHasAnyNum && $bHasAnyNum) {
+                    $cmp = $aNum <=> $bNum;
+                    if ($cmp !== 0) {
+                        return $cmp;
+                    }
+                } elseif ($aHasAnyNum !== $bHasAnyNum) {
+                    return $aHasAnyNum ? -1 : 1;
+                }
+
+                if ($aPrefix !== $bPrefix) {
+                    return $aPrefix <=> $bPrefix;
+                }
+
+                $cmp = strcasecmp($aName, $bName);
+                if ($cmp !== 0) {
+                    return $cmp;
+                }
+
+                return ((int) ($a['lot']->id ?? 0)) <=> ((int) ($b['lot']->id ?? 0));
+            })->values();
+        @endphp
         <div class="wrap">
-            @foreach($blocks as $block)
+            @foreach($sortedBlocks as $block)
                 @php $lot = $block['lot']; @endphp
                 <div class="lot-card">
                     <div class="lot-head">
