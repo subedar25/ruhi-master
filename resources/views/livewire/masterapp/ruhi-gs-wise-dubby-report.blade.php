@@ -78,6 +78,15 @@
                         </tr>
                     @endforelse
                 </tbody>
+                @if(($report['rows'] ?? []) !== [])
+                    <tfoot>
+                        <tr class="table-light">
+                            <td class="font-weight-bold py-2">Total</td>
+                            <td class="text-left font-weight-bold py-2">{{ number_format((int) ($report['grand_total_quantity'] ?? 0), 0, '.', '') }}</td>
+                            <td class="text-left font-weight-bold py-2">{{ number_format((float) ($report['grand_total_weight'] ?? 0), 2, '.', '') }}</td>
+                        </tr>
+                    </tfoot>
+                @endif
             </table>
         </div>
     @endif

@@ -29,7 +29,9 @@ class GsWiseDubbyReportService
      *
      * @return array{
      *     gs_name: string,
-     *     rows: array<int, array{dubby: string, total_quantity: int, weight: float}>
+     *     rows: array<int, array{dubby: string, total_quantity: int, weight: float}>,
+     *     grand_total_quantity: int,
+     *     grand_total_weight: float
      * }
      */
     public function buildReport(int $gsId): array
@@ -97,9 +99,14 @@ class GsWiseDubbyReportService
             })
             ->all();
 
+        $grandTotalQty = (int) array_sum(array_column($rows, 'total_quantity'));
+        $grandTotalWt = round((float) array_sum(array_column($rows, 'weight')), 2);
+
         return [
             'gs_name' => $gsName,
             'rows' => $rows,
+            'grand_total_quantity' => $grandTotalQty,
+            'grand_total_weight' => $grandTotalWt,
         ];
     }
 }

@@ -13,6 +13,7 @@
         table { width: 100%; max-width: 72rem; border-collapse: collapse; font-size: 11px; table-layout: fixed; }
         th, td { border: 1px solid #ddd; padding: 6px 8px; }
         th { background: #fafafa; font-weight: 700; text-align: left; }
+        tfoot td { font-weight: 700; background: #f5f5f5; }
         .col-dubby { width: 18rem; max-width: 18rem; word-break: break-word; }
         .col-qty { text-align: left; width: 12rem; }
         .col-wt { text-align: left; width: 12rem; }
@@ -56,6 +57,15 @@
                 </tr>
             @endforelse
         </tbody>
+        @if(($report['rows'] ?? []) !== [])
+            <tfoot>
+                <tr>
+                    <td class="col-dubby">Total</td>
+                    <td class="col-qty">{{ number_format((int) ($report['grand_total_quantity'] ?? 0), 0, '.', '') }}</td>
+                    <td class="col-wt">{{ number_format((float) ($report['grand_total_weight'] ?? 0), 2, '.', '') }}</td>
+                </tr>
+            </tfoot>
+        @endif
     </table>
 </body>
 </html>
