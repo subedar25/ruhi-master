@@ -164,7 +164,7 @@ class GsWiseCastingReportService
      * @return array{
      *     gs_name: string,
      *     lot_name: string,
-     *     design_groups: array<int, array{design_name: string, lines: array<int, array{casting: string, total_quantity: int}>}>,
+     *     design_groups: array<int, array{design_name: string, design_qty: int, lines: array<int, array{casting: string, total_quantity: int}>}>,
      *     grand_total_quantity: int
      * }
      */
@@ -251,6 +251,7 @@ class GsWiseCastingReportService
             if ($lines !== []) {
                 $designGroups[] = [
                     'design_name' => $designName,
+                    'design_qty' => $designQty,
                     'lines' => $lines,
                 ];
             }

@@ -142,7 +142,7 @@ function handleAjaxForm(formSelector, options = {}) {
                         icon: "success",
                         title: settings.successTitle,
                         text: res.message || 'Operation completed successfully.',
-                        timer: 5000,
+                        timer: 2000,
                         timerProgressBar: true,
                         showConfirmButton: false,
                         didOpen: (toast) => {

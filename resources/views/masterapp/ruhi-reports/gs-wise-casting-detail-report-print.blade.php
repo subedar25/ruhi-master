@@ -54,7 +54,7 @@
                     @foreach($group['lines'] as $lineIdx => $line)
                         <tr>
                             @if($lineIdx === 0)
-                                <td class="col-design" rowspan="{{ count($group['lines']) }}">{{ $group['design_name'] }}</td>
+                                <td class="col-design" rowspan="{{ count($group['lines']) }}">{{ $group['design_name'] }}- {{ number_format((int) ($group['design_qty'] ?? 0), 0, '.', '') }}</td>
                             @endif
                             <td class="col-casting">{{ $line['casting'] }}</td>
                             <td class="col-qty">{{ number_format((int) $line['total_quantity'], 0, '.', '') }}</td>

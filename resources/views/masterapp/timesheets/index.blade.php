@@ -784,7 +784,7 @@ var timesheetToast = typeof Swal !== 'undefined' && Swal.mixin({
     toast: true,
     position: 'top-end',
     icon: 'success',
-    timer: 5000,
+    timer: 2000,
     timerProgressBar: true,
     showConfirmButton: false
 });
@@ -793,7 +793,7 @@ function showTimesheetToast(title, message) {
     if (timesheetToast) {
         timesheetToast.fire({ title: title || 'Success', text: message || '' });
     } else if (typeof Swal !== 'undefined') {
-        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: title || 'Success', text: message || '', timer: 5000, timerProgressBar: true, showConfirmButton: false });
+        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: title || 'Success', text: message || '', timer: 2000, timerProgressBar: true, showConfirmButton: false });
     }
 }
 

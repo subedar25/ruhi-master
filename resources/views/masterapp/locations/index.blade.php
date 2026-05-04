@@ -422,7 +422,7 @@ $(function () {
         toast: true,
         position: 'top-end',
         showConfirmButton: false,
-        timer: 5000,
+        timer: 2000,
         timerProgressBar: true,
         showClass: { popup: 'animate__animated animate__fadeInUp' },
         hideClass: { popup: 'animate__animated animate__fadeOutDown' }
@@ -802,7 +802,7 @@ $(function () {
                         icon: "success",
                         title: "Location Created!",
                         text: res.message || 'Location created successfully.',
-                        timer: 5000,
+                        timer: 2000,
                         timerProgressBar: true,
                         showConfirmButton: false
                     }).then(() => {
@@ -825,7 +825,7 @@ $(function () {
                         icon: "error",
                         title: "Error",
                         text: errorText,
-                        timer: 5000,
+                        timer: 3000,
                         showConfirmButton: false
                     });
                 }
@@ -976,7 +976,7 @@ $(function () {
                     icon: "success",
                     title: "Location Updated!",
                     text: res.message || 'Location updated successfully.',
-                    timer: 5000,
+                    timer: 2000,
                     timerProgressBar: true,
                     showConfirmButton: false
                 }).then(() => {
@@ -999,7 +999,7 @@ $(function () {
                     icon: "error",
                     title: "Error",
                     text: errorText,
-                    timer: 5000,
+                    timer: 3000,
                     showConfirmButton: false
                 });
             }
