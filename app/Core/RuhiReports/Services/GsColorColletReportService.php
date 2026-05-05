@@ -2,19 +2,28 @@
 
 namespace App\Core\RuhiReports\Services;
 
+use App\Core\RuhiReports\ReportNameSort;
+use App\Models\RuhiCollateByColor;
 use App\Models\RuhiDesignProduct;
 use App\Models\RuhiGs;
 use App\Models\RuhiGsOrderByColor;
+use Illuminate\Support\Collection;
+
 /**
- * GS Color Collet Report: products with {@see RuhiProduct} product_type = 3 (Collet),
- * quantities from {@see RuhiCollateByColor} scaled by GS order design_qty (same pattern as GS Detail Each Item).
+ * GS Color Collet Report: matches legacy CI {@code gsColorColletReport} / {@code getColorColleteByDesign}.
+ *
+ * For the selected GS, each {@see RuhiGsOrderByColor} row (per lot + design) supplies
+ * {@code design_qty}, {@code design_red_qty}, {@code design_red_green_qty}, {@code design_green_qty}.
+ * For each row, load design products with {@see RuhiProduct::product_type} = 3 (Collet) and apply
+ * collate-by-color rules per {@see RuhiCollateByColor} row. Results merge by {@code product_id},
+ * then rows with both red and green zero are dropped (legacy {@code removeRedGeenQtyZero}).
  */
 class GsColorColletReportService
 {
     /** Master product type “Collet” on {@see RuhiProduct::product_type}. */
     public const PRODUCT_TYPE_COLLET = 3;
 
-    public function listGsForDropdown(): \Illuminate\Support\Collection
+    public function listGsForDropdown(): Collection
     {
         return RuhiGs::query()
             ->whereNull('deleted_at')
@@ -38,31 +47,37 @@ class GsColorColletReportService
 
         $orderRows = RuhiGsOrderByColor::query()
             ->where('gs_id', $gsId)
-            ->get(['design_id', 'design_qty']);
+            ->with(['design'])
+            ->get()
+            ->sort(function (RuhiGsOrderByColor $a, RuhiGsOrderByColor $b): int {
+                $lot = ((int) $a->lot_id) <=> ((int) $b->lot_id);
+                if ($lot !== 0) {
+                    return $lot;
+                }
+                $na = (string) ($a->design?->design_name ?? '');
+                $nb = (string) ($b->design?->design_name ?? '');
 
-        $designQtyByDesign = [];
-        foreach ($orderRows as $row) {
-            $did = (int) $row->design_id;
-            $designQtyByDesign[$did] = ($designQtyByDesign[$did] ?? 0) + (int) $row->design_qty;
+                return ReportNameSort::compareTuples(
+                    ReportNameSort::hyphenNameTuple($na),
+                    ReportNameSort::hyphenNameTuple($nb)
+                );
+            })
+            ->values();
+
+        if ($orderRows->isEmpty()) {
+            return $this->emptyReport($gsName);
         }
 
-        if ($designQtyByDesign === []) {
-            return [
-                'gs_name' => $gsName,
-                'rows' => [],
-                'grand_red' => 0,
-                'grand_green' => 0,
-                'grand_weight' => 0.0,
-            ];
-        }
+        $raw = [];
 
-        $rows = [];
-
-        foreach ($designQtyByDesign as $designId => $scale) {
-            $scale = max((int) $scale, 0);
+        foreach ($orderRows as $order) {
+            $designQty = (int) $order->design_qty;
+            $designRedQty = (int) $order->design_red_qty;
+            $designRedGreenQty = (int) $order->design_red_green_qty;
+            $designGreenQty = (int) $order->design_green_qty;
 
             $dps = RuhiDesignProduct::query()
-                ->where('design_id', $designId)
+                ->where('design_id', (int) $order->design_id)
                 ->whereHas('product', fn ($q) => $q->where('product_type', self::PRODUCT_TYPE_COLLET)->withTrashed())
                 ->with([
                     'product' => fn ($q) => $q->withTrashed(),
@@ -76,33 +91,58 @@ class GsColorColletReportService
                     continue;
                 }
 
-                $cc = $dp->collateByColors;
-                $sumOnlyRed = (int) $cc->sum('only_red_qty');
-                $sumRed = (int) $cc->sum('red_qty');
-                $sumGreen = (int) $cc->sum('green_qty');
-                $sumOnlyGreen = (int) $cc->sum('only_green_qty');
-
-                $redScaled = (int) round(($sumOnlyRed + $sumRed) * $scale);
-                $greenScaled = (int) round(($sumGreen + $sumOnlyGreen) * $scale);
-
-                $baseQty = (int) $dp->quantity * $scale;
-                $wUnit = (float) $product->weight;
-                $lineWeight = round($baseQty * $wUnit, 2);
-
-                $rows[] = [
-                    'collet' => (string) $product->product_name,
-                    'red' => $redScaled,
-                    'green' => $greenScaled,
-                    'weight' => $lineWeight,
-                ];
+                $collates = $dp->collateByColors;
+                if ($collates->isEmpty()) {
+                    $raw = array_merge($raw, $this->pushLegacySlices(
+                        $dp,
+                        $product->id,
+                        (string) $product->product_name,
+                        (float) $product->weight,
+                        $designQty,
+                        $designRedQty,
+                        $designRedGreenQty,
+                        $designGreenQty,
+                        null
+                    ));
+                } else {
+                    foreach ($collates as $cc) {
+                        $raw = array_merge($raw, $this->pushLegacySlices(
+                            $dp,
+                            $product->id,
+                            (string) $product->product_name,
+                            (float) $product->weight,
+                            $designQty,
+                            $designRedQty,
+                            $designRedGreenQty,
+                            $designGreenQty,
+                            $cc
+                        ));
+                    }
+                }
             }
         }
 
-        $rows = $this->mergeRowsByColletName($rows);
+        $merged = $this->mergeDuplicateProductsById($raw);
+        $filtered = array_values(array_filter(
+            $merged,
+            static fn (array $r): bool => ((int) $r['total_red_qty']) !== 0 || ((int) $r['total_green_qty']) !== 0
+        ));
 
-        usort($rows, function (array $a, array $b): int {
-            return $this->compareProductNameMysqlColletOrder($a['collet'], $b['collet']);
+        usort($filtered, static function (array $a, array $b): int {
+            return strnatcasecmp((string) $a['product_name'], (string) $b['product_name']);
         });
+
+        $rows = [];
+        foreach ($filtered as $r) {
+            $totalColorQty = (int) $r['total_color_qty'];
+            $unitWt = (float) $r['weight'];
+            $rows[] = [
+                'collet' => (string) $r['product_name'],
+                'red' => (int) $r['total_red_qty'],
+                'green' => (int) $r['total_green_qty'],
+                'weight' => round($totalColorQty * $unitWt, 2),
+            ];
+        }
 
         $grandRed = (int) array_sum(array_column($rows, 'red'));
         $grandGreen = (int) array_sum(array_column($rows, 'green'));
@@ -110,7 +150,7 @@ class GsColorColletReportService
 
         return [
             'gs_name' => $gsName,
-            'rows' => array_values($rows),
+            'rows' => $rows,
             'grand_red' => $grandRed,
             'grand_green' => $grandGreen,
             'grand_weight' => $grandWeight,
@@ -118,83 +158,135 @@ class GsColorColletReportService
     }
 
     /**
-     * One row per collet (product) name: duplicate names are combined; red, green, weight are summed.
+     * @return array<int, array{product_id: int, product_name: string, weight: float, total_color_qty: int, total_red_qty: int, total_green_qty: int}>
+     */
+    private function pushLegacySlices(
+        RuhiDesignProduct $dp,
+        int $productId,
+        string $productName,
+        float $unitWeight,
+        int $designQty,
+        int $designRedQty,
+        int $designRedGreenQty,
+        int $designGreenQty,
+        ?RuhiCollateByColor $cc
+    ): array {
+        $qty = [
+            'total_color_qty' => 0,
+            'total_red_qty' => 0,
+            'total_green_qty' => 0,
+        ];
+        $this->applyLegacyCollateMath(
+            $dp,
+            $cc,
+            $designQty,
+            $designRedQty,
+            $designRedGreenQty,
+            $designGreenQty,
+            $qty
+        );
+
+        return [[
+            'product_id' => $productId,
+            'product_name' => $productName,
+            'weight' => $unitWeight,
+            'total_color_qty' => (int) $qty['total_color_qty'],
+            'total_red_qty' => (int) $qty['total_red_qty'],
+            'total_green_qty' => (int) $qty['total_green_qty'],
+        ]];
+    }
+
+    /**
+     * Legacy CI arithmetic from {@code gsColorColletReport} inner loop.
      *
-     * @param  array<int, array{collet: string, red: int, green: int, weight: float}>  $rows
-     * @return array<int, array{collet: string, red: int, green: int, weight: float}>
+     * @param  array{total_color_qty: int, total_red_qty: int, total_green_qty: int}  $out
      */
-    private function mergeRowsByColletName(array $rows): array
-    {
-        $byKey = [];
-        foreach ($rows as $r) {
-            $name = trim((string) $r['collet']);
-            if ($name === '') {
-                $name = (string) $r['collet'];
-            }
-            if (! isset($byKey[$name])) {
-                $byKey[$name] = [
-                    'collet' => $name,
-                    'red' => 0,
-                    'green' => 0,
-                    'weight' => 0.0,
-                ];
-            }
-            $byKey[$name]['red'] += (int) $r['red'];
-            $byKey[$name]['green'] += (int) $r['green'];
-            $byKey[$name]['weight'] += (float) $r['weight'];
+    private function applyLegacyCollateMath(
+        RuhiDesignProduct $dp,
+        ?RuhiCollateByColor $cc,
+        int $designQty,
+        int $designRedQty,
+        int $designRedGreenQty,
+        int $designGreenQty,
+        array &$out
+    ): void {
+        $quantity = (int) $dp->quantity;
+        $onlyRed = $cc !== null ? (int) $cc->only_red_qty : 0;
+        $redQty = $cc !== null ? (int) $cc->red_qty : 0;
+        $greenQty = $cc !== null ? (int) $cc->green_qty : 0;
+
+        $totalColorQty = $quantity * $designQty;
+
+        if (! empty($onlyRed) && empty($redQty)) {
+            $finalRed = $onlyRed * $designRedQty;
+        } elseif (empty($onlyRed) && ! empty($redQty)) {
+            $finalRed = $redQty * $designRedGreenQty;
+        } elseif (! empty($onlyRed) && ! empty($redQty)) {
+            $finalRed = $onlyRed * $designRedQty + $redQty * $designRedGreenQty;
+        } else {
+            $finalRed = 0;
         }
 
-        foreach ($byKey as &$r) {
-            $r['weight'] = round($r['weight'], 2);
+        $finalGreen = 0;
+        if (! empty($designGreenQty)) {
+            if (! empty($onlyRed) && empty($greenQty)) {
+                $finalGreen = $onlyRed * $designGreenQty;
+            } elseif (! empty($onlyRed) && ! empty($greenQty)) {
+                $finalGreen = $onlyRed * $designGreenQty + $greenQty * $designRedGreenQty;
+            }
         }
-        unset($r);
 
-        return array_values($byKey);
+        if (! empty($greenQty) && ! empty($redQty)) {
+            $finalRedGreen = $greenQty * $designRedGreenQty;
+        } elseif (! empty($greenQty) && empty($redQty)) {
+            $finalRedGreen = $greenQty * $designRedGreenQty;
+        } else {
+            $finalRedGreen = 0;
+        }
+
+        $finalTotalGreen = $finalGreen + $finalRedGreen;
+
+        $out['total_color_qty'] += $totalColorQty;
+        $out['total_red_qty'] += $finalRed;
+        $out['total_green_qty'] += $finalTotalGreen;
     }
 
     /**
-     * Matches SQL: ORDER BY LEFT(P.product_name, LOCATE('-', P.product_name)),
-     * CAST(SUBSTRING(P.product_name, LOCATE('-', P.product_name)+1) AS SIGNED).
+     * Legacy {@code calculateDuplicateColor}: sum qty columns by {@code product_id}; keep first row’s unit {@code weight}.
+     *
+     * @param  array<int, array{product_id: int, product_name: string, weight: float, total_color_qty: int, total_red_qty: int, total_green_qty: int}>  $arrProducts
+     * @return array<int, array{product_id: int, product_name: string, weight: float, total_color_qty: int, total_red_qty: int, total_green_qty: int}>
      */
-    private function compareProductNameMysqlColletOrder(string $a, string $b): int
+    private function mergeDuplicateProductsById(array $arrProducts): array
     {
-        [$prefA, $numA] = $this->mysqlColletSortKey($a);
-        [$prefB, $numB] = $this->mysqlColletSortKey($b);
-        $c = strcmp($prefA, $prefB);
-        if ($c !== 0) {
-            return $c;
+        $arrResults = [];
+
+        foreach ($arrProducts as $details) {
+            $productId = $details['product_id'];
+
+            if (isset($arrResults[$productId])) {
+                $arrResults[$productId]['total_color_qty'] += $details['total_color_qty'];
+                $arrResults[$productId]['total_red_qty'] += $details['total_red_qty'];
+                $arrResults[$productId]['total_green_qty'] += $details['total_green_qty'];
+            } else {
+                $arrResults[$productId] = $details;
+            }
         }
 
-        return $numA <=> $numB;
+        return array_values($arrResults);
     }
 
     /**
-     * @return array{0: string, 1: int}
+     * @return array{gs_name: string, rows: array<int, mixed>, grand_red: int, grand_green: int, grand_weight: float}
      */
-    private function mysqlColletSortKey(string $productName): array
+    private function emptyReport(string $gsName): array
     {
-        $pos = strpos($productName, '-');
-        if ($pos === false) {
-            return ['', $this->mysqlCastAsSigned($productName)];
-        }
-
-        $prefix = substr($productName, 0, $pos + 1);
-        $afterHyphen = substr($productName, $pos + 1);
-
-        return [$prefix, $this->mysqlCastAsSigned($afterHyphen)];
-    }
-
-    /** Leading integer like MySQL CAST(... AS SIGNED). */
-    private function mysqlCastAsSigned(string $s): int
-    {
-        $s = trim($s);
-        if ($s === '') {
-            return 0;
-        }
-        if (preg_match('/^([+\-]?\d+)/', $s, $m)) {
-            return (int) $m[1];
-        }
-
-        return 0;
+        return [
+            'gs_name' => $gsName,
+            'rows' => [],
+            'grand_red' => 0,
+            'grand_green' => 0,
+            'grand_weight' => 0.0,
+        ];
     }
 }

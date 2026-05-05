@@ -94,6 +94,9 @@ Route::prefix('master-app')
             Route::get('/gs-color-collet-report/print', [RuhiReportController::class, 'gsColorColletReportPrint'])->name('gs-color-collet-report.print');
             Route::get('/gs-color-full-report', [RuhiReportController::class, 'gsColorFullReport'])->name('gs-color-full-report');
             Route::get('/gs-color-full-report/print', [RuhiReportController::class, 'gsColorFullReportPrint'])->name('gs-color-full-report.print');
+            Route::get('/gs-color-full-report/print/{block}', [RuhiReportController::class, 'gsColorFullReportBlockPrint'])
+                ->where('block', 'kundanfull|pulkifull|addfull')
+                ->name('gs-color-full-report.print.block');
             Route::get('/gs-collet-kstone-color-report', [RuhiReportController::class, 'gsColletKstoneColorReport'])->name('gs-collet-kstone-color-report');
             Route::get('/gs-collet-kstone-color-report/print', [RuhiReportController::class, 'gsColletKstoneColorReportPrint'])->name('gs-collet-kstone-color-report.print');
             Route::get('/gs-wise-drop-report', [RuhiReportController::class, 'gsWiseDropReport'])->name('gs-wise-drop-report');

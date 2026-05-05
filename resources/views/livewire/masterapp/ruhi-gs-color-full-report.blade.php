@@ -23,12 +23,20 @@
                             </select>
                         </div>
                     </div>
+                    <div class="form-group mr-3 mb-2">
+                        <label class="mr-2 mb-0">Filter</label>
+                        <select wire:model="sfilter" class="form-control form-control-sm" style="min-width: 12rem;" title="Legacy sfilter: (S) in product name">
+                            <option value="0">All</option>
+                            <option value="1">Exclude “(S)” in name</option>
+                            <option value="2">Only “(S)” in name</option>
+                        </select>
+                    </div>
                     <button type="submit" class="btn btn-primary btn-sm mb-2">Submit</button>
                 </form>
                 <div class="mb-2 flex-shrink-0 ml-2">
                     @if($submitted && $gsId)
                         <a
-                            href="{{ route('masterapp.ruhi-reports.gs-color-full-report.print', ['gs' => $gsId]) }}"
+                            href="{{ route('masterapp.ruhi-reports.gs-color-full-report.print', ['gs' => $gsId] + (($sfilter ?? 0) > 0 ? ['sfilter' => $sfilter] : [])) }}"
                             target="_blank"
                             rel="noopener"
                             class="btn btn-outline-primary btn-sm"
@@ -55,31 +63,56 @@
                     'title' => 'GS Wise Kundanfull Color Report',
                     'layout' => 'detail',
                     'totalLabel' => 'Kundan Total Qty',
+                    'printBlock' => 'kundanfull',
                     'rows' => $report['kundanfull'],
+                    'totals' => $report['totals_kundanfull'] ?? [],
                 ],
                 [
                     'title' => 'GS Wise Pulkifull Color Report',
                     'layout' => 'simple',
                     'firstCol' => 'Pulki',
+                    'printBlock' => 'pulkifull',
                     'rows' => $report['pulkifull'],
+                    'totals' => $report['totals_pulkifull'] ?? [],
                 ],
                 [
                     'title' => 'GS Wise AddFull Color Report',
                     'layout' => 'simple',
                     'firstCol' => 'AddFull',
+                    'printBlock' => 'addfull',
                     'rows' => $report['addfull'],
+                    'totals' => $report['totals_addfull'] ?? [],
                 ],
             ];
         @endphp
 
         @foreach($blocks as $block)
-            <h5 class="mb-2 mt-4 d-flex flex-wrap align-items-center">
-                <i class="fas fa-palette text-secondary mr-2"></i>
-                <span class="font-weight-bold mr-1">{{ $block['title'] }}</span>
-                @if($selectedGsName !== '')
-                    <span class="text-nowrap">({{ $selectedGsName }})</span>
+            <div class="d-flex flex-wrap align-items-center justify-content-between w-100 mt-4 mb-2">
+                <h5 class="mb-0 d-flex flex-wrap align-items-center">
+                    <i class="fas fa-palette text-secondary mr-2"></i>
+                    <span class="font-weight-bold mr-1">{{ $block['title'] }}</span>
+                    @if($selectedGsName !== '')
+                        <span class="text-nowrap">({{ $selectedGsName }})</span>
+                    @endif
+                </h5>
+                @if($submitted && $gsId)
+                    @php
+                        $blockPrintParams = ['block' => $block['printBlock'], 'gs' => $gsId];
+                        if (($sfilter ?? 0) > 0) {
+                            $blockPrintParams['sfilter'] = $sfilter;
+                        }
+                    @endphp
+                    <a
+                        href="{{ route('masterapp.ruhi-reports.gs-color-full-report.print.block', $blockPrintParams) }}"
+                        target="_blank"
+                        rel="noopener"
+                        class="btn btn-outline-secondary btn-sm mb-0 ml-2 flex-shrink-0"
+                        title="Print this section only"
+                    >
+                        <i class="fa fa-print mr-1"></i> Print section
+                    </a>
                 @endif
-            </h5>
+            </div>
 
             <div class="table-responsive mb-4" style="max-width: 100%; overflow-x: auto;">
                 @if(($block['layout'] ?? 'detail') === 'simple')
@@ -112,6 +145,19 @@
                                 </tr>
                             @endforelse
                         </tbody>
+                        @if(count($block['rows']) > 0)
+                            @php $t = $block['totals'] ?? []; @endphp
+                            <tfoot>
+                                <tr class="table-light">
+                                    <td class="font-weight-bold" colspan="2">Grand Total</td>
+                                    <td class="font-weight-bold">{{ number_format((int) ($t['total_color_qty'] ?? 0), 0, '.', '') }}</td>
+                                    <td class="font-weight-bold">{{ number_format((int) ($t['red_qty'] ?? 0), 0, '.', '') }}</td>
+                                    <td class="font-weight-bold">{{ number_format((int) ($t['green_qty'] ?? 0), 0, '.', '') }}</td>
+                                    <td class="font-weight-bold">{{ number_format((int) ($t['white_qty'] ?? 0), 0, '.', '') }}</td>
+                                    <td class="font-weight-bold">{{ number_format((float) ($t['total_wt'] ?? 0), 2, '.', '') }}</td>
+                                </tr>
+                            </tfoot>
+                        @endif
                     </table>
                 @else
                     <table class="table table-bordered table-sm mb-0 text-nowrap" style="min-width: 920px;">
@@ -158,6 +204,25 @@
                                 </tr>
                             @endforelse
                         </tbody>
+                        @if(count($block['rows']) > 0)
+                            @php $t = $block['totals'] ?? []; @endphp
+                            <tfoot>
+                                <tr class="table-light">
+                                    <td class="font-weight-bold">Grand Total</td>
+                                    <td class="font-weight-bold">{{ number_format((int) ($t['total_color_qty'] ?? 0), 0, '.', '') }}</td>
+                                    <td></td>
+                                    <td class="border-left font-weight-bold">{{ number_format((int) ($t['red_qty'] ?? 0), 0, '.', '') }}</td>
+                                    <td class="font-weight-bold">{{ number_format((float) ($t['red_kstone_wt'] ?? 0), 2, '.', '') }}</td>
+                                    <td class="font-weight-bold">{{ number_format((float) ($t['red_die_wt'] ?? 0), 2, '.', '') }}</td>
+                                    <td class="border-left font-weight-bold">{{ number_format((int) ($t['green_qty'] ?? 0), 0, '.', '') }}</td>
+                                    <td class="font-weight-bold">{{ number_format((float) ($t['green_kstone_wt'] ?? 0), 2, '.', '') }}</td>
+                                    <td class="font-weight-bold">{{ number_format((float) ($t['green_die_wt'] ?? 0), 2, '.', '') }}</td>
+                                    <td class="border-left font-weight-bold">{{ number_format((int) ($t['white_qty'] ?? 0), 0, '.', '') }}</td>
+                                    <td class="font-weight-bold">{{ number_format((float) ($t['white_kstone_wt'] ?? 0), 2, '.', '') }}</td>
+                                    <td class="font-weight-bold">{{ number_format((float) ($t['white_die_wt'] ?? 0), 2, '.', '') }}</td>
+                                </tr>
+                            </tfoot>
+                        @endif
                     </table>
                 @endif
             </div>

@@ -8,6 +8,7 @@ use App\Core\RuhiReports\Services\GsFullReportService;
 use App\Core\RuhiReports\Services\GsLotWiseItemsReportService;
 use App\Core\RuhiReports\Services\GsWiseCastingReportService;
 use App\Core\RuhiReports\Services\GsColorColletReportService;
+use App\Core\RuhiReports\Services\GsColletKstoneColorReportService;
 use App\Core\RuhiReports\Services\GsColorFullReportService;
 use App\Core\RuhiReports\Services\GsWiseColletReportService;
 use App\Core\RuhiReports\Services\GsWiseDubbyReportService;
@@ -179,21 +180,74 @@ class RuhiReportController extends Controller
 
         RuhiGs::query()->whereNull('deleted_at')->findOrFail($gsId);
 
-        $report = $service->buildReport($gsId);
+        $sfilter = (int) $request->query('sfilter', 0);
+        $sfilter = $sfilter === 0 ? null : $sfilter;
+
+        $report = $service->buildReport($gsId, $sfilter);
 
         return view('masterapp.ruhi-reports.gs-color-full-report-print', [
             'report' => $report,
         ]);
     }
 
-    public function gsColletKstoneColorReportPrint(Request $request, GsColorFullReportService $service): View
+    /**
+     * Print a single GS Color Full Report section (Kundanfull, Pulkifull, or AddFull).
+     */
+    public function gsColorFullReportBlockPrint(Request $request, GsColorFullReportService $service, string $block): View
+    {
+        $allowed = ['kundanfull', 'pulkifull', 'addfull'];
+        abort_unless(in_array($block, $allowed, true), 404);
+
+        $gsId = (int) $request->query('gs', 0);
+        abort_unless($gsId > 0, 404);
+
+        RuhiGs::query()->whereNull('deleted_at')->findOrFail($gsId);
+
+        $sfilter = (int) $request->query('sfilter', 0);
+        $sfilter = $sfilter === 0 ? null : $sfilter;
+
+        $full = $service->buildReport($gsId, $sfilter);
+
+        $meta = [
+            'kundanfull' => [
+                'title' => 'GS Wise Kundanfull Color Report',
+                'layout' => 'detail',
+            ],
+            'pulkifull' => [
+                'title' => 'GS Wise Pulkifull Color Report',
+                'layout' => 'simple',
+            ],
+            'addfull' => [
+                'title' => 'GS Wise AddFull Color Report',
+                'layout' => 'simple',
+            ],
+        ][$block];
+
+        $firstCol = match ($block) {
+            'pulkifull' => 'Pulki',
+            'addfull' => 'AddFull',
+            default => 'Pulki',
+        };
+
+        return view('masterapp.ruhi-reports.gs-color-full-report-block-print', [
+            'gs_name' => $full['gs_name'],
+            'block_title' => $meta['title'],
+            'layout' => $meta['layout'],
+            'totalLabel' => 'Kundan Total Qty',
+            'firstCol' => $firstCol,
+            'rows' => $full[$block],
+            'totals' => $full['totals_'.$block] ?? [],
+        ]);
+    }
+
+    public function gsColletKstoneColorReportPrint(Request $request, GsColletKstoneColorReportService $service): View
     {
         $gsId = (int) $request->query('gs', 0);
         abort_unless($gsId > 0, 404);
 
         RuhiGs::query()->whereNull('deleted_at')->findOrFail($gsId);
 
-        $report = $service->buildColletKstoneColorReport($gsId);
+        $report = $service->buildReport($gsId);
 
         return view('masterapp.ruhi-reports.gs-collet-kstone-color-report-print', [
             'report' => $report,

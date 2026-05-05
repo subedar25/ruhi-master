@@ -12,6 +12,7 @@
         table.data { width: 100%; border-collapse: collapse; font-size: 9px; margin-bottom: 14px; }
         table.data th, table.data td { border: 1px solid #ccc; padding: 4px 6px; }
         table.data thead th { background: #f0f0f0; }
+        table.data tfoot td { font-weight: 700; background: #f5f5f5; }
         @media print {
             .actions { display: none; }
             body { margin: 6mm; }
@@ -68,10 +69,23 @@
             @endforelse
         </tbody>
         @if(count($report['rows']) > 0)
-            @php $tot = $report['totals']; @endphp
+            @php
+                $tot = array_merge([
+                    'total_color_qty' => 0,
+                    'red_qty' => 0,
+                    'red_kstone_wt' => 0.0,
+                    'red_die_wt' => 0.0,
+                    'green_qty' => 0,
+                    'green_kstone_wt' => 0.0,
+                    'green_die_wt' => 0.0,
+                    'white_qty' => 0,
+                    'white_kstone_wt' => 0.0,
+                    'white_die_wt' => 0.0,
+                ], $report['totals'] ?? []);
+            @endphp
             <tfoot>
-                <tr style="font-weight:700;background:#f0f0f0;">
-                    <td>Total</td>
+                <tr>
+                    <td>Grand Total</td>
                     <td>{{ number_format((int) $tot['total_color_qty'], 0, '.', '') }}</td>
                     <td></td>
                     <td>{{ number_format((int) $tot['red_qty'], 0, '.', '') }}</td>

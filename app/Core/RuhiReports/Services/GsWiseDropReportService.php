@@ -3,20 +3,26 @@
 namespace App\Core\RuhiReports\Services;
 
 use App\Core\RuhiReports\ReportNameSort;
+use App\Models\RuhiCollateByColor;
 use App\Models\RuhiDesignProduct;
 use App\Models\RuhiGs;
 use App\Models\RuhiGsOrderByColor;
+use Illuminate\Support\Collection;
 
 /**
- * GS Wise Drop Report: lines where {@see RuhiDesignProduct::item_type_id} is Drop (legacy id 8),
- * quantities from collate-by-color scaled by GS design_qty (same as GS Detail Each Item drop rows).
+ * GS Wise Drop Report: matches legacy CI {@code gsDropReport} / {@code getColorColleteByDesign}
+ * with {@code product_type => 8}.
+ *
+ * Each {@see RuhiGsOrderByColor} row is processed separately (not aggregated by design).
+ * White is {@code total_color_qty - (final_red + final_green)} using the same partial green as CI
+ * (not {@code final_total_green} when red–green split exists — CI omits that block for drop).
  */
 class GsWiseDropReportService
 {
-    /** Drop lines use `r_design_products.item_type_id` (= `r_item_type.id`). */
-    private const DROP_ITEM_TYPE_ID = 8;
+    /** Drop / color product type on {@see RuhiProduct::product_type} (legacy CI filter). */
+    public const PRODUCT_TYPE_DROP = 8;
 
-    public function listGsForDropdown(): \Illuminate\Support\Collection
+    public function listGsForDropdown(): Collection
     {
         return RuhiGs::query()
             ->whereNull('deleted_at')
@@ -27,46 +33,57 @@ class GsWiseDropReportService
     /**
      * @return array{
      *     gs_name: string,
-     *     rows: array<int, array{drop: string, red: int, green: int, white: int}>
+     *     rows: array<int, array{drop: string, red: int, green: int, white: int}>,
+     *     grand_red: int,
+     *     grand_green: int,
+     *     grand_white: int
      * }
      */
     public function buildReport(int $gsId): array
     {
         $gs = RuhiGs::query()->whereNull('deleted_at')->find($gsId);
-        if (! $gs) {
-            return [
-                'gs_name' => '',
-                'rows' => [],
-            ];
-        }
-
         $gsName = (string) ($gs->name ?? '');
 
         $orderRows = RuhiGsOrderByColor::query()
             ->where('gs_id', $gsId)
-            ->get(['design_id', 'design_qty']);
+            ->with(['design'])
+            ->get()
+            ->sort(function (RuhiGsOrderByColor $a, RuhiGsOrderByColor $b): int {
+                $lot = ((int) $a->lot_id) <=> ((int) $b->lot_id);
+                if ($lot !== 0) {
+                    return $lot;
+                }
+                $na = (string) ($a->design?->design_name ?? '');
+                $nb = (string) ($b->design?->design_name ?? '');
 
-        $designQtyByDesign = [];
-        foreach ($orderRows as $row) {
-            $did = (int) $row->design_id;
-            $designQtyByDesign[$did] = ($designQtyByDesign[$did] ?? 0) + (int) $row->design_qty;
-        }
+                return ReportNameSort::compareTuples(
+                    ReportNameSort::hyphenNameTuple($na),
+                    ReportNameSort::hyphenNameTuple($nb)
+                );
+            })
+            ->values();
 
-        if ($designQtyByDesign === []) {
+        if ($orderRows->isEmpty()) {
             return [
                 'gs_name' => $gsName,
                 'rows' => [],
+                'grand_red' => 0,
+                'grand_green' => 0,
+                'grand_white' => 0,
             ];
         }
 
-        $rows = [];
+        $raw = [];
 
-        foreach ($designQtyByDesign as $designId => $scale) {
-            $scale = max((int) $scale, 0);
+        foreach ($orderRows as $order) {
+            $designQty = (int) $order->design_qty;
+            $designRedQty = (int) $order->design_red_qty;
+            $designRedGreenQty = (int) $order->design_red_green_qty;
+            $designGreenQty = (int) $order->design_green_qty;
 
             $dps = RuhiDesignProduct::query()
-                ->where('design_id', $designId)
-                ->where('item_type_id', self::DROP_ITEM_TYPE_ID)
+                ->where('design_id', (int) $order->design_id)
+                ->whereHas('product', fn ($q) => $q->where('product_type', self::PRODUCT_TYPE_DROP)->withTrashed())
                 ->with([
                     'product' => fn ($q) => $q->withTrashed(),
                     'collateByColors',
@@ -79,66 +96,136 @@ class GsWiseDropReportService
                     continue;
                 }
 
-                $cc = $dp->collateByColors;
-                $sumOnlyRed = (int) $cc->sum('only_red_qty');
-                $sumRed = (int) $cc->sum('red_qty');
-                $sumGreen = (int) $cc->sum('green_qty');
-                $sumOnlyGreen = (int) $cc->sum('only_green_qty');
-                $sumWhite = (int) $cc->sum('white_qty');
-
-                $redScaled = (int) round(($sumOnlyRed + $sumRed) * $scale);
-                $greenScaled = (int) round(($sumGreen + $sumOnlyGreen) * $scale);
-                $whiteScaled = (int) round($sumWhite * $scale);
-
-                $rows[] = [
-                    'drop' => (string) $product->product_name,
-                    'red' => $redScaled,
-                    'green' => $greenScaled,
-                    'white' => $whiteScaled,
-                ];
+                $collates = $dp->collateByColors;
+                if ($collates->isEmpty()) {
+                    $raw[] = $this->buildRawSlice(
+                        $dp,
+                        (int) $product->id,
+                        (string) $product->product_name,
+                        $designQty,
+                        $designRedQty,
+                        $designRedGreenQty,
+                        $designGreenQty,
+                        null
+                    );
+                } else {
+                    foreach ($collates as $cc) {
+                        $raw[] = $this->buildRawSlice(
+                            $dp,
+                            (int) $product->id,
+                            (string) $product->product_name,
+                            $designQty,
+                            $designRedQty,
+                            $designRedGreenQty,
+                            $designGreenQty,
+                            $cc
+                        );
+                    }
+                }
             }
         }
 
-        $rows = $this->mergeRowsByDropName($rows);
+        $merged = $this->mergeDuplicateProductsById($raw);
 
-        usort($rows, function (array $a, array $b): int {
-            return ReportNameSort::compareTuples(
-                ReportNameSort::hyphenNameTuple($a['drop']),
-                ReportNameSort::hyphenNameTuple($b['drop'])
-            );
+        usort($merged, static function (array $a, array $b): int {
+            return strnatcasecmp((string) $a['product_name'], (string) $b['product_name']);
         });
+
+        $rows = [];
+        foreach ($merged as $r) {
+            $rows[] = [
+                'drop' => (string) $r['product_name'],
+                'red' => (int) $r['total_red_qty'],
+                'green' => (int) $r['total_green_qty'],
+                'white' => (int) $r['total_white_qty'],
+            ];
+        }
 
         return [
             'gs_name' => $gsName,
-            'rows' => array_values($rows),
+            'rows' => $rows,
+            'grand_red' => (int) array_sum(array_column($rows, 'red')),
+            'grand_green' => (int) array_sum(array_column($rows, 'green')),
+            'grand_white' => (int) array_sum(array_column($rows, 'white')),
         ];
     }
 
     /**
-     * @param  array<int, array{drop: string, red: int, green: int, white: int}>  $rows
-     * @return array<int, array{drop: string, red: int, green: int, white: int}>
+     * @return array{product_id: int, product_name: string, total_color_qty: int, total_red_qty: int, total_green_qty: int, total_white_qty: int}
      */
-    private function mergeRowsByDropName(array $rows): array
-    {
-        $byKey = [];
-        foreach ($rows as $r) {
-            $name = trim((string) $r['drop']);
-            if ($name === '') {
-                $name = (string) $r['drop'];
-            }
-            if (! isset($byKey[$name])) {
-                $byKey[$name] = [
-                    'drop' => $name,
-                    'red' => 0,
-                    'green' => 0,
-                    'white' => 0,
-                ];
-            }
-            $byKey[$name]['red'] += (int) $r['red'];
-            $byKey[$name]['green'] += (int) $r['green'];
-            $byKey[$name]['white'] += (int) $r['white'];
+    private function buildRawSlice(
+        RuhiDesignProduct $dp,
+        int $productId,
+        string $productName,
+        int $designQty,
+        int $designRedQty,
+        int $designRedGreenQty,
+        int $designGreenQty,
+        ?RuhiCollateByColor $cc
+    ): array {
+        $qty = (int) $dp->quantity;
+        $onlyRed = $cc !== null ? (int) $cc->only_red_qty : 0;
+        $redQty = $cc !== null ? (int) $cc->red_qty : 0;
+        $greenQty = $cc !== null ? (int) $cc->green_qty : 0;
+
+        $totalColorQty = $qty * $designQty;
+
+        if (! empty($onlyRed) && empty($redQty)) {
+            $finalRed = $onlyRed * $designRedQty;
+        } elseif (empty($onlyRed) && ! empty($redQty)) {
+            $finalRed = $redQty * $designRedGreenQty;
+        } elseif (! empty($onlyRed) && ! empty($redQty)) {
+            $finalRed = $onlyRed * $designRedQty + $redQty * $designRedGreenQty;
+        } else {
+            $finalRed = 0;
         }
 
-        return array_values($byKey);
+        $finalGreen = 0;
+        if (! empty($onlyRed) && empty($greenQty)) {
+            $finalGreen = $onlyRed * $designGreenQty;
+        } elseif (! empty($onlyRed) && ! empty($greenQty)) {
+            $finalGreen = $onlyRed * $designGreenQty + $greenQty * $designRedGreenQty;
+        }
+
+        $finalRedGreen = 0;
+
+        $finalTotalGreen = $finalGreen + $finalRedGreen;
+
+        $designWhiteQty = $totalColorQty - ($finalRed + $finalGreen);
+
+        return [
+            'product_id' => $productId,
+            'product_name' => $productName,
+            'total_color_qty' => $totalColorQty,
+            'total_red_qty' => $finalRed,
+            'total_green_qty' => $finalTotalGreen,
+            'total_white_qty' => $designWhiteQty,
+        ];
+    }
+
+    /**
+     * Legacy {@code calculateDuplicateColor}: sum qty columns by {@code product_id}; keep first {@code product_name}.
+     *
+     * @param  array<int, array{product_id: int, product_name: string, total_color_qty: int, total_red_qty: int, total_green_qty: int, total_white_qty: int}>  $arrProducts
+     * @return array<int, array{product_id: int, product_name: string, total_color_qty: int, total_red_qty: int, total_green_qty: int, total_white_qty: int}>
+     */
+    private function mergeDuplicateProductsById(array $arrProducts): array
+    {
+        $arrResults = [];
+
+        foreach ($arrProducts as $details) {
+            $productId = $details['product_id'];
+
+            if (isset($arrResults[$productId])) {
+                $arrResults[$productId]['total_color_qty'] += $details['total_color_qty'];
+                $arrResults[$productId]['total_red_qty'] += $details['total_red_qty'];
+                $arrResults[$productId]['total_green_qty'] += $details['total_green_qty'];
+                $arrResults[$productId]['total_white_qty'] += $details['total_white_qty'];
+            } else {
+                $arrResults[$productId] = $details;
+            }
+        }
+
+        return array_values($arrResults);
     }
 }

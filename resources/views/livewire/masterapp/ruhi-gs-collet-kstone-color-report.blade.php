@@ -98,15 +98,28 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="12" class="text-center text-muted">No collet color rows for this GS.</td>
+                            <td colspan="12" class="text-center text-muted">No collet (product type 3) color rows for this GS.</td>
                         </tr>
                     @endforelse
                 </tbody>
                 @if(count($report['rows']) > 0)
-                    @php $tot = $report['totals']; @endphp
+                    @php
+                        $tot = array_merge([
+                            'total_color_qty' => 0,
+                            'red_qty' => 0,
+                            'red_kstone_wt' => 0.0,
+                            'red_die_wt' => 0.0,
+                            'green_qty' => 0,
+                            'green_kstone_wt' => 0.0,
+                            'green_die_wt' => 0.0,
+                            'white_qty' => 0,
+                            'white_kstone_wt' => 0.0,
+                            'white_die_wt' => 0.0,
+                        ], $report['totals'] ?? []);
+                    @endphp
                     <tfoot>
                         <tr class="table-light font-weight-bold">
-                            <td class="text-break">Total</td>
+                            <td class="text-break">Grand Total</td>
                             <td>{{ number_format((int) $tot['total_color_qty'], 0, '.', '') }}</td>
                             <td></td>
                             <td class="border-left">{{ number_format((int) $tot['red_qty'], 0, '.', '') }}</td>

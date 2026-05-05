@@ -10,6 +10,9 @@ class RuhiGsColorFullReport extends Component
 {
     public ?int $gsId = null;
 
+    /** 0 = all; 1 = exclude names containing "(S)"; 2 = only those names (legacy CI {@code sfilter}). */
+    public int $sfilter = 0;
+
     public bool $submitted = false;
 
     private ?GsColorFullReportService $service = null;
@@ -44,7 +47,10 @@ class RuhiGsColorFullReport extends Component
         $selectedGsName = '';
 
         if ($this->submitted && $this->gsId) {
-            $report = $this->svc()->buildReport((int) $this->gsId);
+            $report = $this->svc()->buildReport(
+                (int) $this->gsId,
+                $this->sfilter === 0 ? null : $this->sfilter
+            );
             $selectedGsName = (string) ($gsOptions->firstWhere('id', (int) $this->gsId)?->name ?? '');
         }
 

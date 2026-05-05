@@ -81,6 +81,16 @@
                         </tr>
                     @endforelse
                 </tbody>
+                @if(count($report['rows']) > 0)
+                    <tfoot>
+                        <tr class="table-light">
+                            <td class="font-weight-bold py-2">Grand Total</td>
+                            <td class="text-left font-weight-bold py-2">{{ number_format((int) ($report['grand_red'] ?? 0), 0, '.', '') }}</td>
+                            <td class="text-left font-weight-bold py-2">{{ number_format((int) ($report['grand_green'] ?? 0), 0, '.', '') }}</td>
+                            <td class="text-left font-weight-bold py-2">{{ number_format((int) ($report['grand_white'] ?? 0), 0, '.', '') }}</td>
+                        </tr>
+                    </tfoot>
+                @endif
             </table>
         </div>
     @endif

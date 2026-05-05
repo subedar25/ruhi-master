@@ -12,6 +12,7 @@
         table.data { width: 100%; max-width: 52rem; border-collapse: collapse; font-size: 10px; margin-bottom: 10px; }
         table.data th, table.data td { border: 1px solid #ddd; padding: 5px 8px; text-align: left; }
         table.data thead th { background: #fafafa; font-weight: 700; }
+        table.data tfoot td { font-weight: 700; background: #f5f5f5; }
         @media print {
             .actions { display: none; }
             body { margin: 8mm; }
@@ -50,6 +51,16 @@
                 </tr>
             @endforeach
         </tbody>
+        @if(count($report['rows']) > 0)
+            <tfoot>
+                <tr>
+                    <td>Grand Total</td>
+                    <td>{{ number_format((int) ($report['grand_red'] ?? 0), 0, '.', '') }}</td>
+                    <td>{{ number_format((int) ($report['grand_green'] ?? 0), 0, '.', '') }}</td>
+                    <td>{{ number_format((int) ($report['grand_white'] ?? 0), 0, '.', '') }}</td>
+                </tr>
+            </tfoot>
+        @endif
     </table>
 
     @if(count($report['rows']) === 0)
