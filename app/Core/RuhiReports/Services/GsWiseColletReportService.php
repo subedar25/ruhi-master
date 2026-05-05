@@ -176,6 +176,7 @@ class GsWiseColletReportService
     {
         $line = RuhiItemKstone::query()
             ->where('item_id', $productId)
+            ->whereHas('kstone', fn ($q) => $q->withTrashed())
             ->with(['kstone' => fn ($q) => $q->withTrashed()])
             ->orderBy('id')
             ->first();
@@ -198,7 +199,7 @@ class GsWiseColletReportService
         return [
             'kstone_id' => (int) $line->kstone_id,
             'kstone_quantity' => $ksQty,
-            'kstone_name' => $master ? (string) $master->name : '',
+            'kstone_name' => $master ? $master->displayLabel() : '',
             'kstone_stoneweight' => $master ? (float) $master->stoneweight : (float) $line->kstone_weight,
             'kstone_dieweight' => $master ? (float) $master->dieweight : (float) $line->kstone_dieweight,
             'kstone_totalqty' => (int) ($colletQty * $ksQty),

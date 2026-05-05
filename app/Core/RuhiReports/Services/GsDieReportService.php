@@ -80,6 +80,7 @@ class GsDieReportService
         foreach ($productQtyForGs as $productId => $totalProductQty) {
             $itemLines = RuhiItemKstone::query()
                 ->where('item_id', $productId)
+                ->whereHas('kstone', fn ($q) => $q->withTrashed())
                 ->with(['kstone' => fn ($q) => $q->withTrashed()])
                 ->orderBy('id')
                 ->get();
@@ -91,7 +92,7 @@ class GsDieReportService
                 $diePerUnit = (float) $ik->kstone_dieweight;
 
                 $master = $ik->kstone;
-                $name = $master ? (string) $master->name : '';
+                $name = $master ? $master->displayLabel() : '';
 
                 $qtyTotal = (int) ($totalProductQty * $ksPerUnit);
                 $weightTotal = $totalProductQty * $wtPerUnit;

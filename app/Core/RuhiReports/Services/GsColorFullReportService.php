@@ -433,6 +433,7 @@ class GsColorFullReportService
 
         $lines = RuhiItemKstone::query()
             ->where('item_id', $pid)
+            ->whereHas('kstone', fn ($q) => $q->withTrashed())
             ->with(['kstone' => fn ($q) => $q->withTrashed()])
             ->get()
             ->sort(function (RuhiItemKstone $a, RuhiItemKstone $b): int {
@@ -463,15 +464,15 @@ class GsColorFullReportService
                 continue;
             }
 
-            $name = (string) $ks->name;
+            $name = trim((string) $ks->name);
             $ktcq = (int) $ik->kstone_quantity * $baseTotal;
             $ktr = (int) $ik->red * $rq;
             $ktg = (int) $ik->green * $gq;
             $ktw = max(0, $ktcq - $ktr - $ktg);
 
-            $cr = $this->catalogStoneDieSumByNameAndColor($name, 1);
-            $cg = $this->catalogStoneDieSumByNameAndColor($name, 2);
-            $cw = $this->catalogStoneDieSumByNameAndColor($name, 3);
+            $cr = $this->resolveChannelStoneDie($ik, $ks, $name, 1);
+            $cg = $this->resolveChannelStoneDie($ik, $ks, $name, 2);
+            $cw = $this->resolveChannelStoneDie($ik, $ks, $name, 3);
 
             $sumRedKw += $ktr * $cr['stoneweight'];
             $sumRedDw += $ktr * $cr['dieweight'];
@@ -483,7 +484,7 @@ class GsColorFullReportService
 
         $first = $lines->first();
         $firstStoneWt = $first && $first->kstone ? (float) $first->kstone->stoneweight : 0.0;
-        $firstName = $first && $first->kstone ? trim((string) $first->kstone->name) : '';
+        $firstName = $first && $first->kstone ? $first->kstone->displayLabel() : '';
         $firstQty = $first ? (int) $first->kstone_quantity : 0;
 
         $redKw = round($sumRedKw, 2);
@@ -545,19 +546,19 @@ class GsColorFullReportService
 
     /**
      * Legacy {@code getKstoneDieStoneweightByname}: SUM(stoneweight), SUM(dieweight) on {@see RuhiKstone} by name + color_id.
+     * {@code color_id} is stored as varchar in legacy data; match both string and int forms.
      *
      * @return array{stoneweight: float, dieweight: float}
      */
     private function catalogStoneDieSumByNameAndColor(string $name, int $colorId): array
     {
-        if ($name === '') {
-            return ['stoneweight' => 0.0, 'dieweight' => 0.0];
-        }
-
         $agg = RuhiKstone::query()
             ->withTrashed()
             ->where('name', $name)
-            ->where('color_id', $colorId)
+            ->where(function ($q) use ($colorId): void {
+                $q->where('color_id', (string) $colorId)
+                    ->orWhere('color_id', $colorId);
+            })
             ->selectRaw('COALESCE(SUM(stoneweight), 0) as sw, COALESCE(SUM(dieweight), 0) as dw')
             ->first();
 
@@ -569,6 +570,102 @@ class GsColorFullReportService
             'stoneweight' => (float) ($agg->sw ?? 0),
             'dieweight' => (float) ($agg->dw ?? 0),
         ];
+    }
+
+    /**
+     * Per-channel unit stone/die weights: catalog SUM by name (legacy), then item line overrides, then master row,
+     * then any catalog row with the same name that has non-zero weights (incomplete per-color master data).
+     *
+     * @return array{stoneweight: float, dieweight: float}
+     */
+    private function resolveChannelStoneDie(
+        RuhiItemKstone $ik,
+        RuhiKstone $ks,
+        string $trimmedName,
+        int $channelColorId
+    ): array {
+        $cat = $this->catalogStoneDieSumByNameAndColor($trimmedName, $channelColorId);
+        if ($this->stoneDiePairHasMass($cat)) {
+            return $cat;
+        }
+
+        $lw = (float) $ik->kstone_weight;
+        $ld = (float) $ik->kstone_dieweight;
+        if ($lw != 0.0 || $ld != 0.0) {
+            return ['stoneweight' => $lw, 'dieweight' => $ld];
+        }
+
+        $msw = (float) $ks->stoneweight;
+        $mdw = (float) $ks->dieweight;
+        if ($msw != 0.0 || $mdw != 0.0) {
+            if ($this->kstoneColorMatchesChannel($ks->color_id, $channelColorId)
+                || $this->kstoneColorIdIsUnset($ks->color_id)) {
+                return ['stoneweight' => $msw, 'dieweight' => $mdw];
+            }
+        }
+
+        $row = $this->firstCatalogRowByNamePreferColorWithMass($trimmedName, $channelColorId);
+        if ($row !== null) {
+            return [
+                'stoneweight' => (float) $row->stoneweight,
+                'dieweight' => (float) $row->dieweight,
+            ];
+        }
+
+        return ['stoneweight' => 0.0, 'dieweight' => 0.0];
+    }
+
+    /**
+     * @param  array{stoneweight: float, dieweight: float}  $pair
+     */
+    private function stoneDiePairHasMass(array $pair): bool
+    {
+        return ((float) $pair['stoneweight'] != 0.0 || (float) $pair['dieweight'] != 0.0);
+    }
+
+    private function kstoneColorMatchesChannel(mixed $dbColorId, int $channelColorId): bool
+    {
+        if ($this->kstoneColorIdIsUnset($dbColorId)) {
+            return false;
+        }
+
+        return (int) $dbColorId === $channelColorId;
+    }
+
+    private function kstoneColorIdIsUnset(mixed $dbColorId): bool
+    {
+        return $dbColorId === null || $dbColorId === '';
+    }
+
+    private function firstCatalogRowByNamePreferColorWithMass(string $name, int $channelColorId): ?RuhiKstone
+    {
+        $withMass = static function ($q): void {
+            $q->where(function ($q): void {
+                $q->where('stoneweight', '!=', 0)->orWhere('dieweight', '!=', 0);
+            });
+        };
+
+        $exact = RuhiKstone::query()
+            ->withTrashed()
+            ->where('name', $name)
+            ->where(function ($q) use ($channelColorId): void {
+                $q->where('color_id', (string) $channelColorId)
+                    ->orWhere('color_id', $channelColorId);
+            })
+            ->where($withMass)
+            ->orderBy('id')
+            ->first();
+
+        if ($exact !== null) {
+            return $exact;
+        }
+
+        return RuhiKstone::query()
+            ->withTrashed()
+            ->where('name', $name)
+            ->where($withMass)
+            ->orderBy('id')
+            ->first();
     }
 
     private function formatKstoneForBlock(int $productTypeId, string $kstoneName, int $kstoneQty, float $stoneWeight): string

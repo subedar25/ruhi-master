@@ -39,4 +39,14 @@ class RuhiKstone extends Model
     {
         return $this->hasMany(RuhiItemKstone::class, 'kstone_id', 'id');
     }
+
+    /**
+     * Human-readable label for reports when the stored name is blank; catalog weight lookups still use trimmed name.
+     */
+    public function displayLabel(): string
+    {
+        $n = trim((string) $this->name);
+
+        return $n !== '' ? $n : '#'.$this->id;
+    }
 }

@@ -147,12 +147,13 @@ class GsFullReportService
     {
         $line = RuhiItemKstone::query()
             ->where('item_id', $productId)
+            ->whereHas('kstone', fn ($q) => $q->withTrashed())
             ->with(['kstone' => fn ($q) => $q->withTrashed()])
             ->orderBy('id')
             ->first();
 
         if ($line?->kstone) {
-            return (string) $line->kstone->name;
+            return $line->kstone->displayLabel();
         }
 
         return '';
