@@ -100,16 +100,16 @@
                                         <a href="#" wire:click.prevent="openEditModal({{ $design->id }})" class="action-icon" title="Edit">
                                             <i class="fa fa-edit"></i>
                                         </a>
-                                        @if((auth()->user()?->user_type ?? '') === 'systemuser')
-                                            @if($design->deleted_at)
+                                        @if($design->deleted_at)
+                                            @if((auth()->user()?->user_type ?? '') === 'systemuser')
                                                 <button type="button" class="btn btn-link p-0 action-icon text-success" title="Revert" wire:click="restoreById({{ $design->id }})" wire:confirm="Restore this design?">
                                                     <i class="fa fa-undo"></i>
                                                 </button>
-                                            @else
+                                            @endif
+                                        @elseif(auth()->user()?->can('delete-ruhi-design'))
                                                 <button type="button" class="btn btn-link p-0 action-icon text-danger" title="Delete" wire:click="deleteById({{ $design->id }})" wire:confirm="Delete this design?">
                                                     <i class="fa fa-trash"></i>
                                                 </button>
-                                            @endif
                                         @endif
                                     </div>
                                 </td>

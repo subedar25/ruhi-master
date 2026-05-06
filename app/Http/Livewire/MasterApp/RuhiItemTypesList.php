@@ -105,7 +105,7 @@ class RuhiItemTypesList extends Component
 
     public function deleteById(int $id): void
     {
-        abort_unless((auth()->user()?->user_type ?? '') === 'systemuser', 403);
+        abort_unless((bool) (auth()->user()?->can('delete-ruhi-item-type') ?? false), 403);
         $this->svc()->softDeleteById($id);
         $this->dispatch('formResult', type: 'success', message: 'Item category deleted successfully.');
         $this->resetPage();

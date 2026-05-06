@@ -20,6 +20,7 @@
  */
 (function () {
     'use strict';
+    var ruhiGlobalOpenFocusBound = false;
 
     /**
      * Match options by label substring (case-insensitive). If the user types only digits,
@@ -184,9 +185,32 @@
     }
 
     function ruhiMasterSelect2Schedule() {
+        ruhiBindGlobalOpenFocus();
         window.setTimeout(ruhiMasterSelect2InitAll, 0);
         window.setTimeout(ruhiMasterSelect2InitAll, 50);
         window.setTimeout(ruhiMasterSelect2InitAll, 150);
+    }
+
+    function ruhiBindGlobalOpenFocus() {
+        if (ruhiGlobalOpenFocusBound || !window.jQuery) return;
+        ruhiGlobalOpenFocusBound = true;
+        window.jQuery(document).on('select2:open.ruhiMs2Global', function () {
+            // Global listener: applies to all Select2 dropdowns in the app.
+            window.setTimeout(function () {
+                var $search = window.jQuery('.select2-container--open .select2-search__field').last();
+                if ($search.length) {
+                    $search.trigger('focus');
+                    $search.get(0).focus();
+                }
+            }, 0);
+            window.setTimeout(function () {
+                var $search = window.jQuery('.select2-container--open .select2-search__field').last();
+                if ($search.length) {
+                    $search.trigger('focus');
+                    $search.get(0).focus();
+                }
+            }, 60);
+        });
     }
 
     document.addEventListener('livewire:load', ruhiMasterSelect2Schedule);
@@ -200,6 +224,7 @@
         Livewire.hook('message.processed', ruhiMasterSelect2Schedule);
     });
     document.addEventListener('DOMContentLoaded', function () {
+        ruhiBindGlobalOpenFocus();
         window.setTimeout(ruhiMasterSelect2InitAll, 50);
     });
     document.addEventListener('shown.bs.modal', ruhiMasterSelect2Schedule);

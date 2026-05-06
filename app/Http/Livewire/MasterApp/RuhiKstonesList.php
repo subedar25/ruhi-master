@@ -134,7 +134,7 @@ class RuhiKstonesList extends Component
 
     public function deleteById(int $id): void
     {
-        abort_unless((auth()->user()?->user_type ?? '') === 'systemuser', 403);
+        abort_unless((bool) (auth()->user()?->can('delete-ruhi-kstone') ?? false), 403);
         $this->service()->softDeleteById($id);
         $this->dispatch('formResult', type: 'success', message: 'K Stone deleted successfully.');
         $this->resetPage();

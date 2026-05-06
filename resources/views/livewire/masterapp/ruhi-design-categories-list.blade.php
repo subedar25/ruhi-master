@@ -63,16 +63,16 @@
                                         <a href="#" wire:click.prevent="openEditModal({{ $cat->id }})" class="action-icon" title="Edit">
                                             <i class="fa fa-edit"></i>
                                         </a>
-                                        @if((auth()->user()?->user_type ?? '') === 'systemuser')
-                                            @if($cat->deleted_at)
+                                        @if($cat->deleted_at)
+                                            @if((auth()->user()?->user_type ?? '') === 'systemuser')
                                                 <button type="button" class="btn btn-link p-0 action-icon text-success" title="Revert" wire:click="restoreById({{ $cat->id }})" wire:confirm="Restore this category?">
                                                     <i class="fa fa-undo"></i>
                                                 </button>
-                                            @else
+                                            @endif
+                                        @elseif(auth()->user()?->can('delete-ruhi-design-category'))
                                                 <button type="button" class="btn btn-link p-0 action-icon text-danger" title="Delete" wire:click="deleteById({{ $cat->id }})" wire:confirm="Delete this category?">
                                                     <i class="fa fa-trash"></i>
                                                 </button>
-                                            @endif
                                         @endif
                                     </div>
                                 </td>

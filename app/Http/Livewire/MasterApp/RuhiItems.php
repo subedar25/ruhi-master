@@ -58,7 +58,7 @@ class RuhiItems extends Component
 
     public function deleteById(int $id): void
     {
-        abort_unless((auth()->user()?->user_type ?? '') === 'systemuser', 403);
+        abort_unless((bool) (auth()->user()?->can('delete-ruhi-item') ?? false), 403);
 
         $this->service()->softDeleteById($id);
         $this->dispatch('formResult', type: 'success', message: 'Item deleted successfully.');

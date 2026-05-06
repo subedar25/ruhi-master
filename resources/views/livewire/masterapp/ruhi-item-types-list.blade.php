@@ -61,16 +61,16 @@
                                         <a href="#" wire:click.prevent="openEditModal({{ $t->id }})" class="action-icon" title="Edit">
                                             <i class="fa fa-edit"></i>
                                         </a>
-                                        @if((auth()->user()?->user_type ?? '') === 'systemuser')
-                                            @if($t->deleted_at)
+                                        @if($t->deleted_at)
+                                            @if((auth()->user()?->user_type ?? '') === 'systemuser')
                                                 <button type="button" class="btn btn-link p-0 action-icon text-success" title="Revert" wire:click="restoreById({{ $t->id }})" wire:confirm="Restore this item category?">
                                                     <i class="fa fa-undo"></i>
                                                 </button>
-                                            @else
+                                            @endif
+                                        @elseif(auth()->user()?->can('delete-ruhi-item-type'))
                                                 <button type="button" class="btn btn-link p-0 action-icon text-danger" title="Delete" wire:click="deleteById({{ $t->id }})" wire:confirm="Delete this item category?">
                                                     <i class="fa fa-trash"></i>
                                                 </button>
-                                            @endif
                                         @endif
                                     </div>
                                 </td>

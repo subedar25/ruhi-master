@@ -70,16 +70,16 @@
                                         <a href="#" wire:click.prevent="openEditModal({{ $gs->id }})" class="action-icon" title="Edit">
                                             <i class="fa fa-edit"></i>
                                         </a>
-                                        @if((auth()->user()?->user_type ?? '') === 'systemuser')
-                                            @if($gs->deleted_at)
+                                        @if($gs->deleted_at)
+                                            @if((auth()->user()?->user_type ?? '') === 'systemuser')
                                                 <button type="button" class="btn btn-link p-0 action-icon text-success" title="Revert" wire:click="restoreById({{ $gs->id }})" wire:confirm="Restore this GS?">
                                                     <i class="fa fa-undo"></i>
                                                 </button>
-                                            @else
+                                            @endif
+                                        @elseif(auth()->user()?->can('delete-ruhi-gs'))
                                                 <button type="button" class="btn btn-link p-0 action-icon text-danger" title="Delete" wire:click="deleteById({{ $gs->id }})" wire:confirm="Delete this GS?">
                                                     <i class="fa fa-trash"></i>
                                                 </button>
-                                            @endif
                                         @endif
                                     </div>
                                 </td>
