@@ -29,8 +29,50 @@ class RuhiGsLotService
     {
         return RuhiSlot::query()
             ->where('gs_id', $gsId)
-            ->orderByDesc('id')
-            ->get();
+            ->get()
+            ->sort(function (RuhiSlot $a, RuhiSlot $b): int {
+                [$aHasNum, $aNum, $aPrefix, $aName] = $this->lotSortTuple((string) $a->slot_name);
+                [$bHasNum, $bNum, $bPrefix, $bName] = $this->lotSortTuple((string) $b->slot_name);
+
+                if ($aHasNum !== $bHasNum) {
+                    return $aHasNum <=> $bHasNum;
+                }
+                if ($aNum !== $bNum) {
+                    return $aNum <=> $bNum;
+                }
+                if ($aPrefix !== $bPrefix) {
+                    return $aPrefix <=> $bPrefix;
+                }
+                if ($aName !== $bName) {
+                    return $aName <=> $bName;
+                }
+
+                return ((int) $a->id) <=> ((int) $b->id);
+            })
+            ->values();
+    }
+
+    /**
+     * @return array{0:int,1:int,2:string,3:string}
+     */
+    private function lotSortTuple(string $name): array
+    {
+        $name = trim($name);
+        $num = 0;
+        $hasNum = 1;
+
+        if (preg_match('/(\d+)\s*$/', $name, $m) === 1) {
+            $num = (int) $m[1];
+            $hasNum = 0;
+        } elseif (preg_match_all('/\d+/', $name, $all) === 1 && ! empty($all[0])) {
+            $num = (int) end($all[0]);
+            $hasNum = 0;
+        }
+
+        $prefix = mb_strtolower(trim((string) preg_replace('/\d+/', '', $name)));
+        $normalized = mb_strtolower($name);
+
+        return [$hasNum, $num, $prefix, $normalized];
     }
 
     public function listLotsWithItemsByGs(int $gsId): Collection
@@ -40,8 +82,27 @@ class RuhiGsLotService
             ->with(['lotItems' => function ($query) {
                 $query->with('product')->orderByDesc('id');
             }])
-            ->orderByDesc('id')
-            ->get();
+            ->get()
+            ->sort(function (RuhiSlot $a, RuhiSlot $b): int {
+                [$aHasNum, $aNum, $aPrefix, $aName] = $this->lotSortTuple((string) $a->slot_name);
+                [$bHasNum, $bNum, $bPrefix, $bName] = $this->lotSortTuple((string) $b->slot_name);
+
+                if ($aHasNum !== $bHasNum) {
+                    return $aHasNum <=> $bHasNum;
+                }
+                if ($aNum !== $bNum) {
+                    return $aNum <=> $bNum;
+                }
+                if ($aPrefix !== $bPrefix) {
+                    return $aPrefix <=> $bPrefix;
+                }
+                if ($aName !== $bName) {
+                    return $aName <=> $bName;
+                }
+
+                return ((int) $a->id) <=> ((int) $b->id);
+            })
+            ->values();
     }
 
     public function paginateLotItemRowsByGs(int $gsId, string $search = '', ?int $lotId = null, int $perPage = 20): LengthAwarePaginator
