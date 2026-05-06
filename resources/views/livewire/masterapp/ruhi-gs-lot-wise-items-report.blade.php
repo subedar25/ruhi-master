@@ -10,7 +10,7 @@
                 <form wire:submit.prevent="submit" class="form-inline flex-wrap align-items-end">
                     <div class="form-group mr-3 mb-2">
                         <label class="mr-2 mb-0">GS</label>
-                        <input type="hidden" wire:model="gsId" id="ruhi-gs-lot-wise-gsid">
+                        <input type="hidden" wire:model.live="gsId" id="ruhi-gs-lot-wise-gsid">
                         <div wire:ignore class="d-inline-block ruhi-gs-lot-wise-select-wrap" style="min-width: 280px;">
                             <select
                                 id="ruhiGsLotWiseGsSelect"
@@ -19,6 +19,7 @@
                                 data-s2-hidden="#ruhi-gs-lot-wise-gsid"
                                 data-s2-anchor="#ruhi-gs-lot-wise-sync-anchor"
                                 data-s2-placeholder="Select GS"
+                                data-s2-allow-clear="true"
                             >
                                 <option value="">Select GS</option>
                                 @foreach($gsOptions as $g)
