@@ -5,14 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GS Wise Collet Kstone Color Report</title>
     <style>
-        body { font-family: Arial, sans-serif; color: #222; margin: 14px; font-size: 10px; }
+        body { font-family: Arial, sans-serif; color: #222; margin: 14px; font-size: 14px; }
         .actions { margin-bottom: 12px; }
         .print-btn { padding: 6px 10px; border: 1px solid #444; background: #fff; cursor: pointer; }
         .doc-title { font-size: 15px; font-weight: 700; margin-bottom: 10px; }
-        table.data { width: 100%; border-collapse: collapse; font-size: 9px; margin-bottom: 14px; }
+        table.data { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 14px; }
         table.data th, table.data td { border: 1px solid #ccc; padding: 4px 6px; }
         table.data thead th { background: #f0f0f0; }
         table.data tfoot td { font-weight: 700; background: #f5f5f5; }
+        .collet-col { width: 13rem; }
+        .kstone-col { width: 10rem; }
         @media print {
             .actions { display: none; }
             body { margin: 6mm; }
@@ -35,9 +37,9 @@
     <table class="data">
         <thead>
             <tr>
-                <th rowspan="2">Collet</th>
+                <th rowspan="2" class="collet-col">Collet</th>
                 <th rowspan="2">Total Qty</th>
-                <th rowspan="2">Kstone</th>
+                <th rowspan="2" class="kstone-col">Kstone</th>
                 <th colspan="3">Red</th>
                 <th colspan="3">Green</th>
                 <th colspan="3">White</th>
@@ -51,9 +53,9 @@
         <tbody>
             @forelse($report['rows'] as $r)
                 <tr>
-                    <td>{{ $r['product_name'] }}</td>
+                    <td class="collet-col">{{ $r['product_name'] }}</td>
                     <td>{{ number_format((int) $r['total_color_qty'], 0, '.', '') }}</td>
-                    <td>{{ $r['kstone'] }}</td>
+                    <td class="kstone-col">{{ $r['kstone'] }}</td>
                     <td>{{ number_format((int) $r['red_qty'], 0, '.', '') }}</td>
                     <td>{{ number_format((float) $r['red_kstone_wt'], 2, '.', '') }}</td>
                     <td>{{ number_format((float) $r['red_die_wt'], 2, '.', '') }}</td>

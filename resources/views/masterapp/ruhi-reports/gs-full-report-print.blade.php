@@ -15,21 +15,23 @@
         @endif
     </title>
     <style>
-        body { font-family: Arial, sans-serif; color: #222; margin: 18px; font-size: 11px; }
+        body { font-family: Arial, sans-serif; color: #222; margin: 18px; font-size: 14px; }
         .actions { margin-bottom: 12px; }
         .print-btn { padding: 6px 10px; border: 1px solid #444; background: #fff; cursor: pointer; }
         .page-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
         .subtitle { margin-bottom: 16px; color: #555; }
         .section-title { font-size: 14px; font-weight: 700; margin: 20px 0 8px; }
-        table { width: 100%; max-width: 72rem; border-collapse: collapse; font-size: 10px; margin-bottom: 8px; }
+        table { width: 100%; max-width: 72rem; border-collapse: collapse; font-size: 14px; margin-bottom: 8px; }
         th, td { border: 1px solid #ddd; padding: 4px 6px; }
         th { background: #fafafa; font-weight: 700; text-align: left; }
         .col-name { max-width: 14rem; word-break: break-word; white-space: normal; }
         .num { text-align: left; white-space: nowrap; }
         tfoot td { font-weight: 700; background: #f5f5f5; }
+        .print-break-before { page-break-before: always; break-before: page; }
         @media print {
             .actions { display: none; }
             body { margin: 8mm; }
+            .print-break-before { page-break-before: always; break-before: page; }
         }
     </style>
 </head>
@@ -94,6 +96,7 @@
     @endif
 
     @if(empty($section) || $section === 'pulkifull')
+    <div class="{{ empty($section) ? 'print-break-before' : '' }}">
     @if(empty($section))
     <div class="section-title">
         GS Wise Pulkifull Report @if($g !== '') ({{ $g }}) @endif
@@ -126,9 +129,11 @@
             </tr>
         </tfoot>
     </table>
+    </div>
     @endif
 
     @if(empty($section) || $section === 'addfull')
+    <div class="{{ empty($section) ? 'print-break-before' : '' }}">
     @if(empty($section))
     <div class="section-title">
         GS Wise Addfull Report @if($g !== '') ({{ $g }}) @endif
@@ -163,6 +168,7 @@
             </tr>
         </tfoot>
     </table>
+    </div>
     @endif
 </body>
 </html>

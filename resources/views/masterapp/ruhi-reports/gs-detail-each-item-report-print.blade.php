@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GS Wise Detail Report of Each Item</title>
     <style>
-        body { font-family: Arial, sans-serif; color: #222; margin: 14px; font-size: 11px; }
+        body { font-family: Arial, sans-serif; color: #222; margin: 14px; font-size: 14px; }
         .actions { margin-bottom: 12px; }
         .print-btn { padding: 6px 10px; border: 1px solid #444; background: #fff; cursor: pointer; }
         .doc-title { font-size: 17px; font-weight: 700; margin-bottom: 10px; }
@@ -17,14 +17,14 @@
             padding-bottom: 8px;
             border-bottom: 1px solid #ccc;
         }
-        .mini-table { border-collapse: collapse; margin-bottom: 10px; max-width: 72rem; font-size: 10px; }
+        .mini-table { border-collapse: collapse; margin-bottom: 10px; max-width: 72rem; font-size: 14px; }
         .mini-table th, .mini-table td { border: 1px solid #ccc; padding: 4px 6px; text-align: left; vertical-align: top; }
         .mini-table th.bg { background: #f5f5f5; font-weight: 700; white-space: nowrap; }
-        table.data { width: 100%; max-width: 72rem; border-collapse: collapse; font-size: 10px; margin-bottom: 8px; }
+        table.data { width: 100%; max-width: 72rem; border-collapse: collapse; font-size: 14px; margin-bottom: 8px; }
         table.data th, table.data td { border: 1px solid #ddd; padding: 4px 6px; text-align: left; }
         table.data thead th { background: #fafafa; font-weight: 700; }
-        .section-title { font-size: 12px; font-weight: 700; margin: 10px 0 6px; }
-        .footer-line { font-size: 10px; padding: 4px 0; }
+        .section-title { font-size: 14px; font-weight: 700; margin: 10px 0 6px; }
+        .footer-line { font-size: 14px; padding: 4px 0; }
         .collate-after-spacer { height: 12px; }
         .collate-summary-row {
             max-width: 72rem;
@@ -36,7 +36,7 @@
             white-space: nowrap;
         }
         .collate-summary-row .collate-summary-one-line {
-            font-size: 10px;
+            font-size: 14px;
             line-height: 1.45;
         }
         .collate-summary-row .collate-summary-one-line .head {

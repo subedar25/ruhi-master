@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GS Wise Lot Wise item report</title>
     <style>
-        body { font-family: Arial, sans-serif; color: #222; margin: 18px; font-size: 12px; }
+        body { font-family: Arial, sans-serif; color: #222; margin: 18px; font-size: 14px; }
         .actions { margin-bottom: 12px; }
         .print-btn { padding: 6px 10px; border: 1px solid #444; background: #fff; cursor: pointer; }
         .title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
@@ -28,11 +28,11 @@
             padding: 8px 10px;
             background: #f5f5f5;
             font-weight: 700;
-            font-size: 12px;
+            font-size: 14px;
         }
         .lot-head .name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
         .lot-head .collate { flex-shrink: 0; white-space: nowrap; font-weight: normal; }
-        table { width: 100%; border-collapse: collapse; font-size: 11px; table-layout: fixed; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; table-layout: fixed; }
         th, td { border: 1px solid #ddd; padding: 4px 6px; text-align: left; }
         th { background: #fafafa; font-weight: 700; }
         .qty-col { width: 6.5rem; }

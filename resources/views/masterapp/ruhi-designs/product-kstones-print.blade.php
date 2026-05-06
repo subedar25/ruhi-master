@@ -11,7 +11,7 @@
         .title { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
         .subtitle { margin-bottom: 12px; }
         table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 6px; font-size: 12px; }
+        th, td { border: 1px solid #ddd; padding: 6px; font-size: 14px; }
         th { background: #f5f5f5; text-align: left; }
         @media print {
             .actions { display: none; }
@@ -29,7 +29,7 @@
             <div class="title">List KStone - ({{ $product->product_name }})</div>
             <div class="subtitle">List K-Stone | Design: {{ $design->design_name }}</div>
         </div>
-        <div style="font-size:12px; white-space:nowrap; margin-top:6px;">
+        <div style="font-size:14px; white-space:nowrap; margin-top:6px;">
             Date: {{ now()->format('d-m-Y') }}
         </div>
     </div>
