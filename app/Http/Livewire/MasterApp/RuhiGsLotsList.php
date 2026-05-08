@@ -104,6 +104,18 @@ class RuhiGsLotsList extends Component
 
     public function saveLotWithItems(): void
     {
+        $this->addLotRows = array_map(function ($row): array {
+            $row = is_array($row) ? $row : [];
+
+            foreach (['design_qty', 'design_red_qty', 'design_red_green_qty', 'design_green_qty', 'white_qty'] as $field) {
+                if (array_key_exists($field, $row) && preg_match('/^\d+$/', (string) $row[$field]) === 1) {
+                    $row[$field] = (int) $row[$field];
+                }
+            }
+
+            return $row;
+        }, $this->addLotRows);
+
         $validated = $this->validate([
             'lotName' => ['required', 'string', 'max:255'],
             'addLotRows' => ['required', 'array', 'min:1'],
