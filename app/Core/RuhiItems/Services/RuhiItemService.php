@@ -18,14 +18,20 @@ class RuhiItemService
             $query->withTrashed();
         }
 
-        if (trim($search) !== '') {
-            $query->where(function ($q) use ($search) {
-                $q->where('product_name', 'like', "%{$search}%")
-                    ->orWhere('product_desc', 'like', "%{$search}%")
-                    ->orWhere('id', 'like', "%{$search}%")
-                    ->orWhereHas('itemType', function ($itemTypeQuery) use ($search) {
-                        $itemTypeQuery->where('item_type', 'like', "%{$search}%");
+        $term = trim((string) $search);
+        if ($term !== '') {
+            $query->where(function ($q) use ($term) {
+                $q->where('product_name', 'like', "%{$term}%")
+                    ->orWhere('product_desc', 'like', "%{$term}%")
+                    ->orWhereHas('itemType', function ($itemTypeQuery) use ($term) {
+                        $itemTypeQuery->where('item_type', 'like', "%{$term}%");
                     });
+
+                if (ctype_digit($term)) {
+                    $q->orWhere('id', (int) $term);
+                } else {
+                    $q->orWhere('id', 'like', "%{$term}%");
+                }
             });
         }
 
