@@ -106,11 +106,14 @@ class RuhiItems extends Component
             'product_name' => ['required', 'string', 'max:100'],
             'product_type' => ['required', 'integer', 'exists:r_item_type,id'],
             'weight' => ['nullable', 'numeric', 'decimal:0,2'],
-            'photo1' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'photo1' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
 
-        $fileService = app(FileManagementService::class);
-        $photoPath = $fileService->upload($this->photo1, 'ruhi-products');
+        $photoPath = '';
+        if ($this->photo1) {
+            $fileService = app(FileManagementService::class);
+            $photoPath = $fileService->upload($this->photo1, 'ruhi-products');
+        }
 
         $this->service()->create([
             'product_name' => $validated['product_name'],
