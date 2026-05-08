@@ -18,11 +18,14 @@ class RuhiDesigns extends Component
     public int $perPage = 20;
     public bool $showCreateModal = false;
     public bool $showEditModal = false;
+    public bool $showImagePreviewModal = false;
     public ?int $editId = null;
     public string $design_name = '';
     public string $category_id = '';
     public $photo1 = null;
     public ?string $existingPhoto1 = null;
+    public string $previewImageUrl = '';
+    public string $previewImageName = '';
     private ?RuhiDesignService $ruhiDesigns = null;
 
     protected $queryString = [
@@ -105,7 +108,29 @@ class RuhiDesigns extends Component
     {
         $this->showCreateModal = false;
         $this->showEditModal = false;
+        $this->showImagePreviewModal = false;
+        $this->previewImageUrl = '';
+        $this->previewImageName = '';
         $this->resetForm();
+    }
+
+    public function openImagePreviewById(int $id): void
+    {
+        $design = $this->service()->findById($id);
+        if (trim((string) $design->photo1) === '') {
+            return;
+        }
+
+        $this->previewImageUrl = (string) $design->photo1;
+        $this->previewImageName = (string) $design->design_name;
+        $this->showImagePreviewModal = true;
+    }
+
+    public function closeImagePreview(): void
+    {
+        $this->showImagePreviewModal = false;
+        $this->previewImageUrl = '';
+        $this->previewImageName = '';
     }
 
     public function saveCreate(): void

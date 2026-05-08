@@ -80,7 +80,22 @@
                                 </td>
                                 <td>
                                     @if(!empty($design->photo1))
-                                        <img src="{{ asset($design->photo1) }}" alt="{{ $design->design_name }}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;">
+                                        <button
+                                            type="button"
+                                            class="btn btn-link p-0"
+                                            wire:click="openImagePreviewById({{ $design->id }})"
+                                            title="View large image"
+                                        >
+                                            <span style="position:relative; display:inline-block; width:40px; height:40px;">
+                                                <img src="{{ asset($design->photo1) }}" alt="{{ $design->design_name }}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;">
+                                                <span
+                                                    aria-hidden="true"
+                                                    style="position:absolute; right:2px; bottom:2px; width:16px; height:16px; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.6); color:#fff; border-radius:3px; font-size:10px; line-height:1;"
+                                                >
+                                                    <i class="fa fa-search-plus" style="font-size:10px;"></i>
+                                                </span>
+                                            </span>
+                                        </button>
                                     @else
                                         -
                                     @endif
@@ -259,6 +274,29 @@
                         <button type="submit" class="btn btn-primary">Update</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade {{ $showImagePreviewModal ? 'show d-block' : '' }}" tabindex="-1" role="dialog" style="background: rgba(0,0,0,0.65)">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Design Image{{ $previewImageName !== '' ? ' - '.$previewImageName : '' }}</h5>
+                    <button type="button" class="close" wire:click="closeImagePreview"><span>&times;</span></button>
+                </div>
+                <div class="modal-body text-center">
+                    @if($previewImageUrl !== '')
+                        <img
+                            src="{{ asset($previewImageUrl) }}"
+                            alt="{{ $previewImageName !== '' ? $previewImageName : 'Design image' }}"
+                            style="max-width:100%; max-height:70vh; object-fit:contain; border:1px solid #dee2e6; border-radius:6px;"
+                        >
+                    @endif
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" wire:click="closeImagePreview">Close</button>
+                </div>
             </div>
         </div>
     </div>

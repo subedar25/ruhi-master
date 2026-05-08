@@ -4,6 +4,7 @@ namespace App\Http\Livewire\MasterApp;
 
 use App\Core\File\Services\FileManagementService;
 use App\Core\RuhiItems\Services\RuhiItemService;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
@@ -18,12 +19,15 @@ class RuhiItems extends Component
     public int $perPage = 20;
     public bool $showCreateModal = false;
     public bool $showEditModal = false;
+    public bool $showImagePreviewModal = false;
     public ?int $editId = null;
     public string $product_name = '';
     public string $product_type = '';
     public string $weight = '0.00';
     public $photo1 = null;
     public ?string $existingPhoto1 = null;
+    public string $previewImageUrl = '';
+    public string $previewImageName = '';
     private ?RuhiItemService $ruhiItems = null;
 
     protected $queryString = [
@@ -97,16 +101,45 @@ class RuhiItems extends Component
     {
         $this->showCreateModal = false;
         $this->showEditModal = false;
+        $this->showImagePreviewModal = false;
+        $this->previewImageUrl = '';
+        $this->previewImageName = '';
         $this->resetForm();
+    }
+
+    public function openImagePreviewById(int $id): void
+    {
+        $item = $this->service()->findById($id);
+        if (trim((string) $item->photo1) === '') {
+            return;
+        }
+
+        $this->previewImageUrl = (string) $item->photo1;
+        $this->previewImageName = (string) $item->product_name;
+        $this->showImagePreviewModal = true;
+    }
+
+    public function closeImagePreview(): void
+    {
+        $this->showImagePreviewModal = false;
+        $this->previewImageUrl = '';
+        $this->previewImageName = '';
     }
 
     public function saveCreate(): void
     {
         $validated = $this->validate([
-            'product_name' => ['required', 'string', 'max:100'],
             'product_type' => ['required', 'integer', 'exists:r_item_type,id'],
             'weight' => ['nullable', 'numeric', 'decimal:0,2'],
             'photo1' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'product_name' => [
+                'required',
+                'string',
+                'max:100',
+                Rule::unique('r_product', 'product_name')->whereNull('deleted_at'),
+            ],
+        ], [
+            'product_name.unique' => 'Item name already exists.',
         ]);
 
         $photoPath = '';

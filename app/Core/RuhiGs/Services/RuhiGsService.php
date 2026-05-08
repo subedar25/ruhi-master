@@ -14,10 +14,16 @@ class RuhiGsService
             $query->withTrashed();
         }
 
-        if (trim($search) !== '') {
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('id', 'like', "%{$search}%");
+        $term = trim($search);
+        if ($term !== '') {
+            $query->where(function ($q) use ($term) {
+                $q->where('name', 'like', "%{$term}%");
+
+                if (ctype_digit($term)) {
+                    $q->orWhere('id', (int) $term);
+                } else {
+                    $q->orWhere('id', 'like', "%{$term}%");
+                }
             });
         }
 
