@@ -108,7 +108,7 @@ class RuhiGsLotsList extends Component
             'lotName' => ['required', 'string', 'max:255'],
             'addLotRows' => ['required', 'array', 'min:1'],
             'addLotRows.*.design_id' => ['required', 'integer', Rule::exists('r_design', 'id')->whereNull('deleted_at')],
-            'addLotRows.*.design_qty' => ['required', 'integer', 'min:0'],
+            'addLotRows.*.design_qty' => ['required', 'integer', 'min:1'],
             'addLotRows.*.design_red_qty' => ['required', 'integer', 'min:0'],
             'addLotRows.*.design_red_green_qty' => ['required', 'integer', 'min:0'],
             'addLotRows.*.design_green_qty' => ['required', 'integer', 'min:0'],
@@ -157,7 +157,7 @@ class RuhiGsLotsList extends Component
             'selectedLotId' => ['required', 'integer', Rule::exists('r_slot', 'id')->where(fn ($q) => $q->where('gs_id', $this->gsId))],
             'addItemRows' => ['required', 'array', 'min:1'],
             'addItemRows.*.design_id' => ['required', 'integer', Rule::exists('r_design', 'id')->whereNull('deleted_at')],
-            'addItemRows.*.design_qty' => ['required', 'integer', 'min:0'],
+            'addItemRows.*.design_qty' => ['required', 'integer', 'min:1'],
             'addItemRows.*.design_red_qty' => ['required', 'integer', 'min:0'],
             'addItemRows.*.design_red_green_qty' => ['required', 'integer', 'min:0'],
             'addItemRows.*.design_green_qty' => ['required', 'integer', 'min:0'],
@@ -223,7 +223,7 @@ class RuhiGsLotsList extends Component
         $validated = $this->validate([
             'editLotId' => ['required', 'integer', Rule::exists('r_slot', 'id')->where(fn ($q) => $q->where('gs_id', $this->gsId))],
             'editDesignId' => ['required', 'integer', Rule::exists('r_design', 'id')->whereNull('deleted_at')],
-            'editDesignQty' => ['required', 'integer', 'min:0'],
+            'editDesignQty' => ['required', 'integer', 'min:1'],
             'editRedQty' => ['required', 'integer', 'min:0'],
             'editRedGreenQty' => ['required', 'integer', 'min:0'],
             'editGreenQty' => ['required', 'integer', 'min:0'],
@@ -272,6 +272,26 @@ class RuhiGsLotsList extends Component
         $this->addItemRows[$i]['white_qty'] = max($qty - ($red + $redGreen + $green), 0);
     }
 
+    public function updatedAddLotRows($value, $key): void
+    {
+        if (! is_string($key) || ! str_contains($key, '.')) {
+            return;
+        }
+        [$index, $field] = explode('.', $key, 2);
+        if (! in_array($field, ['design_qty', 'design_red_qty', 'design_red_green_qty', 'design_green_qty'], true)) {
+            return;
+        }
+        $i = (int) $index;
+        if (! isset($this->addLotRows[$i])) {
+            return;
+        }
+        $qty = (int) ($this->addLotRows[$i]['design_qty'] ?? 0);
+        $red = (int) ($this->addLotRows[$i]['design_red_qty'] ?? 0);
+        $redGreen = (int) ($this->addLotRows[$i]['design_red_green_qty'] ?? 0);
+        $green = (int) ($this->addLotRows[$i]['design_green_qty'] ?? 0);
+        $this->addLotRows[$i]['white_qty'] = max($qty - ($red + $redGreen + $green), 0);
+    }
+
     public function updatedEditDesignQty(): void
     {
         $this->recalculateEditWhiteQty();
@@ -300,6 +320,7 @@ class RuhiGsLotsList extends Component
             'design_red_qty' => 0,
             'design_red_green_qty' => 0,
             'design_green_qty' => 0,
+            'white_qty' => 0,
         ];
     }
 

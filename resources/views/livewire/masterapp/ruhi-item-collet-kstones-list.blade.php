@@ -64,7 +64,7 @@
                                         <a href="#" wire:click.prevent="openEditModal({{ $row->id }})" class="action-icon" title="Edit">
                                             <i class="fa fa-edit"></i>
                                         </a>
-                                        @if((auth()->user()?->user_type ?? '') === 'systemuser')
+                                        @if(auth()->user()?->can('delete-ruhi-collet-kstone'))
                                             <button type="button" class="btn btn-link p-0 action-icon text-danger" title="Delete" wire:click="deleteById({{ $row->id }})" wire:confirm="Remove this K-Stone line?">
                                                 <i class="fa fa-trash"></i>
                                             </button>

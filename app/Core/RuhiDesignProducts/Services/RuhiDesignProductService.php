@@ -53,6 +53,7 @@ class RuhiDesignProductService
     public function listProductsForDropdown(int $itemTypeId): Collection
     {
         return RuhiProduct::query()
+            ->withTrashed()
             ->where('product_type', $itemTypeId)
             ->orderByRaw("LEFT(product_name, LOCATE('-', product_name))")
             ->orderByRaw("CAST(SUBSTRING(product_name, LOCATE('-', product_name) + 1) AS SIGNED)")

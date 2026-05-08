@@ -109,6 +109,7 @@ class RuhiDesignProducts extends Component
 
     public function openEditModal(int $id): void
     {
+        abort_unless((bool) (auth()->user()?->can('edit-ruhi-design-product') ?? false), 403);
         $row = $this->svc()->findById($id);
         abort_unless((int) $row->design_id === (int) $this->designId, 404);
 
@@ -190,6 +191,7 @@ class RuhiDesignProducts extends Component
 
     public function saveEdit(): void
     {
+        abort_unless((bool) (auth()->user()?->can('edit-ruhi-design-product') ?? false), 403);
         if (! $this->editId) {
             return;
         }
@@ -221,7 +223,7 @@ class RuhiDesignProducts extends Component
 
     public function deleteById(int $id): void
     {
-        abort_unless((auth()->user()?->user_type ?? '') === 'systemuser', 403);
+        abort_unless((bool) (auth()->user()?->can('delete-ruhi-design-product') ?? false), 403);
         $row = $this->svc()->findById($id);
         abort_unless((int) $row->design_id === (int) $this->designId, 404);
         $this->svc()->deleteById($id);

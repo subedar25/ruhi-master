@@ -170,7 +170,7 @@
                             </div>
                             <div class="col-md-2">
                                 <div class="form-group mb-2">
-                                    <label class="mb-1">Quantity</label>
+                                    <label class="mb-1">Quantity <span class="text-danger">*</span></label>
                                     <input type="number" min="0" step="1" class="form-control form-control-sm @error('quantity') is-invalid @enderror" wire:model.defer="quantity">
                                     @error('quantity') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>

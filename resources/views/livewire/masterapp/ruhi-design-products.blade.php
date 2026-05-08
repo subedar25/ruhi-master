@@ -119,10 +119,12 @@
                                                 <span>K-Stone</span>
                                             </a>
                                         @endif
-                                        <a href="#" wire:click.prevent="openEditModal({{ $row->id }})" class="action-icon" title="Edit">
-                                            <i class="fa fa-edit"></i>
-                                        </a>
-                                        @if((auth()->user()?->user_type ?? '') === 'systemuser')
+                                        @if(auth()->user()?->can('edit-ruhi-design-product'))
+                                            <a href="#" wire:click.prevent="openEditModal({{ $row->id }})" class="action-icon" title="Edit">
+                                                <i class="fa fa-edit"></i>
+                                            </a>
+                                        @endif
+                                        @if(auth()->user()?->can('delete-ruhi-design-product'))
                                             <button type="button" class="btn btn-link p-0 action-icon text-danger" wire:click="deleteById({{ $row->id }})" wire:confirm="Remove this design item?" title="Delete">
                                                 <i class="fa fa-trash"></i>
                                             </button>
@@ -309,7 +311,7 @@
                                         <label class="mb-1">Item Name <span class="text-danger">*</span></label>
                                         <div id="ruhi-dp-edit-anchor" class="d-none" data-s2-value="{{ $product_id }}"></div>
                                         <input type="hidden" wire:model.defer="product_id" id="ruhi-dp-edit-hidden" class="@error('product_id') is-invalid @enderror">
-                                        <div wire:ignore class="w-100">
+                                        <div class="w-100">
                                             <select
                                                 id="ruhi-dp-edit-select"
                                                 class="form-control form-control-sm js-ruhi-master-select2 @error('product_id') is-invalid @enderror"
@@ -384,7 +386,7 @@
                                         <label class="mb-1">Item Name <span class="text-danger">*</span></label>
                                         <div id="ruhi-dp-edit-anchor" class="d-none" data-s2-value="{{ $product_id }}"></div>
                                         <input type="hidden" wire:model.defer="product_id" id="ruhi-dp-edit-hidden" class="@error('product_id') is-invalid @enderror">
-                                        <div wire:ignore class="w-100">
+                                        <div class="w-100">
                                             <select
                                                 id="ruhi-dp-edit-select"
                                                 class="form-control form-control-sm js-ruhi-master-select2 @error('product_id') is-invalid @enderror"

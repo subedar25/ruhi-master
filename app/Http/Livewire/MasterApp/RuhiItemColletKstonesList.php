@@ -159,7 +159,7 @@ class RuhiItemColletKstonesList extends Component
 
     public function deleteById(int $id): void
     {
-        abort_unless((auth()->user()?->user_type ?? '') === 'systemuser', 403);
+        abort_unless((bool) (auth()->user()?->can('delete-ruhi-collet-kstone') ?? false), 403);
         $row = $this->svc()->findById($id);
         abort_unless((int) $row->item_id === (int) $this->productId, 404);
         $this->svc()->deleteById($id);

@@ -154,6 +154,16 @@
                 </div>
                 <form wire:submit.prevent="saveLotWithItems">
                     <div class="modal-body py-3" style="max-height: 65vh; overflow-y: auto;">
+                        @if(count($errors->get('addLotRows.*.design_id')) > 0)
+                            <div class="alert alert-danger py-2 px-3 mb-2">
+                                Please select Design in all required rows.
+                            </div>
+                        @endif
+                        @if(count($errors->get('addLotRows.*.design_qty')) > 0)
+                            <div class="alert alert-danger py-2 px-3 mb-2">
+                                Quantity must be at least 1 in all rows.
+                            </div>
+                        @endif
                         <div class="row mb-2">
                             <div class="col-md-4">
                                 <div class="form-group mb-0">
@@ -168,13 +178,13 @@
                             <div class="row align-items-end mb-2">
                                 <div class="col-md-3">
                                     <div class="form-group mb-0">
-                                        @if($i === 0)<label class="mb-1">Select Design</label>@endif
+                                        @if($i === 0)<label class="mb-1">Select Design <span class="text-danger">*</span></label>@endif
                                         <div id="ruhi-gs-lot-add-anchor-{{ $i }}" class="d-none" data-s2-value="{{ $row['design_id'] ?? '' }}"></div>
-                                        <input type="hidden" wire:model.defer="addLotRows.{{ $i }}.design_id" id="ruhi-gs-lot-add-hidden-{{ $i }}" class="@error('addLotRows.'.$i.'.design_id') is-invalid @enderror">
+                                        <input type="hidden" wire:model.defer="addLotRows.{{ $i }}.design_id" id="ruhi-gs-lot-add-hidden-{{ $i }}">
                                         <div wire:ignore class="w-100">
                                             <select
                                                 id="ruhi-gs-lot-add-select-{{ $i }}"
-                                                class="form-control form-control-sm js-ruhi-master-select2 @error('addLotRows.'.$i.'.design_id') is-invalid @enderror"
+                                                class="form-control form-control-sm js-ruhi-master-select2"
                                                 data-s2-hidden="#ruhi-gs-lot-add-hidden-{{ $i }}"
                                                 data-s2-anchor="#ruhi-gs-lot-add-anchor-{{ $i }}"
                                                 data-s2-placeholder="Select Design"
@@ -187,35 +197,39 @@
                                                 @endforeach
                                             </select>
                                         </div>
-                                        @error('addLotRows.'.$i.'.design_id') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                     </div>
                                 </div>
                                 <div class="col-md-2">
                                     <div class="form-group mb-0">
-                                        @if($i === 0)<label class="mb-1">Quantity</label>@endif
-                                        <input type="number" min="0" step="1" class="form-control form-control-sm @error('addLotRows.'.$i.'.design_qty') is-invalid @enderror" wire:model.defer="addLotRows.{{ $i }}.design_qty">
-                                        @error('addLotRows.'.$i.'.design_qty') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                                        @if($i === 0)<label class="mb-1">Quantity <span class="text-danger">*</span></label>@endif
+                                        <input type="number" min="0" step="1" class="form-control form-control-sm @error('addLotRows.'.$i.'.design_qty') is-invalid @enderror" wire:model.live="addLotRows.{{ $i }}.design_qty">
                                     </div>
                                 </div>
                                 <div class="col-md-1">
                                     <div class="form-group mb-0">
                                         @if($i === 0)<label class="mb-1">Red</label>@endif
-                                        <input type="number" min="0" step="1" class="form-control form-control-sm @error('addLotRows.'.$i.'.design_red_qty') is-invalid @enderror" wire:model.defer="addLotRows.{{ $i }}.design_red_qty">
+                                        <input type="number" min="0" step="1" class="form-control form-control-sm @error('addLotRows.'.$i.'.design_red_qty') is-invalid @enderror" wire:model.live="addLotRows.{{ $i }}.design_red_qty">
                                         @error('addLotRows.'.$i.'.design_red_qty') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                     </div>
                                 </div>
                                 <div class="col-md-2">
                                     <div class="form-group mb-0">
                                         @if($i === 0)<label class="mb-1">Red + Green</label>@endif
-                                        <input type="number" min="0" step="1" class="form-control form-control-sm @error('addLotRows.'.$i.'.design_red_green_qty') is-invalid @enderror" wire:model.defer="addLotRows.{{ $i }}.design_red_green_qty">
+                                        <input type="number" min="0" step="1" class="form-control form-control-sm @error('addLotRows.'.$i.'.design_red_green_qty') is-invalid @enderror" wire:model.live="addLotRows.{{ $i }}.design_red_green_qty">
                                         @error('addLotRows.'.$i.'.design_red_green_qty') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                     </div>
                                 </div>
                                 <div class="col-md-1">
                                     <div class="form-group mb-0">
                                         @if($i === 0)<label class="mb-1">Green</label>@endif
-                                        <input type="number" min="0" step="1" class="form-control form-control-sm @error('addLotRows.'.$i.'.design_green_qty') is-invalid @enderror" wire:model.defer="addLotRows.{{ $i }}.design_green_qty">
+                                        <input type="number" min="0" step="1" class="form-control form-control-sm @error('addLotRows.'.$i.'.design_green_qty') is-invalid @enderror" wire:model.live="addLotRows.{{ $i }}.design_green_qty">
                                         @error('addLotRows.'.$i.'.design_green_qty') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="form-group mb-0">
+                                        @if($i === 0)<label class="mb-1">White</label>@endif
+                                        <input type="number" min="0" step="1" class="form-control form-control-sm" wire:model.live="addLotRows.{{ $i }}.white_qty">
                                     </div>
                                 </div>
                                 <div class="col-md-1">
@@ -250,6 +264,24 @@
                 </div>
                 <form wire:submit.prevent="saveItemsInLot">
                     <div class="modal-body py-3" style="max-height: 65vh; overflow-y: auto;">
+                        @php
+                            $showSelectedLotError = $errors->has('selectedLotId');
+                            $showDesignRequiredError = $errors->has('addItemRows.*.design_id');
+                            $showQtyMinError = $errors->has('addItemRows.*.design_qty');
+                        @endphp
+                        @if($showSelectedLotError || $showDesignRequiredError || $showQtyMinError)
+                            <div class="alert alert-danger py-2 px-3 mb-2">
+                                @if($showSelectedLotError)
+                                    <div>Please select Lot.</div>
+                                @endif
+                                @if($showDesignRequiredError)
+                                    <div>Please select Design in all required rows.</div>
+                                @endif
+                                @if($showQtyMinError)
+                                    <div>Quantity must be at least 1 in all rows.</div>
+                                @endif
+                            </div>
+                        @endif
                         <div class="row mb-2">
                             <div class="col-md-3">
                                 <div class="form-group mb-0">
@@ -284,11 +316,11 @@
                                     <div class="form-group mb-0">
                                         @if($i === 0)<label class="mb-1">Select Design</label>@endif
                                         <div id="ruhi-gs-item-add-anchor-{{ $i }}" class="d-none" data-s2-value="{{ $row['design_id'] ?? '' }}"></div>
-                                        <input type="hidden" wire:model.defer="addItemRows.{{ $i }}.design_id" id="ruhi-gs-item-add-hidden-{{ $i }}" class="@error('addItemRows.'.$i.'.design_id') is-invalid @enderror">
+                                        <input type="hidden" wire:model.defer="addItemRows.{{ $i }}.design_id" id="ruhi-gs-item-add-hidden-{{ $i }}">
                                         <div wire:ignore class="w-100">
                                             <select
                                                 id="ruhi-gs-item-add-select-{{ $i }}"
-                                                class="form-control form-control-sm js-ruhi-master-select2 @error('addItemRows.'.$i.'.design_id') is-invalid @enderror"
+                                                class="form-control form-control-sm js-ruhi-master-select2"
                                                 data-s2-hidden="#ruhi-gs-item-add-hidden-{{ $i }}"
                                                 data-s2-anchor="#ruhi-gs-item-add-anchor-{{ $i }}"
                                                 data-s2-placeholder="Select Design"
@@ -301,14 +333,12 @@
                                                 @endforeach
                                             </select>
                                         </div>
-                                        @error('addItemRows.'.$i.'.design_id') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                     </div>
                                 </div>
                                 <div class="col-md-1">
                                     <div class="form-group mb-0">
-                                        @if($i === 0)<label class="mb-1">Qty</label>@endif
-                                        <input type="number" min="0" step="1" class="form-control form-control-sm @error('addItemRows.'.$i.'.design_qty') is-invalid @enderror" wire:model.live="addItemRows.{{ $i }}.design_qty">
-                                        @error('addItemRows.'.$i.'.design_qty') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                                        @if($i === 0)<label class="mb-1">Qty <span class="text-danger">*</span></label>@endif
+                                        <input type="number" min="0" step="1" class="form-control form-control-sm" wire:model.live="addItemRows.{{ $i }}.design_qty">
                                     </div>
                                 </div>
                                 <div class="col-md-1">
@@ -371,6 +401,24 @@
                 </div>
                 <form wire:submit.prevent="saveEdit">
                     <div class="modal-body py-3" style="max-height: 65vh; overflow-y: auto;">
+                        @php
+                            $editValidationMessages = collect([
+                                $errors->get('editLotId'),
+                                $errors->get('editDesignId'),
+                                $errors->get('editDesignQty'),
+                                $errors->get('editRedQty'),
+                                $errors->get('editRedGreenQty'),
+                                $errors->get('editGreenQty'),
+                                $errors->get('editWhiteQty'),
+                            ])->flatten()->filter(fn ($msg) => is_string($msg) && $msg !== '')->unique()->values();
+                        @endphp
+                        @if($editValidationMessages->isNotEmpty())
+                            <div class="alert alert-danger py-2 px-3 mb-2">
+                                @foreach($editValidationMessages as $msg)
+                                    <div>{{ $msg }}</div>
+                                @endforeach
+                            </div>
+                        @endif
                         <div class="row align-items-end mb-2">
                             <div class="col-md-3">
                                 <div class="form-group mb-0">
@@ -386,7 +434,7 @@
                             </div>
                             <div class="col-md-3">
                                 <div class="form-group mb-0">
-                                    <label class="mb-1">Design</label>
+                                    <label class="mb-1">Design <span class="text-danger">*</span></label>
                                     <div id="ruhi-gs-edit-design-anchor" class="d-none" data-s2-value="{{ $editDesignId }}"></div>
                                     <input type="hidden" wire:model.defer="editDesignId" id="ruhi-gs-edit-design-hidden" class="@error('editDesignId') is-invalid @enderror">
                                     <div wire:ignore class="w-100">
@@ -412,7 +460,6 @@
                                 <div class="form-group mb-0">
                                     <label class="mb-1">Qty <span class="text-danger">*</span></label>
                                     <input type="number" min="0" step="1" class="form-control form-control-sm @error('editDesignQty') is-invalid @enderror" wire:model.live="editDesignQty" required>
-                                    @error('editDesignQty') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                 </div>
                             </div>
                             <div class="col-md-1">
