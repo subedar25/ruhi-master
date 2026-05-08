@@ -21,7 +21,7 @@ class RuhiGsService
             });
         }
 
-        return $query->orderByDesc('id')->paginate($perPage)->onEachSide(1);
+        return $query->orderBy('id')->paginate($perPage)->onEachSide(1);
     }
 
     public function findById(int $id): RuhiGs
