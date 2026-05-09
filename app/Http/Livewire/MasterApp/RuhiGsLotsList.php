@@ -118,7 +118,12 @@ class RuhiGsLotsList extends Component
         }, $this->addLotRows);
 
         $validated = $this->validate([
-            'lotName' => ['required', 'string', 'max:255'],
+            'lotName' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('r_slot', 'slot_name')->where(fn ($q) => $q->where('gs_id', $this->gsId)),
+            ],
             'addLotRows' => ['required', 'array', 'min:1'],
             'addLotRows.*.design_id' => ['required', 'integer', Rule::exists('r_design', 'id')->whereNull('deleted_at')],
             'addLotRows.*.design_qty' => ['required', 'integer', 'min:1'],
@@ -126,6 +131,8 @@ class RuhiGsLotsList extends Component
             'addLotRows.*.design_red_green_qty' => ['required', 'integer', 'min:0'],
             'addLotRows.*.design_green_qty' => ['required', 'integer', 'min:0'],
             'addLotRows.*.white_qty' => ['required', 'integer', 'min:0'],
+        ], [
+            'lotName.unique' => 'This lot name already exists for the selected GS.',
         ]);
 
         foreach ($validated['addLotRows'] as $row) {
@@ -143,6 +150,8 @@ class RuhiGsLotsList extends Component
         }
 
         $this->svc()->createLotWithItems($this->gsId, $validated['lotName'], $validated['addLotRows']);
+        $this->lotFilterId = null;
+        $this->resetPage();
         $this->dispatch('formResult', type: 'success', message: 'Lot added successfully.');
         $this->closeAddLotModal();
     }
@@ -206,10 +215,27 @@ class RuhiGsLotsList extends Component
             }
         }
 
+        $designIds = array_map(fn (array $row): int => (int) $row['design_id'], $validated['addItemRows']);
+        if (count($designIds) !== count(array_unique($designIds))) {
+            throw ValidationException::withMessages([
+                'addItemRows' => ['Each design can only be added once in this form.'],
+            ]);
+        }
+
+        $lotId = (int) $validated['selectedLotId'];
+        foreach ($designIds as $designId) {
+            if ($this->svc()->lotHasDesignRow($this->gsId, $lotId, $designId)) {
+                throw ValidationException::withMessages([
+                    'addItemRows' => ['This design is already in this lot for this GS.'],
+                ]);
+            }
+        }
+
         $rows = $validated['addItemRows'];
 
         $this->addItemRows = $rows;
         $this->svc()->addItemsInLot($this->gsId, (int) $validated['selectedLotId'], $rows);
+        $this->resetPage();
         $this->dispatch('formResult', type: 'success', message: 'Items added in lot successfully.');
         $this->closeAddItemModal();
     }

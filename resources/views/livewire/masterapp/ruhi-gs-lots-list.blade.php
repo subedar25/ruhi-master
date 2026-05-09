@@ -9,7 +9,8 @@
                     </div>
                     <div id="ruhi-gs-lots-anchor-lot-filter" class="d-none" data-s2-value="{{ $lotFilterId ?? '' }}"></div>
                     <input type="hidden" wire:model.live="lotFilterId" id="ruhi-gs-lots-hidden-lot-filter">
-                    <div wire:ignore class="d-inline-block" style="width: 200px;">
+                    {{-- No wire:ignore: options must refresh after adding lots; Select2 is re-bound on each Livewire commit. --}}
+                    <div class="d-inline-block" style="width: 200px;">
                         <select
                             id="ruhi-gs-lots-select-lot-filter"
                             class="form-control form-control-sm js-ruhi-master-select2"
@@ -291,13 +292,17 @@
                                 @endif
                             </div>
                         @endif
+                        @php
+                            /** Stable key so Livewire replaces this Select2 when lots change (morph + Select2 cache otherwise hides new lots). */
+                            $addItemLotSelectWireKey = $slotOptions->pluck('id')->sort()->values()->implode('-');
+                        @endphp
                         <div class="row mb-2">
                             <div class="col-md-3">
                                 <div class="form-group mb-0">
                                     <label class="mb-1">Select Lot <span class="text-danger">*</span></label>
                                     <div id="ruhi-gs-item-modal-anchor-lot" class="d-none" data-s2-value="{{ $selectedLotId ?? '' }}"></div>
                                     <input type="hidden" wire:model.defer="selectedLotId" id="ruhi-gs-item-modal-hidden-lot" class="@error('selectedLotId') is-invalid @enderror">
-                                    <div wire:ignore class="w-100">
+                                    <div class="w-100" wire:key="ruhi-add-item-lot-select-{{ $addItemLotSelectWireKey }}">
                                         <select
                                             id="ruhi-gs-item-modal-select-lot"
                                             class="form-control form-control-sm js-ruhi-master-select2 @error('selectedLotId') is-invalid @enderror"

@@ -158,6 +158,15 @@ class RuhiGsLotService
         });
     }
 
+    public function lotHasDesignRow(int $gsId, int $lotId, int $designId): bool
+    {
+        return RuhiGsOrderByColor::query()
+            ->where('gs_id', $gsId)
+            ->where('lot_id', $lotId)
+            ->where('design_id', $designId)
+            ->exists();
+    }
+
     public function addItemsInLot(int $gsId, int $lotId, array $rows): void
     {
         foreach ($rows as $row) {
