@@ -55,14 +55,13 @@
                         >
                             Details
                         </a>
-                        <a
-                            href="{{ route('masterapp.ruhi-reports.gs-wise-casting-report.print', ['gs' => $gsId, 'lot' => $lotId]) }}"
-                            target="_blank"
-                            rel="noopener"
+                        <button
+                            type="button"
+                            wire:click="openPrintPreview"
                             class="btn btn-outline-primary btn-sm"
                         >
                             <i class="fa fa-print mr-1"></i> Print
-                        </a>
+                        </button>
                     @else
                         <button type="button" class="btn btn-outline-secondary btn-sm" disabled title="Select GS, Lot and submit first">
                             Details
@@ -131,4 +130,27 @@
             </table>
         </div>
     @endif
+
+    <div class="modal fade {{ $showPrintPreviewModal ? 'show d-block' : '' }}" tabindex="-1" role="dialog" style="background: rgba(0,0,0,0.65);">
+        <div class="modal-dialog modal-xl" role="document" style="max-width: 92vw;">
+            <div class="modal-content">
+                <div class="modal-header py-2">
+                    <h5 class="modal-title">Print Preview - GS Wise Casting Report</h5>
+                    <button type="button" class="close" wire:click="closePrintPreview"><span>&times;</span></button>
+                </div>
+                <div class="modal-body p-0" style="height: 78vh;">
+                    @if($printPreviewUrl !== '')
+                        <iframe
+                            src="{{ $printPreviewUrl }}"
+                            title="GS Wise Casting Report Print Preview"
+                            style="width:100%; height:100%; border:0;"
+                        ></iframe>
+                    @endif
+                </div>
+                <div class="modal-footer py-2">
+                    <button type="button" class="btn btn-secondary btn-sm" wire:click="closePrintPreview">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
