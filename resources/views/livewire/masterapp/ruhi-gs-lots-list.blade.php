@@ -164,6 +164,11 @@
                                 Quantity must be at least 1 in all rows.
                             </div>
                         @endif
+                        @if($errors->has('addLotRows'))
+                            <div class="alert alert-danger py-2 px-3 mb-2">
+                                {{ $errors->first('addLotRows') }}
+                            </div>
+                        @endif
                         <div class="row mb-2">
                             <div class="col-md-4">
                                 <div class="form-group mb-0">
@@ -268,8 +273,9 @@
                             $showSelectedLotError = $errors->has('selectedLotId');
                             $showDesignRequiredError = $errors->has('addItemRows.*.design_id');
                             $showQtyMinError = $errors->has('addItemRows.*.design_qty');
+                            $showColorSplitError = $errors->has('addItemRows');
                         @endphp
-                        @if($showSelectedLotError || $showDesignRequiredError || $showQtyMinError)
+                        @if($showSelectedLotError || $showDesignRequiredError || $showQtyMinError || $showColorSplitError)
                             <div class="alert alert-danger py-2 px-3 mb-2">
                                 @if($showSelectedLotError)
                                     <div>Please select Lot.</div>
@@ -279,6 +285,9 @@
                                 @endif
                                 @if($showQtyMinError)
                                     <div>Quantity must be at least 1 in all rows.</div>
+                                @endif
+                                @if($showColorSplitError)
+                                    <div>{{ $errors->first('addItemRows') }}</div>
                                 @endif
                             </div>
                         @endif
@@ -410,6 +419,7 @@
                                 $errors->get('editRedGreenQty'),
                                 $errors->get('editGreenQty'),
                                 $errors->get('editWhiteQty'),
+                                $errors->get('editColorSplit'),
                             ])->flatten()->filter(fn ($msg) => is_string($msg) && $msg !== '')->unique()->values();
                         @endphp
                         @if($editValidationMessages->isNotEmpty())
@@ -472,7 +482,7 @@
                             <div class="col-md-2">
                                 <div class="form-group mb-0">
                                     <label class="mb-1">Red + Green</label>
-                                    <input type="number" min="0" step="1" class="form-control form-control-sm @error('editRedGreenQty') is-invalid @enderror" wire:model.live="editRedGreenQty">
+                                    <input type="number" min="0" step="1" class="form-control form-control-sm @error('editRedGreenQty') is-invalid @enderror" value="{{ $editRedGreenQty }}" wire:input="setEditRedGreenQty($event.target.value)">
                                     @error('editRedGreenQty') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                 </div>
                             </div>

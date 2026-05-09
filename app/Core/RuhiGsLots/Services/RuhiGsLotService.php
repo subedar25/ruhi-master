@@ -142,7 +142,7 @@ class RuhiGsLotService
                 $red = (int) ($row['design_red_qty'] ?? 0);
                 $redGreen = (int) ($row['design_red_green_qty'] ?? 0);
                 $green = (int) ($row['design_green_qty'] ?? 0);
-                $white = max($qty - ($red + $redGreen + $green), 0);
+                $white = (int) ($row['white_qty'] ?? 0);
 
                 RuhiGsOrderByColor::query()->create([
                     'gs_id' => $gsId,

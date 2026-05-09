@@ -4,6 +4,7 @@ namespace App\Http\Livewire\MasterApp;
 
 use App\Core\RuhiGsLots\Services\RuhiGsLotService;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -124,7 +125,22 @@ class RuhiGsLotsList extends Component
             'addLotRows.*.design_red_qty' => ['required', 'integer', 'min:0'],
             'addLotRows.*.design_red_green_qty' => ['required', 'integer', 'min:0'],
             'addLotRows.*.design_green_qty' => ['required', 'integer', 'min:0'],
+            'addLotRows.*.white_qty' => ['required', 'integer', 'min:0'],
         ]);
+
+        foreach ($validated['addLotRows'] as $row) {
+            if (! $this->isColorSplitValid(
+                (int) $row['design_qty'],
+                (int) $row['design_red_qty'],
+                (int) $row['design_red_green_qty'],
+                (int) $row['design_green_qty'],
+                (int) $row['white_qty']
+            )) {
+                throw ValidationException::withMessages([
+                    'addLotRows' => ['For each row, Red + Red + Green + Green + White must equal Quantity.'],
+                ]);
+            }
+        }
 
         $this->svc()->createLotWithItems($this->gsId, $validated['lotName'], $validated['addLotRows']);
         $this->dispatch('formResult', type: 'success', message: 'Lot added successfully.');
@@ -173,17 +189,24 @@ class RuhiGsLotsList extends Component
             'addItemRows.*.design_red_qty' => ['required', 'integer', 'min:0'],
             'addItemRows.*.design_red_green_qty' => ['required', 'integer', 'min:0'],
             'addItemRows.*.design_green_qty' => ['required', 'integer', 'min:0'],
-            'addItemRows.*.white_qty' => ['nullable', 'integer', 'min:0'],
+            'addItemRows.*.white_qty' => ['required', 'integer', 'min:0'],
         ]);
 
-        $rows = array_map(function (array $row): array {
-            $qty = (int) $row['design_qty'];
-            $red = (int) $row['design_red_qty'];
-            $redGreen = (int) $row['design_red_green_qty'];
-            $green = (int) $row['design_green_qty'];
-            $row['white_qty'] = max($qty - ($red + $redGreen + $green), 0);
-            return $row;
-        }, $validated['addItemRows']);
+        foreach ($validated['addItemRows'] as $row) {
+            if (! $this->isColorSplitValid(
+                (int) $row['design_qty'],
+                (int) $row['design_red_qty'],
+                (int) $row['design_red_green_qty'],
+                (int) $row['design_green_qty'],
+                (int) $row['white_qty']
+            )) {
+                throw ValidationException::withMessages([
+                    'addItemRows' => ['For each row, Red + Red + Green + Green + White must equal Quantity.'],
+                ]);
+            }
+        }
+
+        $rows = $validated['addItemRows'];
 
         $this->addItemRows = $rows;
         $this->svc()->addItemsInLot($this->gsId, (int) $validated['selectedLotId'], $rows);
@@ -239,15 +262,20 @@ class RuhiGsLotsList extends Component
             'editRedQty' => ['required', 'integer', 'min:0'],
             'editRedGreenQty' => ['required', 'integer', 'min:0'],
             'editGreenQty' => ['required', 'integer', 'min:0'],
-            'editWhiteQty' => ['nullable', 'integer', 'min:0'],
+            'editWhiteQty' => ['required', 'integer', 'min:0'],
         ]);
 
-        $computedWhiteQty = max(
-            (int) $validated['editDesignQty']
-            - ((int) $validated['editRedQty'] + (int) $validated['editRedGreenQty'] + (int) $validated['editGreenQty']),
-            0
-        );
-        $this->editWhiteQty = $computedWhiteQty;
+        if (! $this->isColorSplitValid(
+            (int) $validated['editDesignQty'],
+            (int) $validated['editRedQty'],
+            (int) $validated['editRedGreenQty'],
+            (int) $validated['editGreenQty'],
+            (int) $validated['editWhiteQty']
+        )) {
+            throw ValidationException::withMessages([
+                'editColorSplit' => ['Red + Red + Green + Green + White must equal Quantity.'],
+            ]);
+        }
 
         $row = $this->svc()->findLotItemById($this->editId, $this->gsId);
         $this->svc()->updateLotItem($row, [
@@ -257,72 +285,29 @@ class RuhiGsLotsList extends Component
             'design_red_qty' => (int) $validated['editRedQty'],
             'design_red_green_qty' => (int) $validated['editRedGreenQty'],
             'design_green_qty' => (int) $validated['editGreenQty'],
-            'white_qty' => $computedWhiteQty,
+            'white_qty' => (int) $validated['editWhiteQty'],
         ]);
 
         $this->dispatch('formResult', type: 'success', message: 'Lot item updated successfully.');
         $this->closeEditModal();
     }
 
-    public function updatedAddItemRows($value, $key): void
+    public function updatedAddItemRows($value, $key): void {}
+
+    public function updatedAddLotRows($value, $key): void {}
+
+    public function updatedEditDesignQty(): void {}
+
+    public function updatedEditRedQty(): void {}
+
+    public function updatedEditRedGreenQty(): void {}
+
+    public function setEditRedGreenQty($value): void
     {
-        if (! is_string($key) || ! str_contains($key, '.')) {
-            return;
-        }
-        [$index, $field] = explode('.', $key, 2);
-        if (! in_array($field, ['design_qty', 'design_red_qty', 'design_red_green_qty', 'design_green_qty'], true)) {
-            return;
-        }
-        $i = (int) $index;
-        if (! isset($this->addItemRows[$i])) {
-            return;
-        }
-        $qty = (int) ($this->addItemRows[$i]['design_qty'] ?? 0);
-        $red = (int) ($this->addItemRows[$i]['design_red_qty'] ?? 0);
-        $redGreen = (int) ($this->addItemRows[$i]['design_red_green_qty'] ?? 0);
-        $green = (int) ($this->addItemRows[$i]['design_green_qty'] ?? 0);
-        $this->addItemRows[$i]['white_qty'] = max($qty - ($red + $redGreen + $green), 0);
+        $this->editRedGreenQty = max((int) $value, 0);
     }
 
-    public function updatedAddLotRows($value, $key): void
-    {
-        if (! is_string($key) || ! str_contains($key, '.')) {
-            return;
-        }
-        [$index, $field] = explode('.', $key, 2);
-        if (! in_array($field, ['design_qty', 'design_red_qty', 'design_red_green_qty', 'design_green_qty'], true)) {
-            return;
-        }
-        $i = (int) $index;
-        if (! isset($this->addLotRows[$i])) {
-            return;
-        }
-        $qty = (int) ($this->addLotRows[$i]['design_qty'] ?? 0);
-        $red = (int) ($this->addLotRows[$i]['design_red_qty'] ?? 0);
-        $redGreen = (int) ($this->addLotRows[$i]['design_red_green_qty'] ?? 0);
-        $green = (int) ($this->addLotRows[$i]['design_green_qty'] ?? 0);
-        $this->addLotRows[$i]['white_qty'] = max($qty - ($red + $redGreen + $green), 0);
-    }
-
-    public function updatedEditDesignQty(): void
-    {
-        $this->recalculateEditWhiteQty();
-    }
-
-    public function updatedEditRedQty(): void
-    {
-        $this->recalculateEditWhiteQty();
-    }
-
-    public function updatedEditRedGreenQty(): void
-    {
-        $this->recalculateEditWhiteQty();
-    }
-
-    public function updatedEditGreenQty(): void
-    {
-        $this->recalculateEditWhiteQty();
-    }
+    public function updatedEditGreenQty(): void {}
 
     private function addDefaultLotRow(): void
     {
@@ -353,12 +338,9 @@ class RuhiGsLotsList extends Component
         return $this->service ??= app(RuhiGsLotService::class);
     }
 
-    private function recalculateEditWhiteQty(): void
+    private function isColorSplitValid(int $qty, int $red, int $redGreen, int $green, int $white): bool
     {
-        $this->editWhiteQty = max(
-            (int) $this->editDesignQty - ((int) $this->editRedQty + (int) $this->editRedGreenQty + (int) $this->editGreenQty),
-            0
-        );
+        return ($red + $redGreen + $green + $white) === $qty;
     }
 
     public function render()
