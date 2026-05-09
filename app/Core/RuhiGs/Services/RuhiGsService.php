@@ -3,16 +3,17 @@
 namespace App\Core\RuhiGs\Services;
 
 use App\Models\RuhiGs;
+use App\Models\RuhiGsOrderByColor;
+use App\Models\RuhiSlot;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class RuhiGsService
 {
-    public function paginateForList(string $search, int $perPage, bool $includeDeleted = false): LengthAwarePaginator
+    public function paginateForList(string $search, int $perPage): LengthAwarePaginator
     {
         $query = RuhiGs::query();
-        if ($includeDeleted) {
-            $query->withTrashed();
-        }
 
         $term = trim($search);
         if ($term !== '') {
@@ -32,7 +33,7 @@ class RuhiGsService
 
     public function findById(int $id): RuhiGs
     {
-        return RuhiGs::withTrashed()->findOrFail($id);
+        return RuhiGs::query()->findOrFail($id);
     }
 
     public function create(array $attributes): RuhiGs
@@ -45,14 +46,31 @@ class RuhiGsService
         return $gs->update($attributes);
     }
 
-    public function softDeleteById(int $id): int
+    /**
+     * Permanently remove GS and dependent lots / order rows. Deletions are audited per model.
+     */
+    public function permanentlyDeleteById(int $id): void
     {
-        return RuhiGs::query()->where('id', $id)->delete();
-    }
+        DB::transaction(function () use ($id): void {
+            $gs = RuhiGs::query()->findOrFail($id);
 
-    public function restoreById(int $id): int
-    {
-        return RuhiGs::withTrashed()->where('id', $id)->restore();
+            RuhiGsOrderByColor::query()
+                ->where('gs_id', $gs->id)
+                ->orderBy('id')
+                ->get()
+                ->each->delete();
+
+            RuhiSlot::query()
+                ->where('gs_id', $gs->id)
+                ->orderBy('id')
+                ->get()
+                ->each->delete();
+
+            if (Schema::hasTable('r_gs_order')) {
+                DB::table('r_gs_order')->where('gs_id', $gs->id)->delete();
+            }
+
+            $gs->delete();
+        });
     }
 }
-

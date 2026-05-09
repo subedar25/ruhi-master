@@ -18,7 +18,6 @@ class GsDieReportService
     public function listGsForDropdown(): Collection
     {
         return RuhiGs::query()
-            ->whereNull('deleted_at')
             ->orderBy('name')
             ->get(['id', 'name']);
     }
@@ -39,7 +38,7 @@ class GsDieReportService
      */
     public function buildReport(int $gsId): array
     {
-        $gs = RuhiGs::query()->whereNull('deleted_at')->find($gsId);
+        $gs = RuhiGs::query()->find($gsId);
         $gsName = (string) ($gs->name ?? '');
 
         $orderRows = RuhiGsOrderByColor::query()

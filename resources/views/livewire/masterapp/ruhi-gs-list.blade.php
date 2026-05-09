@@ -48,13 +48,10 @@
                     </thead>
                     <tbody>
                         @forelse($gss as $gs)
-                            <tr class="{{ $gs->deleted_at ? 'table-danger' : '' }}">
+                            <tr>
                                 <td style="width: 70px; white-space: nowrap;">{{ ($gss->firstItem() ?? 1) + $loop->index }}</td>
                                 <td>
                                     {{ $gs->name }}
-                                    @if($gs->deleted_at)
-                                        <span class="badge badge-danger ml-1">Deleted</span>
-                                    @endif
                                 </td>
                                 <td style="min-width: 170px;">
                                     <div class="action-div master-actions">
@@ -70,16 +67,10 @@
                                         <a href="#" wire:click.prevent="openEditModal({{ $gs->id }})" class="action-icon" title="Edit">
                                             <i class="fa fa-edit"></i>
                                         </a>
-                                        @if($gs->deleted_at)
-                                            @if((auth()->user()?->user_type ?? '') === 'systemuser')
-                                                <button type="button" class="btn btn-link p-0 action-icon text-success" title="Revert" wire:click="restoreById({{ $gs->id }})" wire:confirm="Restore this GS?">
-                                                    <i class="fa fa-undo"></i>
-                                                </button>
-                                            @endif
-                                        @elseif(auth()->user()?->can('delete-ruhi-gs'))
-                                                <button type="button" class="btn btn-link p-0 action-icon text-danger" title="Delete" wire:click="deleteById({{ $gs->id }})" wire:confirm="Delete this GS?">
-                                                    <i class="fa fa-trash"></i>
-                                                </button>
+                                        @if(auth()->user()?->can('delete-ruhi-gs'))
+                                            <button type="button" class="btn btn-link p-0 action-icon text-danger" title="Delete permanently" wire:click="deleteById({{ $gs->id }})" wire:confirm="Permanently delete this GS, all its lots, and all lot items? This cannot be undone.">
+                                                <i class="fa fa-trash"></i>
+                                            </button>
                                         @endif
                                     </div>
                                 </td>

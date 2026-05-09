@@ -14,7 +14,7 @@ class RuhiGsLotService
 {
     public function findGs(int $gsId): RuhiGs
     {
-        return RuhiGs::withTrashed()->findOrFail($gsId);
+        return RuhiGs::query()->findOrFail($gsId);
     }
 
     public function listDesignsForDropdown(): Collection
@@ -183,12 +183,33 @@ class RuhiGsLotService
         }
     }
 
-    public function deleteLotItemById(int $id, int $gsId): int
+    public function deleteLotItemById(int $id, int $gsId): void
     {
-        return RuhiGsOrderByColor::query()
+        $row = RuhiGsOrderByColor::query()
             ->where('id', $id)
             ->where('gs_id', $gsId)
-            ->delete();
+            ->firstOrFail();
+
+        $row->delete();
+    }
+
+    public function deleteLotForGs(int $gsId, int $lotId): void
+    {
+        DB::transaction(function () use ($gsId, $lotId): void {
+            $slot = RuhiSlot::query()
+                ->where('gs_id', $gsId)
+                ->whereKey($lotId)
+                ->firstOrFail();
+
+            RuhiGsOrderByColor::query()
+                ->where('gs_id', $gsId)
+                ->where('lot_id', $lotId)
+                ->orderBy('id')
+                ->get()
+                ->each->delete();
+
+            $slot->delete();
+        });
     }
 
     public function findLotItemById(int $id, int $gsId): RuhiGsOrderByColor

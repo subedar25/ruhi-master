@@ -22,7 +22,6 @@ class GsFullReportService
     public function listGsForDropdown(): Collection
     {
         return RuhiGs::query()
-            ->whereNull('deleted_at')
             ->orderBy('name')
             ->get(['id', 'name']);
     }
@@ -39,7 +38,7 @@ class GsFullReportService
      */
     public function buildReport(int $gsId): array
     {
-        $gs = RuhiGs::query()->whereNull('deleted_at')->find($gsId);
+        $gs = RuhiGs::query()->find($gsId);
         $gsName = (string) ($gs->name ?? '');
 
         $designQtyByDesign = $this->designQtyByDesign($gsId);

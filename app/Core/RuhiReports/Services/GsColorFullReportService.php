@@ -32,7 +32,6 @@ class GsColorFullReportService
     public function listGsForDropdown(): Collection
     {
         return RuhiGs::query()
-            ->whereNull('deleted_at')
             ->orderBy('name')
             ->get(['id', 'name']);
     }
@@ -51,7 +50,7 @@ class GsColorFullReportService
      */
     public function buildReport(int $gsId, ?int $sfilter = null): array
     {
-        $gs = RuhiGs::query()->whereNull('deleted_at')->find($gsId);
+        $gs = RuhiGs::query()->find($gsId);
         $gsName = (string) ($gs->name ?? '');
 
         $k = $this->buildEnrichedBlock($gsId, self::PRODUCT_TYPE_KUNDAN_FULL, $sfilter);
@@ -181,7 +180,7 @@ class GsColorFullReportService
      */
     public function buildColletKstoneColorReport(int $gsId): array
     {
-        $gs = RuhiGs::query()->whereNull('deleted_at')->find($gsId);
+        $gs = RuhiGs::query()->find($gsId);
         $gsName = (string) ($gs->name ?? '');
 
         $merged = $this->collectMergedProducts($gsId, self::PRODUCT_TYPE_COLLET);

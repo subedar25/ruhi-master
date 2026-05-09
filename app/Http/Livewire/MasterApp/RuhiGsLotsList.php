@@ -22,6 +22,7 @@ class RuhiGsLotsList extends Component
     public ?int $editId = null;
     public string $lotName = '';
     public ?int $selectedLotId = null;
+    public ?int $deleteLotTargetId = null;
     public array $addLotRows = [];
     public array $addItemRows = [];
     public ?int $editLotId = null;
@@ -174,6 +175,29 @@ class RuhiGsLotsList extends Component
         $this->resetValidation();
     }
 
+    /**
+     * Delete the lot currently selected in the filter dropdown and all design assignments in that lot.
+     * Master designs (r_design) are not deleted.
+     */
+    public function deleteSelectedFilterLot(): void
+    {
+        abort_unless((bool) (auth()->user()?->can('delete-ruhi-gs-lot') ?? false), 403);
+
+        $this->validate([
+            'lotFilterId' => [
+                'required',
+                'integer',
+                Rule::exists('r_slot', 'id')->where(fn ($q) => $q->where('gs_id', $this->gsId)),
+            ],
+        ]);
+
+        $lotId = (int) $this->lotFilterId;
+        $this->svc()->deleteLotForGs($this->gsId, $lotId);
+        $this->lotFilterId = null;
+        $this->resetPage();
+        $this->dispatch('formResult', type: 'success', message: 'Lot and its design assignments removed. Master designs were not deleted.');
+    }
+
     public function addItemRow(): void
     {
         $this->addDefaultItemRow();
@@ -242,8 +266,10 @@ class RuhiGsLotsList extends Component
 
     public function deleteLotItemById(int $id): void
     {
+        abort_unless((bool) (auth()->user()?->can('delete-ruhi-gs-lot') ?? false), 403);
         $this->svc()->deleteLotItemById($id, $this->gsId);
-        $this->dispatch('formResult', type: 'success', message: 'Lot item deleted successfully.');
+        $this->resetPage();
+        $this->dispatch('formResult', type: 'success', message: 'Lot item deleted permanently.');
     }
 
     public function openEditModal(int $id): void

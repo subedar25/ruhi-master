@@ -4,14 +4,36 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
+use OwenIt\Auditing\Auditable as AuditableTrait;
 
-class RuhiGsOrderByColor extends Model
+class RuhiGsOrderByColor extends Model implements AuditableContract
 {
+    use AuditableTrait;
+
     protected $table = 'r_gs_order_by_color';
 
     public $timestamps = false;
 
     protected $fillable = [
+        'gs_id',
+        'lot_id',
+        'design_id',
+        'design_qty',
+        'design_red_qty',
+        'design_red_green_qty',
+        'design_green_qty',
+        'white_qty',
+    ];
+
+    /**
+     * @var array<int, string>
+     */
+    protected array $auditEvents = [
+        'deleted',
+    ];
+
+    protected $auditInclude = [
         'gs_id',
         'lot_id',
         'design_id',

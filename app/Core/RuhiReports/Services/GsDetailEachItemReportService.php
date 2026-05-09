@@ -20,7 +20,6 @@ class GsDetailEachItemReportService
     public function listGsForDropdown(): Collection
     {
         return RuhiGs::query()
-            ->whereNull('deleted_at')
             ->orderBy('name')
             ->get(['id', 'name']);
     }
@@ -121,7 +120,7 @@ class GsDetailEachItemReportService
         array $productIds,
         string $nameFilter,
     ): array {
-        $gs = RuhiGs::query()->whereNull('deleted_at')->find($gsId);
+        $gs = RuhiGs::query()->find($gsId);
         $gsName = (string) ($gs->name ?? '');
 
         $productTypes = array_values(array_unique(array_map('intval', $productTypes)));

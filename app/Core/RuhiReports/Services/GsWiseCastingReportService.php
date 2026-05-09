@@ -19,7 +19,6 @@ class GsWiseCastingReportService
     public function listGsForDropdown(): Collection
     {
         return RuhiGs::query()
-            ->whereNull('deleted_at')
             ->orderBy('name')
             ->get(['id', 'name']);
     }
@@ -93,7 +92,7 @@ class GsWiseCastingReportService
      */
     public function buildReport(int $gsId, int $lotId): array
     {
-        $gs = RuhiGs::query()->whereNull('deleted_at')->find($gsId);
+        $gs = RuhiGs::query()->find($gsId);
         $slot = RuhiSlot::query()->where('gs_id', $gsId)->find($lotId);
 
         $gsName = (string) ($gs->name ?? '');
@@ -213,7 +212,7 @@ class GsWiseCastingReportService
      */
     public function buildDetailReport(int $gsId, int $lotId): array
     {
-        $gs = RuhiGs::query()->whereNull('deleted_at')->find($gsId);
+        $gs = RuhiGs::query()->find($gsId);
         $slot = RuhiSlot::query()->where('gs_id', $gsId)->find($lotId);
 
         $gsName = (string) ($gs->name ?? '');

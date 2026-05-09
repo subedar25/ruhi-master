@@ -3,6 +3,11 @@
         <div class="card-body p-0">
             <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 px-3 pt-3 pb-2 border-bottom">
                 <div class="d-flex flex-wrap align-items-center" style="gap:8px;">
+                    @error('lotFilterId')
+                        <div class="w-100 order-last">
+                            <div class="alert alert-danger py-2 px-3 mb-0 small">{{ $message }}</div>
+                        </div>
+                    @enderror
                     <div class="search-input-wrapper" style="width: 230px; min-width: 160px; position: relative;">
                         <i class="fa fa-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#6c757d;pointer-events:none;"></i>
                         <input type="search" wire:model.live.debounce.300ms="search" class="form-control form-control-sm" style="padding-left:34px;" placeholder="Search design/lot...">
@@ -25,6 +30,19 @@
                             @endforeach
                         </select>
                     </div>
+                    @can('delete-ruhi-gs-lot')
+                        @if($lotFilterId)
+                            <button
+                                type="button"
+                                class="btn btn-outline-danger btn-sm text-nowrap"
+                                title="Delete this lot"
+                                wire:click="deleteSelectedFilterLot"
+                                wire:confirm="Are you sure you want to delete this lot? All design assignments linked to this lot (quantities and colours) will be removed permanently. Master designs in Manage Design will not be deleted."
+                            >
+                                <i class="fa fa-trash mr-1"></i> Delete lot
+                            </button>
+                        @endif
+                    @endcan
                 </div>
                 <div class="d-flex flex-wrap align-items-center" style="gap:8px;">
                 <button type="button" class="btn btn-primary btn-sm" wire:click="openAddLotModal">
@@ -98,15 +116,17 @@
                                     >
                                         <i class="fa fa-edit"></i>
                                     </button>
+                                    @can('delete-ruhi-gs-lot')
                                     <button
                                         type="button"
                                         class="btn btn-link p-0 text-danger"
                                         title="Delete"
                                         wire:click="deleteLotItemById({{ $row->id }})"
-                                        wire:confirm="Delete this row?"
+                                        wire:confirm="Permanently delete this item from the lot?"
                                     >
                                         <i class="fa fa-trash"></i>
                                     </button>
+                                    @endcan
                                 </td>
                             </tr>
                         @empty

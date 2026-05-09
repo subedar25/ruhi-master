@@ -86,7 +86,7 @@ class RuhiReportController extends Controller
         $gsId = (int) $request->query('gs', 0);
         abort_unless($gsId > 0, 404);
 
-        RuhiGs::query()->whereNull('deleted_at')->findOrFail($gsId);
+        RuhiGs::query()->findOrFail($gsId);
 
         $typesRaw = (string) $request->query('types', '');
         $types = array_values(array_filter(array_map('intval', $typesRaw !== '' ? explode(',', $typesRaw) : [])));
@@ -116,7 +116,7 @@ class RuhiReportController extends Controller
         $gsId = (int) $request->query('gs', 0);
         abort_unless($gsId > 0, 404);
 
-        RuhiGs::query()->whereNull('deleted_at')->findOrFail($gsId);
+        RuhiGs::query()->findOrFail($gsId);
 
         $report = $service->buildReport($gsId);
 
@@ -130,7 +130,7 @@ class RuhiReportController extends Controller
         $gsId = (int) $request->query('gs', 0);
         abort_unless($gsId > 0, 404);
 
-        RuhiGs::query()->whereNull('deleted_at')->findOrFail($gsId);
+        RuhiGs::query()->findOrFail($gsId);
 
         $section = $request->query('section');
         $section = is_string($section) ? trim($section) : '';
@@ -150,7 +150,7 @@ class RuhiReportController extends Controller
         $gsId = (int) $request->query('gs', 0);
         abort_unless($gsId > 0, 404);
 
-        RuhiGs::query()->whereNull('deleted_at')->findOrFail($gsId);
+        RuhiGs::query()->findOrFail($gsId);
 
         $report = $service->buildReport($gsId);
 
@@ -164,7 +164,7 @@ class RuhiReportController extends Controller
         $gsId = (int) $request->query('gs', 0);
         abort_unless($gsId > 0, 404);
 
-        RuhiGs::query()->whereNull('deleted_at')->findOrFail($gsId);
+        RuhiGs::query()->findOrFail($gsId);
 
         $report = $service->buildReport($gsId);
 
@@ -178,7 +178,7 @@ class RuhiReportController extends Controller
         $gsId = (int) $request->query('gs', 0);
         abort_unless($gsId > 0, 404);
 
-        RuhiGs::query()->whereNull('deleted_at')->findOrFail($gsId);
+        RuhiGs::query()->findOrFail($gsId);
 
         $sfilter = (int) $request->query('sfilter', 0);
         $sfilter = $sfilter === 0 ? null : $sfilter;
@@ -201,7 +201,7 @@ class RuhiReportController extends Controller
         $gsId = (int) $request->query('gs', 0);
         abort_unless($gsId > 0, 404);
 
-        RuhiGs::query()->whereNull('deleted_at')->findOrFail($gsId);
+        RuhiGs::query()->findOrFail($gsId);
 
         $sfilter = (int) $request->query('sfilter', 0);
         $sfilter = $sfilter === 0 ? null : $sfilter;
@@ -245,7 +245,7 @@ class RuhiReportController extends Controller
         $gsId = (int) $request->query('gs', 0);
         abort_unless($gsId > 0, 404);
 
-        RuhiGs::query()->whereNull('deleted_at')->findOrFail($gsId);
+        RuhiGs::query()->findOrFail($gsId);
 
         $report = $service->buildReport($gsId);
 
@@ -259,7 +259,7 @@ class RuhiReportController extends Controller
         $gsId = (int) $request->query('gs', 0);
         abort_unless($gsId > 0, 404);
 
-        RuhiGs::query()->whereNull('deleted_at')->findOrFail($gsId);
+        RuhiGs::query()->findOrFail($gsId);
 
         $report = $service->buildReport($gsId);
 
@@ -273,7 +273,7 @@ class RuhiReportController extends Controller
         $gsId = (int) $request->query('gs', 0);
         abort_unless($gsId > 0, 404);
 
-        RuhiGs::query()->whereNull('deleted_at')->findOrFail($gsId);
+        RuhiGs::query()->findOrFail($gsId);
 
         $report = $service->buildReport($gsId);
 
@@ -293,7 +293,7 @@ class RuhiReportController extends Controller
             404
         );
 
-        RuhiGs::query()->whereNull('deleted_at')->findOrFail($gsId);
+        RuhiGs::query()->findOrFail($gsId);
 
         $report = $service->buildReport($gsId, $lotId);
 
@@ -313,7 +313,7 @@ class RuhiReportController extends Controller
             404
         );
 
-        RuhiGs::query()->whereNull('deleted_at')->findOrFail($gsId);
+        RuhiGs::query()->findOrFail($gsId);
 
         $report = $service->buildDetailReport($gsId, $lotId);
 
@@ -327,7 +327,7 @@ class RuhiReportController extends Controller
         $gsId = (int) $request->query('gs', 0);
         abort_unless($gsId > 0, 404);
 
-        $gs = RuhiGs::query()->whereNull('deleted_at')->findOrFail($gsId);
+        $gs = RuhiGs::query()->findOrFail($gsId);
         $blocks = $service->lotBlocksForGs($gsId);
 
         return view('masterapp.ruhi-reports.gs-lot-wise-items-print', [

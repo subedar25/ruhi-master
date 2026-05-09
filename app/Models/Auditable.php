@@ -104,6 +104,18 @@ class Auditable extends BaseAudit
                 'restored' => 'Invoice file restored',
                 default   => ucfirst($this->event),
             },
+            \App\Models\RuhiGs::class => match ($this->event) {
+                'deleted' => 'Ruhi GS deleted',
+                default   => ucfirst($this->event),
+            },
+            \App\Models\RuhiSlot::class => match ($this->event) {
+                'deleted' => 'Ruhi GS lot deleted',
+                default   => ucfirst($this->event),
+            },
+            \App\Models\RuhiGsOrderByColor::class => match ($this->event) {
+                'deleted' => 'Ruhi GS lot item deleted',
+                default   => ucfirst($this->event),
+            },
             default => ucfirst($this->event),
         };
     }

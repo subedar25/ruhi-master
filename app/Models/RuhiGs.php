@@ -4,17 +4,30 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
+use OwenIt\Auditing\Auditable as AuditableTrait;
 
-class RuhiGs extends Model
+class RuhiGs extends Model implements AuditableContract
 {
-    use SoftDeletes;
+    use AuditableTrait;
 
     protected $table = 'r_gs';
 
     public $timestamps = false;
 
     protected $fillable = [
+        'name',
+        'created_date',
+    ];
+
+    /**
+     * @var array<int, string>
+     */
+    protected array $auditEvents = [
+        'deleted',
+    ];
+
+    protected $auditInclude = [
         'name',
         'created_date',
     ];

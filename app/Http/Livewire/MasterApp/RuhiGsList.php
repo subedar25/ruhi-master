@@ -101,16 +101,8 @@ class RuhiGsList extends Component
     public function deleteById(int $id): void
     {
         abort_unless((bool) (auth()->user()?->can('delete-ruhi-gs') ?? false), 403);
-        $this->service()->softDeleteById($id);
-        $this->dispatch('formResult', type: 'success', message: 'GS deleted successfully.');
-        $this->resetPage();
-    }
-
-    public function restoreById(int $id): void
-    {
-        abort_unless((auth()->user()?->user_type ?? '') === 'systemuser', 403);
-        $this->service()->restoreById($id);
-        $this->dispatch('formResult', type: 'success', message: 'GS restored successfully.');
+        $this->service()->permanentlyDeleteById($id);
+        $this->dispatch('formResult', type: 'success', message: 'GS deleted permanently.');
         $this->resetPage();
     }
 
@@ -128,8 +120,7 @@ class RuhiGsList extends Component
 
     public function render()
     {
-        $includeDeleted = (auth()->user()?->user_type ?? '') === 'systemuser';
-        $gss = $this->service()->paginateForList($this->search, $this->perPage, $includeDeleted);
+        $gss = $this->service()->paginateForList($this->search, $this->perPage);
 
         return view('livewire.masterapp.ruhi-gs-list', [
             'gss' => $gss,

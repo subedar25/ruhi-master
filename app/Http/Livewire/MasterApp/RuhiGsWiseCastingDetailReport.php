@@ -40,7 +40,7 @@ class RuhiGsWiseCastingDetailReport extends Component
                     'gsId' => [
                         'required',
                         'integer',
-                        Rule::exists('r_gs', 'id')->whereNull('deleted_at'),
+                        Rule::exists('r_gs', 'id'),
                     ],
                     'lotId' => [
                         'required',
@@ -73,7 +73,7 @@ class RuhiGsWiseCastingDetailReport extends Component
             'gsId' => [
                 'required',
                 'integer',
-                Rule::exists('r_gs', 'id')->whereNull('deleted_at'),
+                Rule::exists('r_gs', 'id'),
             ],
             'lotId' => [
                 'required',

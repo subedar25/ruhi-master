@@ -66,7 +66,7 @@ class RuhiGsDetailEachItemReport extends Component
             'gsId' => [
                 'required',
                 'integer',
-                Rule::exists('r_gs', 'id')->whereNull('deleted_at'),
+                Rule::exists('r_gs', 'id'),
             ],
             'designIdsCsv' => ['nullable', 'string'],
             'productTypes' => ['required', 'array', 'min:1'],
