@@ -53,8 +53,11 @@ class RuhiGsLotsList extends Component
         $this->resetPage();
     }
 
-    public function updatedLotFilterId(): void
+    public function updatedLotFilterId(mixed $value): void
     {
+        if ($value === '' || $value === null) {
+            $this->lotFilterId = null;
+        }
         $this->resetPage();
     }
 

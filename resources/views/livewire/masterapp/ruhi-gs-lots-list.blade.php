@@ -23,8 +23,9 @@
                             data-s2-hidden="#ruhi-gs-lots-hidden-lot-filter"
                             data-s2-anchor="#ruhi-gs-lots-anchor-lot-filter"
                             data-s2-placeholder="All Lots"
+                            data-s2-allow-clear="true"
                         >
-                            <option value="">All Lots</option>
+                            <option value=""></option>
                             @foreach($slotOptions as $slot)
                                 <option value="{{ $slot->id }}">{{ $slot->slot_name }}</option>
                             @endforeach
