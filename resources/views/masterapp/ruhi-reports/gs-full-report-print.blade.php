@@ -60,7 +60,7 @@
     </div>
     <div class="subtitle">
         @if($report['gs_name'] !== '')
-            GS: {{ $report['gs_name'] }}
+            {{ $report['gs_name'] }}
         @endif
     </div>
 

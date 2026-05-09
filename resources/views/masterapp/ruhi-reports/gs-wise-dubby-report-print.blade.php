@@ -35,7 +35,7 @@
     <div class="title"><span class="date-right">Date: {{ now()->format('d-m-Y') }}</span>GS Wise Dubby Report</div>
     <div class="subtitle">
         @if($report['gs_name'] !== '')
-            GS: {{ $report['gs_name'] }}
+            {{ $report['gs_name'] }}
         @endif
     </div>
 

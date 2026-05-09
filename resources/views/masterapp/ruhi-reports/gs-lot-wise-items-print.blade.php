@@ -59,7 +59,7 @@
     </div>
 
     <div class="title"><span class="date-right">Date: {{ now()->format('d-m-Y') }}</span>GS Wise Lot Wise item report</div>
-    <div class="subtitle">GS: {{ $gs->name }}</div>
+    <div class="subtitle">{{ $gs->name }}</div>
 
     @if($blocks->isEmpty())
         <p>No lots found for this GS.</p>

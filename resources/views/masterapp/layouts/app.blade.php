@@ -215,29 +215,56 @@ document.addEventListener('click', function (event) {
     var href = link.getAttribute('href');
     if (!href) return;
 
+    var loader = document.getElementById('livewire-global-loader');
+    if (loader) {
+        loader.classList.remove('livewire-global-loader--hidden');
+        loader.setAttribute('aria-hidden', 'false');
+    }
+
     var frame = document.getElementById('ruhiGlobalPrintPreviewFrame');
     if (!frame) {
-        window.location.href = href;
+        // If preview frame is unavailable, open in new tab instead of replacing current page.
+        window.open(href, '_blank', 'noopener');
+        if (loader) {
+            loader.classList.add('livewire-global-loader--hidden');
+            loader.setAttribute('aria-hidden', 'true');
+        }
         return;
     }
 
+    var printed = false;
+    var fallbackTimer = null;
+
+    function hideLoader() {
+        if (loader) {
+            loader.classList.add('livewire-global-loader--hidden');
+            loader.setAttribute('aria-hidden', 'true');
+        }
+    }
+
     frame.onload = function () {
+        if (printed) return;
         try {
             var win = frame.contentWindow;
             if (win) {
+                printed = true;
+                if (fallbackTimer) clearTimeout(fallbackTimer);
                 win.focus();
                 win.print();
+                // Keep iframe content intact; clearing too early causes blank print pages.
+                hideLoader();
             }
         } catch (e) {
-            // Fallback: open print page directly if browser blocks iframe print.
-            window.location.href = href;
-        } finally {
-            setTimeout(function () {
-                frame.onload = null;
-                frame.setAttribute('src', 'about:blank');
-            }, 1500);
+            // Do not navigate current page on print errors.
+            // Keep user on report screen and allow retry.
+            hideLoader();
         }
     };
+    fallbackTimer = setTimeout(function () {
+        if (printed) return;
+        // Timeout fallback: keep user on same page (no same-tab redirect).
+        hideLoader();
+    }, 8000);
     frame.setAttribute('src', href);
 });
 </script>

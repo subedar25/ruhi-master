@@ -6,7 +6,7 @@
                 <form wire:submit.prevent="submit" class="form-inline flex-wrap align-items-end flex-grow-1">
                     <div class="form-group mr-3 mb-2">
                         <label class="mr-2 mb-0">GS</label>
-                        <input type="hidden" wire:model.live="gsId" id="ruhi-color-full-hidden-gs">
+                        <input type="hidden" wire:model.defer="gsId" id="ruhi-color-full-hidden-gs">
                         <div wire:ignore class="d-inline-block" style="min-width: 280px;">
                             <select
                                 id="ruhi-color-full-select-gs"
@@ -25,7 +25,7 @@
                     </div>
                     <div class="form-group mr-3 mb-2">
                         <label class="mr-2 mb-0">Filter</label>
-                        <select wire:model="sfilter" class="form-control form-control-sm" style="min-width: 12rem;" title="Legacy sfilter: (S) in product name">
+                        <select wire:model.defer="sfilter" class="form-control form-control-sm" style="min-width: 12rem;" title="Legacy sfilter: (S) in product name">
                             <option value="0">All</option>
                             <option value="1">Exclude “(S)” in name</option>
                             <option value="2">Only “(S)” in name</option>
