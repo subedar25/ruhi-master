@@ -29,9 +29,7 @@
                     @if($submitted && $gsId)
                         <a
                             href="{{ route('masterapp.ruhi-reports.gs-full-report.print', ['gs' => $gsId]) }}"
-                            target="_blank"
-                            rel="noopener"
-                            class="btn btn-outline-primary btn-sm"
+                        class="btn btn-outline-primary btn-sm ruhi-print-preview-link"
                             title="Print all three sections"
                         >
                             <i class="fa fa-print mr-1"></i> Print all
@@ -65,9 +63,7 @@
                     </h5>
                     <a
                         href="{{ route('masterapp.ruhi-reports.gs-full-report.print', ['gs' => $gsId, 'section' => 'kundanfull']) }}"
-                        target="_blank"
-                        rel="noopener"
-                        class="btn btn-outline-secondary btn-sm flex-shrink-0"
+                        class="btn btn-outline-secondary btn-sm flex-shrink-0 ruhi-print-preview-link"
                         title="Print this section only"
                     >
                         <i class="fa fa-print mr-1"></i> Print
@@ -118,9 +114,7 @@
                     </h5>
                     <a
                         href="{{ route('masterapp.ruhi-reports.gs-full-report.print', ['gs' => $gsId, 'section' => 'pulkifull']) }}"
-                        target="_blank"
-                        rel="noopener"
-                        class="btn btn-outline-secondary btn-sm flex-shrink-0"
+                        class="btn btn-outline-secondary btn-sm flex-shrink-0 ruhi-print-preview-link"
                         title="Print this section only"
                     >
                         <i class="fa fa-print mr-1"></i> Print
@@ -171,9 +165,7 @@
                     </h5>
                     <a
                         href="{{ route('masterapp.ruhi-reports.gs-full-report.print', ['gs' => $gsId, 'section' => 'addfull']) }}"
-                        target="_blank"
-                        rel="noopener"
-                        class="btn btn-outline-secondary btn-sm flex-shrink-0"
+                        class="btn btn-outline-secondary btn-sm flex-shrink-0 ruhi-print-preview-link"
                         title="Print this section only"
                     >
                         <i class="fa fa-print mr-1"></i> Print

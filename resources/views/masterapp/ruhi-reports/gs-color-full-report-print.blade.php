@@ -9,6 +9,7 @@
         .actions { margin-bottom: 12px; }
         .print-btn { padding: 6px 10px; border: 1px solid #444; background: #fff; cursor: pointer; }
         .doc-title { font-size: 15px; font-weight: 700; margin-bottom: 10px; }
+        .date-right { float: right; font-weight: 500; }
         .block-title { font-size: 14px; font-weight: 700; margin: 16px 0 8px; }
         table.data { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 14px; }
         table.data th, table.data td { border: 1px solid #ccc; padding: 4px 6px; }
@@ -21,6 +22,9 @@
             body { margin: 6mm; }
             .print-block { display: block; }
             .print-break-before { page-break-before: always; break-before: page; }
+            body, table, th, td { font-size: 16px !important; }
+            thead { display: table-row-group; }
+            tfoot { display: table-row-group; }
         }
     </style>
 </head>
@@ -30,11 +34,11 @@
     </div>
 
     <div class="doc-title">
+        <span class="date-right">Date: {{ now()->format('d-m-Y') }}</span>
         GS Color Full Report
         @if($report['gs_name'] !== '')
             ({{ $report['gs_name'] }})
         @endif
-        &nbsp;|&nbsp; {{ now()->format('d-m-Y') }}
     </div>
 
     @php

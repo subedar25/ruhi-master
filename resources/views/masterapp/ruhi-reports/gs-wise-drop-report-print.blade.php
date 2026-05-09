@@ -9,6 +9,7 @@
         .actions { margin-bottom: 12px; }
         .print-btn { padding: 6px 10px; border: 1px solid #444; background: #fff; cursor: pointer; }
         .doc-title { font-size: 16px; font-weight: 700; margin-bottom: 10px; }
+        .date-right { float: right; font-weight: 500; }
         table.data { width: 100%; max-width: 52rem; border-collapse: collapse; font-size: 14px; margin-bottom: 10px; }
         table.data th, table.data td { border: 1px solid #ddd; padding: 5px 8px; text-align: left; }
         table.data thead th { background: #fafafa; font-weight: 700; }
@@ -16,6 +17,9 @@
         @media print {
             .actions { display: none; }
             body { margin: 8mm; }
+            body, table, th, td { font-size: 16px !important; }
+            thead { display: table-row-group; }
+            tfoot { display: table-row-group; }
         }
     </style>
 </head>
@@ -25,11 +29,11 @@
     </div>
 
     <div class="doc-title">
+        <span class="date-right">Date: {{ now()->format('d-m-Y') }}</span>
         GS Wise Drop Report
         @if($report['gs_name'] !== '')
             ({{ $report['gs_name'] }})
         @endif
-        &nbsp;|&nbsp; {{ now()->format('d-m-Y') }}
     </div>
 
     <table class="data">

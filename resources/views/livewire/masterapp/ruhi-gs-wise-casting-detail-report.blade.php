@@ -50,9 +50,7 @@
                     @if($submitted && $gsId && $lotId)
                         <a
                             href="{{ route('masterapp.ruhi-reports.gs-wise-casting-detail-report.print', ['gs' => $gsId, 'lot' => $lotId]) }}"
-                            target="_blank"
-                            rel="noopener"
-                            class="btn btn-outline-primary btn-sm"
+                            class="btn btn-outline-primary btn-sm ruhi-print-preview-link"
                         >
                             <i class="fa fa-print mr-1"></i> Print
                         </a>

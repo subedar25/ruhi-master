@@ -89,6 +89,22 @@
             All rights reserved.
         </footer>
     </div>
+    <div class="modal fade" id="ruhiGlobalPrintPreviewModal" tabindex="-1" role="dialog" aria-hidden="true" style="background: rgba(0,0,0,0.65);">
+        <div class="modal-dialog modal-xl" role="document" style="max-width: 92vw;">
+            <div class="modal-content">
+                <div class="modal-header py-2">
+                    <h5 class="modal-title">Print Preview</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body p-0" style="height: 78vh;">
+                    <iframe id="ruhiGlobalPrintPreviewFrame" title="Print preview" style="width:100%; height:100%; border:0;"></iframe>
+                </div>
+                <div class="modal-footer py-2">
+                    <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -188,6 +204,41 @@ document.addEventListener('livewire:init', function () {
             loader.setAttribute('aria-hidden', 'true');
         });
     });
+});
+</script>
+<script>
+document.addEventListener('click', function (event) {
+    var link = event.target.closest && event.target.closest('a.ruhi-print-preview-link');
+    if (!link) return;
+    event.preventDefault();
+
+    var href = link.getAttribute('href');
+    if (!href) return;
+
+    var frame = document.getElementById('ruhiGlobalPrintPreviewFrame');
+    if (!frame) {
+        window.location.href = href;
+        return;
+    }
+
+    frame.onload = function () {
+        try {
+            var win = frame.contentWindow;
+            if (win) {
+                win.focus();
+                win.print();
+            }
+        } catch (e) {
+            // Fallback: open print page directly if browser blocks iframe print.
+            window.location.href = href;
+        } finally {
+            setTimeout(function () {
+                frame.onload = null;
+                frame.setAttribute('src', 'about:blank');
+            }, 1500);
+        }
+    };
+    frame.setAttribute('src', href);
 });
 </script>
 {{-- @if (session('success'))

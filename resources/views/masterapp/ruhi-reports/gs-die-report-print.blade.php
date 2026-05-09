@@ -9,6 +9,7 @@
         .actions { margin-bottom: 12px; }
         .print-btn { padding: 6px 10px; border: 1px solid #444; background: #fff; cursor: pointer; }
         .title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+        .date-right { float: right; font-size: 16px; font-weight: 500; }
         .subtitle { margin-bottom: 14px; color: #555; }
         table { width: 100%; max-width: 72rem; border-collapse: collapse; font-size: 14px; table-layout: fixed; }
         th, td { border: 1px solid #ddd; padding: 4px 6px; }
@@ -19,6 +20,9 @@
         @media print {
             .actions { display: none; }
             body { margin: 8mm; }
+            body, table, th, td { font-size: 16px !important; }
+            thead { display: table-row-group; }
+            tfoot { display: table-row-group; }
         }
     </style>
 </head>
@@ -27,13 +31,12 @@
         <button type="button" class="print-btn" onclick="window.print()">Print / Save PDF</button>
     </div>
 
-    <div class="title">GS Die Report</div>
+    <div class="title"><span class="date-right">Date: {{ now()->format('d-m-Y') }}</span>GS Die Report</div>
     <div class="subtitle">
         GS Wise Die Report
         @if($report['gs_name'] !== '')
             ({{ $report['gs_name'] }})
         @endif
-        &nbsp;|&nbsp; Date: {{ now()->format('d-m-Y') }}
     </div>
 
     <table>

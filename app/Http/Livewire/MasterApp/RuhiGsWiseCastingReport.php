@@ -13,8 +13,6 @@ class RuhiGsWiseCastingReport extends Component
     public ?int $lotId = null;
 
     public bool $submitted = false;
-    public bool $showPrintPreviewModal = false;
-    public string $printPreviewUrl = '';
 
     private ?GsWiseCastingReportService $service = null;
 
@@ -45,34 +43,6 @@ class RuhiGsWiseCastingReport extends Component
         ]);
 
         $this->submitted = true;
-    }
-
-    public function openPrintPreview(): void
-    {
-        $this->validate([
-            'gsId' => [
-                'required',
-                'integer',
-                Rule::exists('r_gs', 'id')->whereNull('deleted_at'),
-            ],
-            'lotId' => [
-                'required',
-                'integer',
-                Rule::exists('r_slot', 'id')->where(fn ($q) => $q->where('gs_id', $this->gsId)),
-            ],
-        ]);
-
-        $this->printPreviewUrl = route('masterapp.ruhi-reports.gs-wise-casting-report.print', [
-            'gs' => (int) $this->gsId,
-            'lot' => (int) $this->lotId,
-        ]);
-        $this->showPrintPreviewModal = true;
-    }
-
-    public function closePrintPreview(): void
-    {
-        $this->showPrintPreviewModal = false;
-        $this->printPreviewUrl = '';
     }
 
     private function svc(): GsWiseCastingReportService

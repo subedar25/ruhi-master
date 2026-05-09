@@ -37,9 +37,7 @@
                     @if($submitted && $gsId)
                         <a
                             href="{{ route('masterapp.ruhi-reports.gs-color-full-report.print', ['gs' => $gsId] + (($sfilter ?? 0) > 0 ? ['sfilter' => $sfilter] : [])) }}"
-                            target="_blank"
-                            rel="noopener"
-                            class="btn btn-outline-primary btn-sm"
+                            class="btn btn-outline-primary btn-sm ruhi-print-preview-link"
                         >
                             <i class="fa fa-print mr-1"></i> Print
                         </a>
@@ -104,9 +102,7 @@
                     @endphp
                     <a
                         href="{{ route('masterapp.ruhi-reports.gs-color-full-report.print.block', $blockPrintParams) }}"
-                        target="_blank"
-                        rel="noopener"
-                        class="btn btn-outline-secondary btn-sm mb-0 ml-2 flex-shrink-0"
+                        class="btn btn-outline-secondary btn-sm mb-0 ml-2 flex-shrink-0 ruhi-print-preview-link"
                         title="Print this section only"
                     >
                         <i class="fa fa-print mr-1"></i> Print section

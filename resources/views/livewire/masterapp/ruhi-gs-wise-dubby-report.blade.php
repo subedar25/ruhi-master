@@ -29,9 +29,7 @@
                     @if($submitted && $gsId)
                         <a
                             href="{{ route('masterapp.ruhi-reports.gs-wise-dubby-report.print', ['gs' => $gsId]) }}"
-                            target="_blank"
-                            rel="noopener"
-                            class="btn btn-outline-primary btn-sm"
+                            class="btn btn-outline-primary btn-sm ruhi-print-preview-link"
                         >
                             <i class="fa fa-print mr-1"></i> Print
                         </a>

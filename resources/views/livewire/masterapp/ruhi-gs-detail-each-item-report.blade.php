@@ -235,9 +235,7 @@
                 @if($printParams)
                     <a
                         href="{{ route('masterapp.ruhi-reports.gs-detail-each-item-report.print', $printParams) }}"
-                        target="_blank"
-                        rel="noopener"
-                        class="btn btn-outline-secondary btn-sm px-3"
+                        class="btn btn-outline-secondary btn-sm px-3 ruhi-print-preview-link"
                     >
                         <i class="fa fa-print mr-1"></i> Print
                     </a>

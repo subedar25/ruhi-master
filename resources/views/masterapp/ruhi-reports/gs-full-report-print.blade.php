@@ -19,6 +19,7 @@
         .actions { margin-bottom: 12px; }
         .print-btn { padding: 6px 10px; border: 1px solid #444; background: #fff; cursor: pointer; }
         .page-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+        .date-right { float: right; font-size: 16px; font-weight: 500; }
         .subtitle { margin-bottom: 16px; color: #555; }
         .section-title { font-size: 14px; font-weight: 700; margin: 20px 0 8px; }
         table { width: 100%; max-width: 72rem; border-collapse: collapse; font-size: 14px; margin-bottom: 8px; }
@@ -32,6 +33,9 @@
             .actions { display: none; }
             body { margin: 8mm; }
             .print-break-before { page-break-before: always; break-before: page; }
+            body, table, th, td { font-size: 16px !important; }
+            thead { display: table-row-group; }
+            tfoot { display: table-row-group; }
         }
     </style>
 </head>
@@ -43,6 +47,7 @@
     @php $g = $report['gs_name']; @endphp
 
     <div class="page-title">
+        <span class="date-right">Date: {{ now()->format('d-m-Y') }}</span>
         @if(!empty($section) && $section === 'kundanfull')
             GS Wise Kundanfull Report @if($g !== '') ({{ $g }}) @endif
         @elseif(!empty($section) && $section === 'pulkifull')
@@ -57,7 +62,6 @@
         @if($report['gs_name'] !== '')
             GS: {{ $report['gs_name'] }}
         @endif
-        &nbsp;|&nbsp; Date: {{ now()->format('d-m-Y') }}
     </div>
 
     @if(empty($section) || $section === 'kundanfull')

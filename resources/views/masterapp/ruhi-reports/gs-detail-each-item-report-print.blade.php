@@ -25,6 +25,7 @@
         table.data thead th { background: #fafafa; font-weight: 700; }
         .section-title { font-size: 14px; font-weight: 700; margin: 10px 0 6px; }
         .footer-line { font-size: 14px; padding: 4px 0; }
+        .date-right { float: right; font-size: 16px; font-weight: 500; }
         .collate-after-spacer { height: 12px; }
         .collate-summary-row {
             max-width: 72rem;
@@ -45,6 +46,9 @@
         @media print {
             .actions { display: none; }
             body { margin: 8mm; }
+            body, table, th, td, .mini-table, .footer-line { font-size: 16px !important; }
+            thead { display: table-row-group; }
+            tfoot { display: table-row-group; }
         }
     </style>
 </head>
@@ -53,7 +57,7 @@
         <button type="button" class="print-btn" onclick="window.print()">Print / Save PDF</button>
     </div>
 
-    <p class="footer-line" style="margin-bottom: 14px; color: #555;">{{ now()->format('d-m-Y') }}</p>
+    <div class="section-title" style="margin-bottom: 10px;"><span class="date-right">Date: {{ now()->format('d-m-Y') }}</span>GS Wise Detail Report of Each Item</div>
 
     @foreach($report['blocks'] as $block)
         <div class="block design-detail">

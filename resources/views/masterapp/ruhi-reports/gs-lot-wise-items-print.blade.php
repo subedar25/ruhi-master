@@ -9,6 +9,7 @@
         .actions { margin-bottom: 12px; }
         .print-btn { padding: 6px 10px; border: 1px solid #444; background: #fff; cursor: pointer; }
         .title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+        .date-right { float: right; font-size: 16px; font-weight: 500; }
         .subtitle { margin-bottom: 14px; color: #555; }
         .wrap { display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch; }
         .lot-card {
@@ -40,6 +41,9 @@
             .actions { display: none; }
             body { margin: 8mm; }
             .lot-card { break-inside: avoid-page; }
+            body, table, th, td { font-size: 16px !important; }
+            thead { display: table-row-group; }
+            tfoot { display: table-row-group; }
         }
         @media (max-width: 900px) {
             .lot-card { max-width: calc(50% - 8px); }
@@ -54,8 +58,8 @@
         <button type="button" class="print-btn" onclick="window.print()">Print / Save PDF</button>
     </div>
 
-    <div class="title">GS Wise Lot Wise item report</div>
-    <div class="subtitle">GS: {{ $gs->name }} &nbsp;|&nbsp; Date: {{ now()->format('d-m-Y') }}</div>
+    <div class="title"><span class="date-right">Date: {{ now()->format('d-m-Y') }}</span>GS Wise Lot Wise item report</div>
+    <div class="subtitle">GS: {{ $gs->name }}</div>
 
     @if($blocks->isEmpty())
         <p>No lots found for this GS.</p>
