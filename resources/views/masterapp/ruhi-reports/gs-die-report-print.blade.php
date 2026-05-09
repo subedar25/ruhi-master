@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GS Die Report</title>
     <style>
-        body { font-family: Arial, sans-serif; color: #222; margin: 18px; font-size: 14px; }
+        body { font-family: Arial, sans-serif; color: #222; margin: 18px; font-size: 16px; }
         .actions { margin-bottom: 12px; }
         .print-btn { padding: 6px 10px; border: 1px solid #444; background: #fff; cursor: pointer; }
         .title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
         .date-right { float: right; font-size: 16px; font-weight: 500; }
         .subtitle { margin-bottom: 14px; color: #555; }
-        table { width: 100%; max-width: 72rem; border-collapse: collapse; font-size: 14px; table-layout: fixed; }
+        table { width: 100%; max-width: 72rem; border-collapse: collapse; font-size: 16px; table-layout: fixed; }
         th, td { border: 1px solid #ddd; padding: 4px 6px; }
         th { background: #fafafa; font-weight: 700; text-align: left; }
         .col-name { max-width: 14rem; word-break: break-word; white-space: normal; }

@@ -11,13 +11,13 @@
         .title { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
         .subtitle { font-size: 16px; margin-bottom: 12px; }
         .summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; border: 1px solid #ccc; padding: 10px; margin-bottom: 16px; }
-        .summary .label { font-size: 14px; color: #666; }
+        .summary .label { font-size: 16px; color: #666; }
         .summary .value { font-size: 16px; font-weight: 600; margin-top: 2px; }
         .grid-two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
         .block { border: 1px solid #ccc; page-break-inside: avoid; margin-bottom: 12px; }
         .block-title { background: #f5f5f5; padding: 8px 10px; font-weight: 700; }
         table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 6px; font-size: 14px; text-align: left; }
+        th, td { border: 1px solid #ddd; padding: 6px; font-size: 16px; text-align: left; }
         th { background: #fafafa; }
         .full-width { width: 100%; }
         @media print {
@@ -37,7 +37,7 @@
             <div class="title">Design Product</div>
             <div class="subtitle">List Design Items for Design "{{ $design->design_name }}"</div>
         </div>
-        <div style="font-size:14px; white-space:nowrap; margin-top:6px;">
+        <div style="font-size:16px; white-space:nowrap; margin-top:6px;">
             Date: {{ now()->format('d-m-Y') }}
         </div>
     </div>

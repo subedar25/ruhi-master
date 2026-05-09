@@ -249,6 +249,12 @@ class GsDetailEachItemReportService
                 ReportNameSort::hyphenNameTuple($b['item'])
             ));
 
+            // Show design block when at least one section has data.
+            // Hide only sections where both Collate and Drop are empty.
+            if ($collateRows === [] && $dropRows === []) {
+                continue;
+            }
+
             $blocks[] = [
                 'design_id' => $designId,
                 'design_name' => (string) $design->design_name,

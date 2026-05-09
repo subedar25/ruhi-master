@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $block_title }}</title>
     <style>
-        body { font-family: Arial, sans-serif; color: #222; margin: 14px; font-size: 14px; }
+        body { font-family: Arial, sans-serif; color: #222; margin: 14px; font-size: 16px; }
         .actions { margin-bottom: 12px; }
         .print-btn { padding: 6px 10px; border: 1px solid #444; background: #fff; cursor: pointer; }
         .doc-title { font-size: 15px; font-weight: 700; margin-bottom: 10px; }
         .date-right { float: right; font-weight: 500; }
-        .block-title { font-size: 14px; font-weight: 700; margin: 0 0 8px; }
-        table.data { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 14px; }
+        .block-title { font-size: 16px; font-weight: 700; margin: 0 0 8px; }
+        table.data { width: 100%; border-collapse: collapse; font-size: 16px; margin-bottom: 14px; }
         table.data th, table.data td { border: 1px solid #ccc; padding: 4px 6px; }
         table.data thead th { background: #f0f0f0; }
         table.data tfoot td { font-weight: 700; background: #f5f5f5; }

@@ -5,26 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GS Wise Detail Report of Each Item</title>
     <style>
-        body { font-family: Arial, sans-serif; color: #222; margin: 14px; font-size: 14px; }
+        body { font-family: Arial, sans-serif; color: #222; margin: 14px; font-size: 16px; }
         .actions { margin-bottom: 12px; }
         .print-btn { padding: 6px 10px; border: 1px solid #444; background: #fff; cursor: pointer; }
         .doc-title { font-size: 17px; font-weight: 700; margin-bottom: 10px; }
         .block { margin-bottom: 18px; page-break-inside: avoid; }
         .design-detail-title {
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 700;
             margin-bottom: 12px;
             padding-bottom: 8px;
             border-bottom: 1px solid #ccc;
         }
-        .mini-table { border-collapse: collapse; margin-bottom: 10px; max-width: 72rem; font-size: 14px; }
+        .mini-table { border-collapse: collapse; margin-bottom: 10px; max-width: 72rem; font-size: 16px; }
         .mini-table th, .mini-table td { border: 1px solid #ccc; padding: 4px 6px; text-align: left; vertical-align: top; }
         .mini-table th.bg { background: #f5f5f5; font-weight: 700; white-space: nowrap; }
-        table.data { width: 100%; max-width: 72rem; border-collapse: collapse; font-size: 14px; margin-bottom: 8px; }
+        table.data { width: 100%; max-width: 72rem; border-collapse: collapse; font-size: 16px; margin-bottom: 8px; }
         table.data th, table.data td { border: 1px solid #ddd; padding: 4px 6px; text-align: left; }
         table.data thead th { background: #fafafa; font-weight: 700; }
-        .section-title { font-size: 14px; font-weight: 700; margin: 10px 0 6px; }
-        .footer-line { font-size: 14px; padding: 4px 0; }
+        .section-title { font-size: 16px; font-weight: 700; margin: 10px 0 6px; }
+        .footer-line { font-size: 16px; padding: 4px 0; }
         .date-right { float: right; font-size: 16px; font-weight: 500; }
         .collate-after-spacer { height: 12px; }
         .collate-summary-row {
@@ -37,7 +37,7 @@
             white-space: nowrap;
         }
         .collate-summary-row .collate-summary-one-line {
-            font-size: 14px;
+            font-size: 16px;
             line-height: 1.45;
         }
         .collate-summary-row .collate-summary-one-line .head {
@@ -49,6 +49,7 @@
             body, table, th, td, .mini-table, .footer-line { font-size: 16px !important; }
             thead { display: table-row-group; }
             tfoot { display: table-row-group; }
+            .block + .block { page-break-before: always; break-before: page; }
         }
     </style>
 </head>
