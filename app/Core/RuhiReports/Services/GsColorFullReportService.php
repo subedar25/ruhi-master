@@ -499,9 +499,27 @@ class GsColorFullReportService
 
             $name = trim((string) $ks->name);
             $ktcq = (int) $ik->kstone_quantity * $baseTotal;
-            $ktr = (int) $ik->red * $rq;
-            $ktg = (int) $ik->green * $gq;
-            $ktw = max(0, $ktcq - $ktr - $ktg);
+
+            $ikRed = (int) $ik->red;
+            $ikGreen = (int) $ik->green;
+            $ikRgRed = (int) ($ik->rg_red ?? 0);
+            $ikRgGreen = (int) ($ik->rg_green ?? 0);
+
+            if (
+                $productTypeId === self::PRODUCT_TYPE_COLLET
+                && $ikRed === 0 && $ikGreen === 0 && $ikRgRed === 0 && $ikRgGreen === 0
+                && $baseTotal > 0
+            ) {
+                // Collet `r_k_stone` rows are often saved with all channel flags 0; split this line’s piece count
+                // by the same red / green / white mix as the merged collate totals (CI-style allocation).
+                $ktr = (int) (($ktcq * $rq) / $baseTotal);
+                $ktg = (int) (($ktcq * $gq) / $baseTotal);
+                $ktw = max(0, $ktcq - $ktr - $ktg);
+            } else {
+                $ktr = $ikRed * $rq;
+                $ktg = $ikGreen * $gq;
+                $ktw = max(0, $ktcq - $ktr - $ktg);
+            }
 
             $cr = $this->resolveChannelStoneDie($ik, $ks, $name, 1);
             $cg = $this->resolveChannelStoneDie($ik, $ks, $name, 2);
