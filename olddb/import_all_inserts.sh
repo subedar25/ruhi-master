@@ -13,7 +13,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-INSERT_DIR="$SCRIPT_DIR/table_inserts"
+INSERT_DIR="$SCRIPT_DIR/generated_table_inserts"
 ENV_FILE="$SCRIPT_DIR/../.env"
 
 FRESH=0
@@ -87,6 +87,7 @@ fi
 
 if [[ ! -d "$INSERT_DIR" ]]; then
   echo "Missing inserts directory: $INSERT_DIR"
+  echo "Generate SQL files with: python3 \"$SCRIPT_DIR/extract_all_table_inserts_from_dump.py\""
   exit 1
 fi
 

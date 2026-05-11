@@ -1,4 +1,4 @@
-# Import old Ruhi data (`olddb/table_inserts`)
+# Import old Ruhi data (`olddb/generated_table_inserts`)
 
 This describes how to load legacy SQL insert bundles into the application database used by Laravel.
 
@@ -10,7 +10,7 @@ This describes how to load legacy SQL insert bundles into the application databa
    php artisan migrate
    ```
 
-2. **Insert files** — Place or generate files under `olddb/table_inserts/` (see “Regenerating inserts from a dump” below).
+2. **Insert files** — Place or generate files under `olddb/generated_table_inserts/` (see “Regenerating inserts from a dump” below).
 
 3. **MySQL client** — Either the `mysql` CLI on your machine, or Docker so the script can run `mysql` inside the `db` container (see `olddb/import_all_inserts.sh`).
 
@@ -65,7 +65,7 @@ bash olddb/import_all_inserts.sh --help
 
 ## Regenerating inserts from `ruhicreation.sql`
 
-If you have a full dump at `olddb/ruhicreation.sql`, regenerate the insert bundle into `olddb/table_inserts/`:
+If you have a full dump at `olddb/ruhicreation.sql`, regenerate the insert bundle into `olddb/generated_table_inserts/`:
 
 ```bash
 python3 olddb/extract_all_table_inserts_from_dump.py

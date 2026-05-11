@@ -8,7 +8,7 @@ Split olddb/ruhicreation.sql into one .sql file per **app-imported** table only.
 
 Usage:
   python3 olddb/extract_all_table_inserts_from_dump.py
-  python3 olddb/extract_all_table_inserts_from_dump.py --dump olddb/ruhicreation.sql --out olddb/table_inserts
+  python3 olddb/extract_all_table_inserts_from_dump.py --dump olddb/ruhicreation.sql --out olddb/generated_table_inserts
 
 INSERT blocks: line starts with INSERT INTO `name`; continuation until a line ends with ");"
 (same heuristic as the older extract_inserts_from_ruhicreation.py).
@@ -135,7 +135,7 @@ def main() -> None:
     ap.add_argument(
         "--out",
         type=Path,
-        default=Path(__file__).resolve().parent / "table_inserts",
+        default=Path(__file__).resolve().parent / "generated_table_inserts",
         help="Output directory (created if missing; same default as import_all_inserts.sh)",
     )
     args = ap.parse_args()

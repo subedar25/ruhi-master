@@ -2,7 +2,7 @@
 
 Use this when `olddb/ruhicreation.sql` is updated and you want to:
 
-- regenerate `olddb/table_inserts/*.sql` (only bundled tables, `INSERT INTO r_*`), and
+- regenerate `olddb/generated_table_inserts/*.sql` (only bundled tables, `INSERT INTO r_*`), and
 - import into DB after clearing old rows.
 
 ## 1) Extract table inserts from `ruhicreation.sql`
@@ -13,7 +13,7 @@ From project root:
 python3 olddb/extract_all_table_inserts_from_dump.py
 ```
 
-This writes into **`olddb/table_inserts/`** (same path `olddb/import_all_inserts.sh` reads). Override paths with `--dump` and `--out` if needed.
+This writes into **`olddb/generated_table_inserts/`** (same path `olddb/import_all_inserts.sh` reads). Override paths with `--dump` and `--out` if needed.
 
 ## 2) Import into DB after clearing old data
 
