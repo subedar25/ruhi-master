@@ -106,8 +106,12 @@ class RuhiReportController extends Controller
 
         $report = $service->buildReport($gsId, $types, $designIds, $productIds, $nf);
 
+        $sectionVis = GsDetailEachItemReportService::sectionVisibilityForProductTypes($types);
+
         return view('masterapp.ruhi-reports.gs-detail-each-item-report-print', [
             'report' => $report,
+            'showCollateSection' => $sectionVis['show_collate'],
+            'showDropSection' => $sectionVis['show_drop'],
         ]);
     }
 

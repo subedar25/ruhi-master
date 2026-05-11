@@ -133,13 +133,12 @@ class GsColorColletReportService
 
         $rows = [];
         foreach ($filtered as $r) {
-            $totalColorQty = (int) $r['total_color_qty'];
             $unitWt = (float) $r['weight'];
             $rows[] = [
                 'collet' => (string) $r['product_name'],
                 'red' => (int) $r['total_red_qty'],
                 'green' => (int) $r['total_green_qty'],
-                'weight' => round($totalColorQty * $unitWt, 2),
+                'weight' => round($unitWt, 2),
             ];
         }
 

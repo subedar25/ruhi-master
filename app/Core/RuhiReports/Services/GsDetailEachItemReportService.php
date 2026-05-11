@@ -16,7 +16,33 @@ class GsDetailEachItemReportService
     /** Default `r_product.product_type` filter set (Collet, AD Full, Polki Full, Kundan Full, Drop). */
     public const DEFAULT_PRODUCT_TYPES = [3, 4, 5, 6, 8];
 
+    /** `r_product.product_type` values that can appear in the Collate Item section (excludes Drop). */
+    public const COLLATE_PRODUCT_TYPE_IDS = [3, 4, 5, 6];
+
+    /** `r_product.product_type` for Drop items (checkbox "Drop"). */
+    public const DROP_PRODUCT_TYPE_ID = 8;
+
     private const DROP_ITEM_TYPE_ID = 8;
+
+    /**
+     * Whether to show Collate / Drop blocks from the current product-type checkboxes.
+     * Empty selection is treated as "all types" (same as default) so both sections show.
+     *
+     * @param  array<int|string>  $productTypeIds
+     * @return array{show_collate: bool, show_drop: bool}
+     */
+    public static function sectionVisibilityForProductTypes(array $productTypeIds): array
+    {
+        $pt = array_values(array_unique(array_map('intval', $productTypeIds)));
+        if ($pt === []) {
+            return ['show_collate' => true, 'show_drop' => true];
+        }
+
+        return [
+            'show_collate' => count(array_intersect($pt, self::COLLATE_PRODUCT_TYPE_IDS)) > 0,
+            'show_drop' => in_array(self::DROP_PRODUCT_TYPE_ID, $pt, true),
+        ];
+    }
 
     public function listGsForDropdown(): Collection
     {

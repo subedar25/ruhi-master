@@ -180,6 +180,8 @@ class RuhiGsDetailEachItemReport extends Component
             ];
         }
 
+        $sectionVis = GsDetailEachItemReportService::sectionVisibilityForProductTypes($this->productTypes);
+
         return view('livewire.masterapp.ruhi-gs-detail-each-item-report', [
             'gsOptions' => $gsOptions,
             'designOptions' => $designOptions,
@@ -187,6 +189,8 @@ class RuhiGsDetailEachItemReport extends Component
             'report' => $report,
             'selectedGsName' => $selectedGsName,
             'printParams' => $printParams,
+            'showCollateSection' => $sectionVis['show_collate'],
+            'showDropSection' => $sectionVis['show_drop'],
         ]);
     }
 

@@ -94,6 +94,7 @@
                 </tr>
             </table>
 
+            @if($showCollateSection ?? true)
             <div class="section-title">Collate Item</div>
             <table class="data">
                 <thead>
@@ -127,11 +128,15 @@
                 </tbody>
             </table>
             <div class="collate-after-spacer" aria-hidden="true"></div>
+            @endif
+            @if(($showCollateSection ?? true) || ($showDropSection ?? true))
             <div class="collate-summary-row">
                 <div class="left collate-summary-one-line">
                     <span class="head">({{ $report['gs_name'] }})({{ $block['design_name'] }}) - {{ (int) $block['order_footer']['color_count'] }}</span><span>&nbsp;&nbsp;&nbsp;&nbsp;</span><span>Red:- {{ (int) $block['order_footer']['red'] }}&nbsp;&nbsp;&nbsp;&nbsp;Red+Green:- {{ (int) $block['order_footer']['red_green'] }}&nbsp;&nbsp;&nbsp;&nbsp;Green:- {{ (int) $block['order_footer']['green'] }}&nbsp;&nbsp;&nbsp;&nbsp;White:- {{ (int) $block['order_footer']['white'] }}</span>
                 </div>
             </div>
+            @endif
+            @if($showDropSection ?? true)
             <div class="section-title">Drop Item</div>
             <table class="data">
                 <thead>
@@ -164,6 +169,7 @@
                     @endif
                 </tbody>
             </table>
+            @endif
         </div>
     @endforeach
 

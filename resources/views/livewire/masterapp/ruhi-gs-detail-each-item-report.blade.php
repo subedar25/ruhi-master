@@ -167,6 +167,7 @@
                             </select>
                         </div>
                     </div>
+                    @if($showCollateSection)
                     <div class="ruhi-detail-col-flex">
                         <label class="ruhi-field-label" for="ruhi-detail-namefilter">Name filter <span class="font-weight-normal" style="color:#868e96;">(Collate)</span></label>
                         <div class="ruhi-detail-namefilter-wrap">
@@ -177,6 +178,7 @@
                             </select>
                         </div>
                     </div>
+                    @endif
                     <div class="ruhi-detail-col-flex">
                         <label class="ruhi-field-label">Designs</label>
                         <div id="ruhi-detail-anchor-designs" class="d-none" data-s2-value="{{ $designIdsCsv }}"></div>
@@ -315,6 +317,7 @@
                         </table>
                     </div>
 
+                    @if($showCollateSection)
                     <h6 class="font-weight-bold mb-2">Collate Item</h6>
                     <div class="table-responsive mb-3">
                         <table class="table table-bordered table-sm mb-0" style="max-width: 72rem;">
@@ -353,14 +356,18 @@
                             </tbody>
                         </table>
                     </div>
+                    @endif
 
+                    @if($showCollateSection || $showDropSection)
                     <div class="mb-3 text-left text-dark" style="max-width: 72rem; overflow-x: auto;">
                         <div class="w-100" style="height: 1rem;" aria-hidden="true"></div>
                         <div class="text-nowrap" style="font-size: 0.9rem; line-height: 1.45;">
                             <span class="font-weight-bold">({{ $gsLabel }})({{ $block['design_name'] }}) - {{ (int) $block['order_footer']['color_count'] }}</span><span class="font-weight-normal">&nbsp;&nbsp;&nbsp;&nbsp;</span><span>Red:- {{ (int) $block['order_footer']['red'] }}&nbsp;&nbsp;&nbsp;&nbsp;Red+Green:- {{ (int) $block['order_footer']['red_green'] }}&nbsp;&nbsp;&nbsp;&nbsp;Green:- {{ (int) $block['order_footer']['green'] }}&nbsp;&nbsp;&nbsp;&nbsp;White:- {{ (int) $block['order_footer']['white'] }}</span>
                         </div>
                     </div>
+                    @endif
 
+                    @if($showDropSection)
                     <h6 class="font-weight-bold mb-2">Drop Item</h6>
                     <div class="table-responsive">
                         <table class="table table-bordered table-sm mb-0" style="max-width: 72rem;">
@@ -399,6 +406,7 @@
                             </tbody>
                         </table>
                     </div>
+                    @endif
                 </div>
             </div>
         @endforeach
