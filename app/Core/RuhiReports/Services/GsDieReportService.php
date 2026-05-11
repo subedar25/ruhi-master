@@ -25,8 +25,8 @@ class GsDieReportService
     /**
      * Die totals aggregated by k stone across GS orders for products with product_type 3 or 6.
      * Per product GS qty = sum(design_products.quantity × design_qty); then multiply each `r_k_stone` row.
-     * Die weight per line = `r_item_k_stone.kstone_dieweight` × line k stone quantity
-     * (line k stone qty = product GS qty × `kstone_quantity` on that mapping row).
+     * Die weight per line = **K stone quantity** × **`r_kstone.dieweight`** (catalog row for that `kstone_id`),
+     * where K stone quantity = product GS qty × `r_k_stone.kstone_quantity` for that mapping row.
      *
      * @return array{
      *     gs_name: string,
@@ -88,14 +88,14 @@ class GsDieReportService
                 $kid = (int) $ik->kstone_id;
                 $ksPerUnit = (int) $ik->kstone_quantity;
                 $wtPerUnit = (float) $ik->kstone_weight;
-                $diePerUnit = (float) $ik->kstone_dieweight;
 
                 $master = $ik->kstone;
                 $name = $master ? $master->displayLabel() : '';
 
                 $qtyTotal = (int) ($totalProductQty * $ksPerUnit);
                 $weightTotal = $totalProductQty * $wtPerUnit;
-                $dieTotal = $diePerUnit * $qtyTotal;
+                $diePerPiece = $master !== null ? (float) $master->dieweight : 0.0;
+                $dieTotal = $diePerPiece * $qtyTotal;
 
                 if ($weightTotal == 0.0 && $master && $qtyTotal > 0) {
                     $weightTotal = $qtyTotal * (float) $master->stoneweight;

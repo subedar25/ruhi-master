@@ -251,7 +251,7 @@ class GsColorFullReportService
                     $t['white_qty'] += (int) ($kr['white_qty'] ?? 0);
                 }
             } else {
-                $t['red_qty'] += (int) $r['red_qty'];
+            $t['red_qty'] += (int) $r['red_qty'];
                 $t['green_qty'] += (int) $r['green_qty'];
                 $t['white_qty'] += (int) $r['white_qty'];
             }
@@ -571,31 +571,31 @@ class GsColorFullReportService
         $whiteKw = round($sumWhiteKw, 2);
         $whiteDw = round($sumWhiteDw, 2);
 
-        $sumChannelWt = round($redKw + $redDw + $greenKw + $greenDw + $whiteKw + $whiteDw, 2);
+            $sumChannelWt = round($redKw + $redDw + $greenKw + $greenDw + $whiteKw + $whiteDw, 2);
 
-        if ($productTypeId === self::PRODUCT_TYPE_PULKI_FULL || $productTypeId === self::PRODUCT_TYPE_ADD_FULL) {
+            if ($productTypeId === self::PRODUCT_TYPE_PULKI_FULL || $productTypeId === self::PRODUCT_TYPE_ADD_FULL) {
             $totalWt = round($firstStoneWt * $baseTotal, 2);
-        } else {
-            $totalWt = $sumChannelWt;
-        }
+            } else {
+                $totalWt = $sumChannelWt;
+            }
 
         return [
             'product_name' => (string) $m['product_name'],
             'kstone' => $kstoneLabel,
             'kstone_rows' => $kstoneRows,
             'total_color_qty' => $baseTotal,
-            'red_qty' => $rq,
-            'red_kstone_wt' => $redKw,
-            'red_die_wt' => $redDw,
-            'green_qty' => $gq,
-            'green_kstone_wt' => $greenKw,
-            'green_die_wt' => $greenDw,
-            'white_qty' => $wq,
-            'white_kstone_wt' => $whiteKw,
-            'white_die_wt' => $whiteDw,
-            'total_wt' => $totalWt,
-        ];
-    }
+                'red_qty' => $rq,
+                'red_kstone_wt' => $redKw,
+                'red_die_wt' => $redDw,
+                'green_qty' => $gq,
+                'green_kstone_wt' => $greenKw,
+                'green_die_wt' => $greenDw,
+                'white_qty' => $wq,
+                'white_kstone_wt' => $whiteKw,
+                'white_die_wt' => $whiteDw,
+                'total_wt' => $totalWt,
+            ];
+        }
 
     /**
      * @param  array{product_id: int, product_name: string, total_color_qty: int, total_red_qty: int, total_green_qty: int, total_white_qty: int, weight: float}  $m
@@ -683,7 +683,7 @@ class GsColorFullReportService
 
         $row = $this->firstCatalogRowByNamePreferColorWithMass($trimmedName, $channelColorId);
         if ($row !== null) {
-            return [
+        return [
                 'stoneweight' => (float) $row->stoneweight,
                 'dieweight' => (float) $row->dieweight,
             ];
