@@ -55,24 +55,16 @@
             </tr>
         </thead>
         <tbody>
-            @forelse($report['rows'] as $r)
-                <tr>
-                    <td class="collet-col">{{ $r['product_name'] }}</td>
-                    <td>{{ number_format((int) $r['total_color_qty'], 0, '.', '') }}</td>
-                    <td class="kstone-col">{{ $r['kstone'] }}</td>
-                    <td>{{ number_format((int) $r['red_qty'], 0, '.', '') }}</td>
-                    <td>{{ number_format((float) $r['red_kstone_wt'], 2, '.', '') }}</td>
-                    <td>{{ number_format((float) $r['red_die_wt'], 2, '.', '') }}</td>
-                    <td>{{ number_format((int) $r['green_qty'], 0, '.', '') }}</td>
-                    <td>{{ number_format((float) $r['green_kstone_wt'], 2, '.', '') }}</td>
-                    <td>{{ number_format((float) $r['green_die_wt'], 2, '.', '') }}</td>
-                    <td>{{ number_format((int) $r['white_qty'], 0, '.', '') }}</td>
-                    <td>{{ number_format((float) $r['white_kstone_wt'], 2, '.', '') }}</td>
-                    <td>{{ number_format((float) $r['white_die_wt'], 2, '.', '') }}</td>
-                </tr>
-            @empty
+            @if(count($report['rows']) === 0)
                 <tr><td colspan="12" style="text-align:center;color:#666;">No data.</td></tr>
-            @endforelse
+            @else
+                @include('masterapp.ruhi-reports.partials.gs-color-full-kstone-detail-rows', [
+                    'rows' => $report['rows'],
+                    'useBorderLeft' => false,
+                    'productTdExtraClass' => 'collet-col',
+                    'kstoneTdExtraClass' => 'kstone-col',
+                ])
+            @endif
         </tbody>
         @if(count($report['rows']) > 0)
             @php

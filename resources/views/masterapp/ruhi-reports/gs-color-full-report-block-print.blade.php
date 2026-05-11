@@ -99,24 +99,14 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($rows as $r)
-                    <tr>
-                        <td>{{ $r['product_name'] }}</td>
-                        <td>{{ number_format((int) $r['total_color_qty'], 0, '.', '') }}</td>
-                        <td>{{ $r['kstone'] }}</td>
-                        <td>{{ number_format((int) $r['red_qty'], 0, '.', '') }}</td>
-                        <td>{{ number_format((float) $r['red_kstone_wt'], 2, '.', '') }}</td>
-                        <td>{{ number_format((float) $r['red_die_wt'], 2, '.', '') }}</td>
-                        <td>{{ number_format((int) $r['green_qty'], 0, '.', '') }}</td>
-                        <td>{{ number_format((float) $r['green_kstone_wt'], 2, '.', '') }}</td>
-                        <td>{{ number_format((float) $r['green_die_wt'], 2, '.', '') }}</td>
-                        <td>{{ number_format((int) $r['white_qty'], 0, '.', '') }}</td>
-                        <td>{{ number_format((float) $r['white_kstone_wt'], 2, '.', '') }}</td>
-                        <td>{{ number_format((float) $r['white_die_wt'], 2, '.', '') }}</td>
-                    </tr>
-                @empty
+                @if(count($rows) === 0)
                     <tr><td colspan="12" style="text-align:center;color:#666;">No data.</td></tr>
-                @endforelse
+                @else
+                    @include('masterapp.ruhi-reports.partials.gs-color-full-kstone-detail-rows', [
+                        'rows' => $rows,
+                        'useBorderLeft' => false,
+                    ])
+                @endif
             </tbody>
             @if(count($rows) > 0)
                 @php $pt = $totals ?? []; @endphp

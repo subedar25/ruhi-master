@@ -83,6 +83,9 @@ class GsColorFullReportService
      *     white_die_wt: float,
      *     total_wt: float
      * }
+     *
+     * Red / green / white {@code qty} in the returned totals sum each displayed {@code kstone_rows} line; stone/die
+     * weights sum each product row (same as summing line weights within that product).
      */
     private function sumKundanDetailBlock(array $rows): array
     {
@@ -102,16 +105,27 @@ class GsColorFullReportService
 
         foreach ($rows as $r) {
             $t['total_color_qty'] += (int) $r['total_color_qty'];
-            $t['red_qty'] += (int) $r['red_qty'];
+            $t['total_wt'] += (float) ($r['total_wt'] ?? 0);
+
+            $krows = $r['kstone_rows'] ?? [];
+            if ($krows !== []) {
+                foreach ($krows as $kr) {
+                    $t['red_qty'] += (int) ($kr['red_qty'] ?? 0);
+                    $t['green_qty'] += (int) ($kr['green_qty'] ?? 0);
+                    $t['white_qty'] += (int) ($kr['white_qty'] ?? 0);
+                }
+            } else {
+                $t['red_qty'] += (int) $r['red_qty'];
+                $t['green_qty'] += (int) $r['green_qty'];
+                $t['white_qty'] += (int) $r['white_qty'];
+            }
+
             $t['red_kstone_wt'] += (float) $r['red_kstone_wt'];
             $t['red_die_wt'] += (float) $r['red_die_wt'];
-            $t['green_qty'] += (int) $r['green_qty'];
             $t['green_kstone_wt'] += (float) $r['green_kstone_wt'];
             $t['green_die_wt'] += (float) $r['green_die_wt'];
-            $t['white_qty'] += (int) $r['white_qty'];
             $t['white_kstone_wt'] += (float) $r['white_kstone_wt'];
             $t['white_die_wt'] += (float) $r['white_die_wt'];
-            $t['total_wt'] += (float) ($r['total_wt'] ?? 0);
         }
 
         $t['red_kstone_wt'] = round($t['red_kstone_wt'], 2);
@@ -228,13 +242,24 @@ class GsColorFullReportService
 
         foreach ($rows as $r) {
             $t['total_color_qty'] += (int) $r['total_color_qty'];
-            $t['red_qty'] += (int) $r['red_qty'];
+
+            $krows = $r['kstone_rows'] ?? [];
+            if ($krows !== []) {
+                foreach ($krows as $kr) {
+                    $t['red_qty'] += (int) ($kr['red_qty'] ?? 0);
+                    $t['green_qty'] += (int) ($kr['green_qty'] ?? 0);
+                    $t['white_qty'] += (int) ($kr['white_qty'] ?? 0);
+                }
+            } else {
+                $t['red_qty'] += (int) $r['red_qty'];
+                $t['green_qty'] += (int) $r['green_qty'];
+                $t['white_qty'] += (int) $r['white_qty'];
+            }
+
             $t['red_kstone_wt'] += (float) $r['red_kstone_wt'];
             $t['red_die_wt'] += (float) $r['red_die_wt'];
-            $t['green_qty'] += (int) $r['green_qty'];
             $t['green_kstone_wt'] += (float) $r['green_kstone_wt'];
             $t['green_die_wt'] += (float) $r['green_die_wt'];
-            $t['white_qty'] += (int) $r['white_qty'];
             $t['white_kstone_wt'] += (float) $r['white_kstone_wt'];
             $t['white_die_wt'] += (float) $r['white_die_wt'];
         }
@@ -373,10 +398,16 @@ class GsColorFullReportService
             $finalGreen = $greenQty * $designGreenQty;
         }
 
+        // When only_green is not used but collate green_qty is set, add the red–green lot share (legacy collet math).
         $finalRedGreen = 0;
+        if (empty($onlyGreen) && ! empty($greenQty)) {
+            $finalRedGreen = $greenQty * $designRedGreenQty;
+        }
+
         $finalTotalGreen = $finalGreen + $finalRedGreen;
 
-        $designWhiteQty = $totalColorQty - ($finalRed + $finalGreen);
+        // Remainder must subtract full green total (same channel total as total_green_qty), not only $finalGreen.
+        $designWhiteQty = $totalColorQty - ($finalRed + $finalTotalGreen);
 
         return [
             'product_id' => (int) $product->id,
@@ -457,6 +488,9 @@ class GsColorFullReportService
         $sumWhiteKw = 0.0;
         $sumWhiteDw = 0.0;
 
+        /** @var array<int, array<string, int|float|string>> $kstoneRows */
+        $kstoneRows = [];
+
         foreach ($lines as $ik) {
             $ks = $ik->kstone;
             if (! $ks) {
@@ -473,18 +507,44 @@ class GsColorFullReportService
             $cg = $this->resolveChannelStoneDie($ik, $ks, $name, 2);
             $cw = $this->resolveChannelStoneDie($ik, $ks, $name, 3);
 
-            $sumRedKw += $ktr * $cr['stoneweight'];
-            $sumRedDw += $ktr * $cr['dieweight'];
-            $sumGreenKw += $ktg * $cg['stoneweight'];
-            $sumGreenDw += $ktg * $cg['dieweight'];
-            $sumWhiteKw += $ktw * $cw['stoneweight'];
-            $sumWhiteDw += $ktw * $cw['dieweight'];
+            $lineRedKw = $ktr * $cr['stoneweight'];
+            $lineRedDw = $ktr * $cr['dieweight'];
+            $lineGreenKw = $ktg * $cg['stoneweight'];
+            $lineGreenDw = $ktg * $cg['dieweight'];
+            $lineWhiteKw = $ktw * $cw['stoneweight'];
+            $lineWhiteDw = $ktw * $cw['dieweight'];
+
+            $kstoneRows[] = [
+                'label' => trim($ks->displayLabel()),
+                'kstone_qty' => (int) $ik->kstone_quantity,
+                'piece_qty' => $ktcq,
+                'red_qty' => $ktr,
+                'red_kstone_wt' => round($lineRedKw, 2),
+                'red_die_wt' => round($lineRedDw, 2),
+                'green_qty' => $ktg,
+                'green_kstone_wt' => round($lineGreenKw, 2),
+                'green_die_wt' => round($lineGreenDw, 2),
+                'white_qty' => $ktw,
+                'white_kstone_wt' => round($lineWhiteKw, 2),
+                'white_die_wt' => round($lineWhiteDw, 2),
+            ];
+
+            $sumRedKw += $lineRedKw;
+            $sumRedDw += $lineRedDw;
+            $sumGreenKw += $lineGreenKw;
+            $sumGreenDw += $lineGreenDw;
+            $sumWhiteKw += $lineWhiteKw;
+            $sumWhiteDw += $lineWhiteDw;
+        }
+
+        if ($kstoneRows === []) {
+            return $this->emptyDisplayRow($m, $productTypeId);
         }
 
         $first = $lines->first();
         $firstStoneWt = $first && $first->kstone ? (float) $first->kstone->stoneweight : 0.0;
-        $firstName = $first && $first->kstone ? $first->kstone->displayLabel() : '';
-        $firstQty = $first ? (int) $first->kstone_quantity : 0;
+
+        $kstoneLabel = $this->buildKstoneDisplayLabel($lines, $productTypeId);
 
         $redKw = round($sumRedKw, 2);
         $redDw = round($sumRedDw, 2);
@@ -501,11 +561,10 @@ class GsColorFullReportService
             $totalWt = $sumChannelWt;
         }
 
-        $kstoneLabel = $this->formatKstoneForBlock($productTypeId, $firstName, $firstQty, $firstStoneWt);
-
         return [
             'product_name' => (string) $m['product_name'],
             'kstone' => $kstoneLabel,
+            'kstone_rows' => $kstoneRows,
             'total_color_qty' => $baseTotal,
             'red_qty' => $rq,
             'red_kstone_wt' => $redKw,
@@ -529,6 +588,7 @@ class GsColorFullReportService
         return [
             'product_name' => (string) $m['product_name'],
             'kstone' => '',
+            'kstone_rows' => [],
             'total_color_qty' => (int) $m['total_color_qty'],
             'red_qty' => (int) $m['total_red_qty'],
             'red_kstone_wt' => 0.0,
@@ -665,6 +725,29 @@ class GsColorFullReportService
             ->where($withMass)
             ->orderBy('id')
             ->first();
+    }
+
+    /**
+     * @param  Collection<int, RuhiItemKstone>  $lines
+     */
+    private function buildKstoneDisplayLabel(Collection $lines, int $productTypeId): string
+    {
+        $parts = [];
+        foreach ($lines as $ik) {
+            $ks = $ik->kstone;
+            if (! $ks) {
+                continue;
+            }
+            $name = trim($ks->displayLabel());
+            $qty = (int) $ik->kstone_quantity;
+            $stoneWt = (float) ($ks->stoneweight ?? 0);
+            $segment = $this->formatKstoneForBlock($productTypeId, $name, $qty, $stoneWt);
+            if ($segment !== '') {
+                $parts[] = $segment;
+            }
+        }
+
+        return implode('; ', $parts);
     }
 
     private function formatKstoneForBlock(int $productTypeId, string $kstoneName, int $kstoneQty, float $stoneWeight): string
