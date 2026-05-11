@@ -211,37 +211,28 @@ class GsDetailEachItemReportService
                     continue;
                 }
 
-                $baseQty = (int) $dp->quantity * max($scale, 0);
-                $cc = $dp->collateByColors;
-                $sumOnlyRed = (int) $cc->sum('only_red_qty');
-                $sumRed = (int) $cc->sum('red_qty');
-                $sumGreen = (int) $cc->sum('green_qty');
-                $sumOnlyGreen = (int) $cc->sum('only_green_qty');
-                $sumWhite = (int) $cc->sum('white_qty');
-
-                $redScaled = (int) round(($sumOnlyRed + $sumRed) * max($scale, 0));
-                $greenScaled = (int) round(($sumGreen + $sumOnlyGreen) * max($scale, 0));
-                $whiteScaled = (int) round($sumWhite * max($scale, 0));
+                if ($isDrop || $isCollate) {
+                    [$rowTotal, $rowRed, $rowGreen, $rowWhite] = $this->collateRowQuantitiesForDesignProduct(
+                        $dp,
+                        $orderRowsForDesign
+                    );
+                }
 
                 if ($isDrop) {
                     $dropRows[] = [
                         'item' => (string) $product->product_name,
-                        'total_qty' => $baseQty,
-                        'red' => $redScaled,
-                        'green' => $greenScaled,
-                        'white' => $whiteScaled,
+                        'total_qty' => $rowTotal,
+                        'red' => $rowRed,
+                        'green' => $rowGreen,
+                        'white' => $rowWhite,
                     ];
                 } elseif ($isCollate) {
-                    [$collTotalQty, $collRed, $collGreen, $collWhite] = $this->collateRowQuantitiesForDesignProduct(
-                        $dp,
-                        $orderRowsForDesign
-                    );
                     $collateRows[] = [
                         'item' => (string) $product->product_name,
-                        'total_qty' => $collTotalQty,
-                        'red' => $collRed,
-                        'green' => $collGreen,
-                        'white' => $collWhite,
+                        'total_qty' => $rowTotal,
+                        'red' => $rowRed,
+                        'green' => $rowGreen,
+                        'white' => $rowWhite,
                     ];
                 }
             }
@@ -335,9 +326,10 @@ class GsDetailEachItemReportService
     }
 
     /**
-     * Collate totals for one design product on this GS/design: for each GS order line,
+     * Totals for one design product (Collate or Drop) on this GS/design: for each GS order line,
      * total = r_design_products.quantity × r_gs_order_by_color.design_qty; red/green from
      * r_collate_by_color × order color qtys; white = total − red − green (per line), then summed.
+     * If there are no collate-by-color rows, red/green are 0 and white equals total per line.
      *
      * @param  \Illuminate\Support\Collection<int, RuhiGsOrderByColor>  $orderRowsForDesign
      * @return array{0: int, 1: int, 2: int, 3: int} total_qty, red, green, white
@@ -346,7 +338,7 @@ class GsDetailEachItemReportService
     {
         $dpQty = (int) $dp->quantity;
         $collateLines = $dp->collateByColors;
-        if ($collateLines->isEmpty() || $orderRowsForDesign->isEmpty()) {
+        if ($orderRowsForDesign->isEmpty()) {
             return [0, 0, 0, 0];
         }
 
@@ -359,9 +351,11 @@ class GsDetailEachItemReportService
             $totalQtyOnce = $dpQty * (int) $productDetail->design_qty;
             $lineRed = 0;
             $lineGreen = 0;
-            foreach ($collateLines as $designDetail) {
-                $lineRed += $this->collateRedContribution($designDetail, $productDetail);
-                $lineGreen += $this->collateGreenContribution($designDetail, $productDetail);
+            if ($collateLines->isNotEmpty()) {
+                foreach ($collateLines as $designDetail) {
+                    $lineRed += $this->collateRedContribution($designDetail, $productDetail);
+                    $lineGreen += $this->collateGreenContribution($designDetail, $productDetail);
+                }
             }
             $lineWhite = $totalQtyOnce - ($lineRed + $lineGreen);
 
