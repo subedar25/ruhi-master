@@ -1,7 +1,8 @@
 # Extract and Re-import Old DB Data
 
 Use this when `olddb/ruhicreation.sql` is updated and you want to:
-- regenerate `olddb/table_inserts/*.sql` (only bundled tables), and
+
+- regenerate `olddb/table_inserts/*.sql` (only bundled tables, `INSERT INTO r_*`), and
 - import into DB after clearing old rows.
 
 ## 1) Extract table inserts from `ruhicreation.sql`
@@ -9,10 +10,10 @@ Use this when `olddb/ruhicreation.sql` is updated and you want to:
 From project root:
 
 ```bash
-python3 olddb/extract_inserts_from_ruhicreation.py
+python3 olddb/extract_all_table_inserts_from_dump.py
 ```
 
-This script updates only files that already exist in `olddb/table_inserts/`.
+This writes into **`olddb/table_inserts/`** (same path `olddb/import_all_inserts.sh` reads). Override paths with `--dump` and `--out` if needed.
 
 ## 2) Import into DB after clearing old data
 
@@ -41,6 +42,5 @@ bash olddb/import_all_inserts.sh --fresh <db_name> <db_user> <db_host> <db_port>
 ## Full one-time flow
 
 ```bash
-python3 olddb/extract_inserts_from_ruhicreation.py && bash olddb/import_all_inserts.sh --fresh
+python3 olddb/extract_all_table_inserts_from_dump.py && bash olddb/import_all_inserts.sh --fresh
 ```
-

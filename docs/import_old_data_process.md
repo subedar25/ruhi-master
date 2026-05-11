@@ -65,10 +65,10 @@ bash olddb/import_all_inserts.sh --help
 
 ## Regenerating inserts from `ruhicreation.sql`
 
-If you have a full dump at `olddb/ruhicreation.sql` and existing files under `olddb/table_inserts/`, you can rewrite those insert files from the dump:
+If you have a full dump at `olddb/ruhicreation.sql`, regenerate the insert bundle into `olddb/table_inserts/`:
 
 ```bash
-python3 olddb/extract_inserts_from_ruhicreation.py
+python3 olddb/extract_all_table_inserts_from_dump.py
 ```
 
 Then run the import script as above.
@@ -80,7 +80,7 @@ Then run the import script as above.
 | **ERROR 1062** (duplicate key) | Re-run with `--fresh`, or truncate the affected tables, then import again. |
 | **ERROR 1048** (column cannot be null) on `r_collate_by_color` | Legacy rows may contain `NULL` in quantity columns. Ensure migration `2026_05_03_000000_make_r_collate_by_color_qty_columns_nullable.php` has been applied, then re-import. |
 | **Success but no visible data** | Confirm you query the same database, host, and **port** as the script (very often `127.0.0.1:3308` from the host vs `3306` inside Docker). |
-| **Column / value mismatch** on `r_collate_by_color` | Regenerate with `extract_inserts_from_ruhicreation.py` or ensure `INSERT` columns match the Laravel migrations (explicit column list vs table column order). |
+| **Column / value mismatch** on `r_collate_by_color` | Regenerate with `extract_all_table_inserts_from_dump.py` or ensure `INSERT` columns match the Laravel migrations (explicit column list vs table column order). |
 
 On failure, the import script prints a **MySQL** section with the server error line; use that as the source of truth.
 
