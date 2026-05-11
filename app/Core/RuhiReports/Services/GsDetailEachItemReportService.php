@@ -3,6 +3,7 @@
 namespace App\Core\RuhiReports\Services;
 
 use App\Core\RuhiReports\ReportNameSort;
+use App\Models\RuhiCollateByColor;
 use App\Models\RuhiDesign;
 use App\Models\RuhiDesignProduct;
 use App\Models\RuhiGs;
@@ -155,10 +156,12 @@ class GsDetailEachItemReportService
                 continue;
             }
 
-            $scale = (int) RuhiGsOrderByColor::query()
+            $orderRowsForDesign = RuhiGsOrderByColor::query()
                 ->where('gs_id', $gsId)
                 ->where('design_id', $designId)
-                ->sum('design_qty');
+                ->get();
+
+            $scale = (int) $orderRowsForDesign->sum('design_qty');
 
             $orderFooter = RuhiGsOrderByColor::query()
                 ->where('gs_id', $gsId)
@@ -229,12 +232,16 @@ class GsDetailEachItemReportService
                         'white' => $whiteScaled,
                     ];
                 } elseif ($isCollate) {
+                    [$collTotalQty, $collRed, $collGreen, $collWhite] = $this->collateRowQuantitiesForDesignProduct(
+                        $dp,
+                        $orderRowsForDesign
+                    );
                     $collateRows[] = [
                         'item' => (string) $product->product_name,
-                        'total_qty' => $baseQty,
-                        'red' => $redScaled,
-                        'green' => $greenScaled,
-                        'white' => $whiteScaled,
+                        'total_qty' => $collTotalQty,
+                        'red' => $collRed,
+                        'green' => $collGreen,
+                        'white' => $collWhite,
                     ];
                 }
             }
@@ -325,5 +332,85 @@ class GsDetailEachItemReportService
         }
 
         return true;
+    }
+
+    /**
+     * Collate totals for one design product on this GS/design: for each GS order line,
+     * total = r_design_products.quantity × r_gs_order_by_color.design_qty; red/green from
+     * r_collate_by_color × order color qtys; white = total − red − green (per line), then summed.
+     *
+     * @param  \Illuminate\Support\Collection<int, RuhiGsOrderByColor>  $orderRowsForDesign
+     * @return array{0: int, 1: int, 2: int, 3: int} total_qty, red, green, white
+     */
+    private function collateRowQuantitiesForDesignProduct(RuhiDesignProduct $dp, Collection $orderRowsForDesign): array
+    {
+        $dpQty = (int) $dp->quantity;
+        $collateLines = $dp->collateByColors;
+        if ($collateLines->isEmpty() || $orderRowsForDesign->isEmpty()) {
+            return [0, 0, 0, 0];
+        }
+
+        $totalQtySum = 0;
+        $redSum = 0;
+        $greenSum = 0;
+        $whiteSum = 0;
+
+        foreach ($orderRowsForDesign as $productDetail) {
+            $totalQtyOnce = $dpQty * (int) $productDetail->design_qty;
+            $lineRed = 0;
+            $lineGreen = 0;
+            foreach ($collateLines as $designDetail) {
+                $lineRed += $this->collateRedContribution($designDetail, $productDetail);
+                $lineGreen += $this->collateGreenContribution($designDetail, $productDetail);
+            }
+            $lineWhite = $totalQtyOnce - ($lineRed + $lineGreen);
+
+            $totalQtySum += $totalQtyOnce;
+            $redSum += $lineRed;
+            $greenSum += $lineGreen;
+            $whiteSum += $lineWhite;
+        }
+
+        return [$totalQtySum, $redSum, $greenSum, $whiteSum];
+    }
+
+    private function collateRedContribution(RuhiCollateByColor $designDetail, RuhiGsOrderByColor $productDetail): int
+    {
+        $onlyRed = $designDetail->only_red_qty;
+        $red = $designDetail->red_qty;
+        $designRedQty = (int) $productDetail->design_red_qty;
+        $designRedGreenQty = (int) $productDetail->design_red_green_qty;
+
+        if (! empty($onlyRed) && empty($red)) {
+            return (int) $onlyRed * $designRedQty;
+        }
+        if (empty($onlyRed) && ! empty($red)) {
+            return (int) $red * $designRedGreenQty;
+        }
+        if (! empty($onlyRed) && ! empty($red)) {
+            return (int) $onlyRed * $designRedQty + (int) $red * $designRedGreenQty;
+        }
+
+        return 0;
+    }
+
+    private function collateGreenContribution(RuhiCollateByColor $designDetail, RuhiGsOrderByColor $productDetail): int
+    {
+        $onlyGreen = $designDetail->only_green_qty;
+        $green = $designDetail->green_qty;
+        $designGreenQty = (int) $productDetail->design_green_qty;
+        $designRedGreenQty = (int) $productDetail->design_red_green_qty;
+
+        if (! empty($onlyGreen) && empty($green)) {
+            return (int) $onlyGreen * $designGreenQty;
+        }
+        if (empty($onlyGreen) && ! empty($green)) {
+            return (int) $green * $designRedGreenQty;
+        }
+        if (! empty($onlyGreen) && ! empty($green)) {
+            return (int) $onlyGreen * $designGreenQty + (int) $green * $designRedGreenQty;
+        }
+
+        return 0;
     }
 }
