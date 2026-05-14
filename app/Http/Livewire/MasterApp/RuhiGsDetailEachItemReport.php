@@ -4,24 +4,34 @@ namespace App\Http\Livewire\MasterApp;
 
 use App\Core\RuhiReports\Services\GsDetailEachItemReportService;
 use App\Models\RuhiGsOrderByColor;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 class RuhiGsDetailEachItemReport extends Component
 {
+    #[Url(as: 'gs')]
     public ?int $gsId = null;
 
     /** @var array<int, int> */
     public array $productTypes = [];
 
     /** Comma-separated design IDs for Select2 multi sync */
+    #[Url(as: 'designs', except: '')]
     public string $designIdsCsv = '';
 
     /** Comma-separated product IDs (optional) */
+    #[Url(as: 'items', except: '')]
     public string $productIdsCsv = '';
 
     /** Collate items only: '' = all names, '1' = name without "(s)", '2' = name contains "(s)" (drop items ignore) */
+    #[Url(as: 'nf', except: '')]
     public string $nameFilter = '';
+
+    /** Comma-separated product type ids (mirrors print `types`); kept in sync with {@see $productTypes} */
+    #[Url(as: 'types', except: '')]
+    public string $typesCsv = '';
 
     public bool $submitted = false;
 
@@ -29,40 +39,42 @@ class RuhiGsDetailEachItemReport extends Component
 
     public function mount(): void
     {
-        $this->productTypes = GsDetailEachItemReportService::DEFAULT_PRODUCT_TYPES;
+        $this->hydrateProductTypesFromTypesCsv();
+        if ($this->productTypes === []) {
+            $this->productTypes = GsDetailEachItemReportService::DEFAULT_PRODUCT_TYPES;
+        }
+        $this->syncTypesCsvFromProductTypes();
+        $this->syncSubmittedFromFilters();
     }
 
-    public function updatedGsId(): void
+    private function hydrateProductTypesFromTypesCsv(): void
     {
-        $this->submitted = false;
-        $this->designIdsCsv = '';
-        $this->productIdsCsv = '';
+        $raw = trim($this->typesCsv);
+        if ($raw === '') {
+            return;
+        }
+
+        $parsed = array_values(array_unique(array_filter(array_map('intval', preg_split('/\s*,\s*/', $raw, -1, PREG_SPLIT_NO_EMPTY)))));
+        $allowed = [3, 4, 5, 6, 8];
+        $filtered = array_values(array_intersect($parsed, $allowed));
+        if ($filtered === []) {
+            return;
+        }
+
+        $this->productTypes = $filtered;
     }
 
-    public function updatedDesignIdsCsv(): void
+    private function syncTypesCsvFromProductTypes(): void
     {
-        $this->submitted = false;
-        $this->productIdsCsv = '';
+        $this->typesCsv = implode(',', $this->normalizedProductTypes());
     }
 
-    public function updatedProductIdsCsv(): void
+    /**
+     * @return array<string, array<int, mixed>>
+     */
+    private function reportValidationRules(): array
     {
-        $this->submitted = false;
-    }
-
-    public function updatedNameFilter(): void
-    {
-        $this->submitted = false;
-    }
-
-    public function updatedProductTypes(): void
-    {
-        $this->submitted = false;
-    }
-
-    public function submit(): void
-    {
-        $this->validate([
+        return [
             'gsId' => [
                 'required',
                 'integer',
@@ -73,8 +85,79 @@ class RuhiGsDetailEachItemReport extends Component
             'productTypes.*' => ['integer', Rule::in([3, 4, 5, 6, 8])],
             'productIdsCsv' => ['nullable', 'string'],
             'nameFilter' => ['nullable', 'string', Rule::in(['', '1', '2'])],
-        ]);
+        ];
+    }
 
+    private function syncSubmittedFromFilters(): void
+    {
+        if ($this->gsId === null) {
+            $this->submitted = false;
+
+            return;
+        }
+
+        $validator = Validator::make(
+            [
+                'gsId' => $this->gsId,
+                'designIdsCsv' => $this->designIdsCsv,
+                'productTypes' => $this->normalizedProductTypes(),
+                'productIdsCsv' => $this->productIdsCsv,
+                'nameFilter' => $this->nameFilter,
+            ],
+            $this->reportValidationRules(),
+        );
+
+        if ($validator->fails()) {
+            $this->submitted = false;
+
+            return;
+        }
+
+        if ($this->productTypes === []) {
+            $this->productTypes = GsDetailEachItemReportService::DEFAULT_PRODUCT_TYPES;
+        }
+        $this->syncTypesCsvFromProductTypes();
+
+        $this->resetValidation();
+        $this->submitted = true;
+    }
+
+    public function updatedGsId(): void
+    {
+        $this->designIdsCsv = '';
+        $this->productIdsCsv = '';
+        $this->syncSubmittedFromFilters();
+    }
+
+    public function updatedDesignIdsCsv(): void
+    {
+        $this->productIdsCsv = '';
+        $this->syncSubmittedFromFilters();
+    }
+
+    public function updatedProductIdsCsv(): void
+    {
+        $this->syncSubmittedFromFilters();
+    }
+
+    public function updatedNameFilter(): void
+    {
+        $this->syncSubmittedFromFilters();
+    }
+
+    public function updatedProductTypes(): void
+    {
+        $this->syncTypesCsvFromProductTypes();
+        $this->syncSubmittedFromFilters();
+    }
+
+    public function submit(): void
+    {
+        if ($this->productTypes === []) {
+            $this->productTypes = GsDetailEachItemReportService::DEFAULT_PRODUCT_TYPES;
+        }
+        $this->syncTypesCsvFromProductTypes();
+        $this->validate($this->reportValidationRules());
         $this->submitted = true;
     }
 
@@ -180,7 +263,7 @@ class RuhiGsDetailEachItemReport extends Component
             ];
         }
 
-        $sectionVis = GsDetailEachItemReportService::sectionVisibilityForProductTypes($this->productTypes);
+        $sectionVis = GsDetailEachItemReportService::sectionVisibilityForProductTypes($this->normalizedProductTypes());
 
         return view('livewire.masterapp.ruhi-gs-detail-each-item-report', [
             'gsOptions' => $gsOptions,

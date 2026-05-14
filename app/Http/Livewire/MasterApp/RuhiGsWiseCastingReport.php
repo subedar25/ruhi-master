@@ -3,33 +3,29 @@
 namespace App\Http\Livewire\MasterApp;
 
 use App\Core\RuhiReports\Services\GsWiseCastingReportService;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 class RuhiGsWiseCastingReport extends Component
 {
+    #[Url(as: 'gs')]
     public ?int $gsId = null;
 
+    #[Url(as: 'lot')]
     public ?int $lotId = null;
 
     public bool $submitted = false;
 
     private ?GsWiseCastingReportService $service = null;
 
-    public function updatedGsId(mixed $value): void
+    /**
+     * @return array<string, array<int, mixed>>
+     */
+    private function reportValidationRules(): array
     {
-        $this->lotId = null;
-        $this->submitted = false;
-    }
-
-    public function updatedLotId(): void
-    {
-        $this->submitted = false;
-    }
-
-    public function submit(): void
-    {
-        $this->validate([
+        return [
             'gsId' => [
                 'required',
                 'integer',
@@ -40,8 +36,54 @@ class RuhiGsWiseCastingReport extends Component
                 'integer',
                 Rule::exists('r_slot', 'id')->where(fn ($q) => $q->where('gs_id', $this->gsId)),
             ],
-        ]);
+        ];
+    }
 
+    public function mount(): void
+    {
+        $this->syncSubmittedFromSelections();
+    }
+
+    private function syncSubmittedFromSelections(): void
+    {
+        if ($this->gsId === null || $this->lotId === null) {
+            $this->submitted = false;
+
+            return;
+        }
+
+        $validator = Validator::make(
+            [
+                'gsId' => $this->gsId,
+                'lotId' => $this->lotId,
+            ],
+            $this->reportValidationRules(),
+        );
+
+        if ($validator->fails()) {
+            $this->submitted = false;
+
+            return;
+        }
+
+        $this->resetValidation();
+        $this->submitted = true;
+    }
+
+    public function updatedGsId(): void
+    {
+        $this->lotId = null;
+        $this->submitted = false;
+    }
+
+    public function updatedLotId(): void
+    {
+        $this->syncSubmittedFromSelections();
+    }
+
+    public function submit(): void
+    {
+        $this->validate($this->reportValidationRules());
         $this->submitted = true;
     }
 

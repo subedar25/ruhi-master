@@ -3,26 +3,71 @@
 namespace App\Http\Livewire\MasterApp;
 
 use App\Core\RuhiReports\Services\GsLotWiseItemsReportService;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 class RuhiGsLotWiseItemsReport extends Component
 {
+    #[Url(as: 'gs')]
     public ?int $gsId = null;
 
     public bool $submitted = false;
 
     private ?GsLotWiseItemsReportService $service = null;
 
-    public function submit(): void
+    /**
+     * @return array<string, array<int, mixed>>
+     */
+    private function gsIdValidationRules(): array
     {
-        $this->validate([
+        return [
             'gsId' => [
                 'required',
                 'integer',
                 Rule::exists('r_gs', 'id'),
             ],
-        ]);
+        ];
+    }
+
+    public function mount(): void
+    {
+        $this->syncSubmittedFromGsId();
+    }
+
+    private function syncSubmittedFromGsId(): void
+    {
+        if ($this->gsId === null) {
+            $this->submitted = false;
+
+            return;
+        }
+
+        $validator = Validator::make(
+            ['gsId' => $this->gsId],
+            $this->gsIdValidationRules(),
+        );
+
+        if ($validator->fails()) {
+            $this->gsId = null;
+            $this->submitted = false;
+
+            return;
+        }
+
+        $this->resetValidation();
+        $this->submitted = true;
+    }
+
+    public function updatedGsId(): void
+    {
+        $this->syncSubmittedFromGsId();
+    }
+
+    public function submit(): void
+    {
+        $this->validate($this->gsIdValidationRules());
         $this->submitted = true;
     }
 
