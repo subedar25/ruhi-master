@@ -5,28 +5,28 @@
         <div class="card-body p-0">
             <div id="itemTableToolbar" class="d-flex flex-wrap align-items-center gap-2 px-3 pt-3 pb-2 border-bottom">
                 <div class="d-flex flex-wrap align-items-center flex-grow-1" style="gap: .5rem; min-width: 0;">
+                    <div class="search-input-wrapper flex-grow-1" style="max-width: 18rem; min-width: 9rem; position: relative;">
+                        <i class="fa fa-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#6c757d;pointer-events:none;"></i>
+                        <input type="search" wire:model.live.debounce.300ms="search" class="form-control search-input" style="padding-left:34px;" placeholder="Search item..." autocomplete="off">
+                    </div>
                     <div id="ruhi-items-anchor-item-type" class="d-none" data-s2-value="{{ $itemTypeId }}"></div>
                     <input type="hidden" wire:model.live="itemTypeId" id="ruhi-items-hidden-item-type">
-                    <div wire:ignore class="d-inline-block" style="min-width: 220px;">
+                    <div wire:ignore class="d-inline-block flex-shrink-0" style="width: 220px; min-width: 220px; max-width: 100%;">
                         <select
                             id="ruhi-items-select-item-type"
                             class="form-control form-control-sm js-ruhi-master-select2"
-                            style="width: 100%; min-width: 220px;"
+                            style="width: 100%; min-width: 0;"
                             data-s2-hidden="#ruhi-items-hidden-item-type"
                             data-s2-anchor="#ruhi-items-anchor-item-type"
                             data-s2-placeholder="All Item Categories"
                             data-s2-allow-clear="true"
+                            aria-label="Filter by item category"
                         >
                             <option value=""></option>
                             @foreach($itemTypes as $type)
                                 <option value="{{ $type->id }}">{{ $type->item_type }}</option>
                             @endforeach
                         </select>
-                    </div>
-
-                    <div class="search-input-wrapper flex-grow-1" style="max-width: 18rem; min-width: 9rem; position: relative;">
-                        <i class="fa fa-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#6c757d;pointer-events:none;"></i>
-                        <input type="search" wire:model.live.debounce.300ms="search" class="form-control search-input" style="padding-left:34px;" placeholder="Search item..." autocomplete="off">
                     </div>
                 </div>
 
