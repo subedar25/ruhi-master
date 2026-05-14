@@ -89,7 +89,7 @@
             return String($hidden.val() || '');
         }
 
-        var placeholder = $select.attr('data-s2-placeholder') || 'Select';
+        var placeholderStr = $select.attr('data-s2-placeholder') || 'Select';
 
         var ddParentAttr = ($select.attr('data-s2-dropdown-parent') || '').toLowerCase();
         var $dropdownParent = $(document.body);
@@ -116,12 +116,19 @@
         if (!$select.data('ruhiMs2Init')) {
             var s2opts = {
                 width: '100%',
-                placeholder: placeholder,
                 minimumResultsForSearch: 0,
                 allowClear: allowClear,
                 dropdownParent: $dropdownParent,
                 matcher: ruhiSelect2Matcher,
             };
+            if (allowClear && ! $select.prop('multiple')) {
+                s2opts.placeholder = {
+                    id: '',
+                    text: placeholderStr,
+                };
+            } else {
+                s2opts.placeholder = placeholderStr;
+            }
             if (dropdownCssClass) {
                 s2opts.dropdownCssClass = dropdownCssClass;
             }

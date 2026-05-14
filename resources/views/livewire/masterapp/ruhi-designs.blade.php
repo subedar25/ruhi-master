@@ -3,8 +3,8 @@
 
     <div class="card">
         <div class="card-body p-0">
-            <div id="designTableToolbar" class="d-flex flex-wrap align-items-center justify-content-between gap-2 px-3 pt-3 pb-2 border-bottom">
-                <div class="d-flex flex-wrap align-items-center" style="gap: .5rem;">
+            <div id="designTableToolbar" class="d-flex flex-wrap align-items-center gap-2 px-3 pt-3 pb-2 border-bottom">
+                <div class="d-flex flex-wrap align-items-center flex-grow-1" style="gap: .5rem; min-width: 0;">
                     <div id="ruhi-designs-anchor-category" class="d-none" data-s2-value="{{ $categoryId }}"></div>
                     <input type="hidden" wire:model.live="categoryId" id="ruhi-designs-hidden-category">
                     <div wire:ignore class="d-inline-block" style="min-width: 220px;">
@@ -15,19 +15,28 @@
                             data-s2-hidden="#ruhi-designs-hidden-category"
                             data-s2-anchor="#ruhi-designs-anchor-category"
                             data-s2-placeholder="All Design Categories"
+                            data-s2-allow-clear="true"
                         >
-                            <option value="">All Design Categories</option>
+                            <option value=""></option>
                             @foreach($categories as $category)
                                 <option value="{{ $category->id }}">{{ $category->category_name }}</option>
                             @endforeach
                         </select>
                     </div>
+
+                    <div class="search-input-wrapper flex-grow-1" style="max-width: 18rem; min-width: 9rem; position: relative;">
+                        <i class="fa fa-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#6c757d;pointer-events:none;"></i>
+                        <input type="search" wire:model.live.debounce.300ms="search" class="form-control search-input" style="padding-left:34px;" placeholder="Search design..." autocomplete="off">
+                    </div>
                 </div>
 
-                <div class="search-input-wrapper flex-grow-1" style="max-width: 18rem; min-width: 9rem; position: relative;">
-                    <i class="fa fa-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#6c757d;pointer-events:none;"></i>
-                    <input type="search" wire:model.live.debounce.300ms="search" class="form-control search-input" style="padding-left:34px;" placeholder="Search design..." autocomplete="off">
-                </div>
+                <button
+                    type="button"
+                    class="btn btn-primary btn-sm flex-shrink-0 ml-auto"
+                    onclick="document.getElementById('ruhiAddDesignTrigger')?.click();"
+                >
+                    <i class="fa fa-plus"></i> Add Design
+                </button>
             </div>
 
             <div class="px-3 py-2 border-bottom">
@@ -166,7 +175,8 @@
         </div>
     </div>
 
-    <div class="modal fade {{ $showCreateModal ? 'show d-block' : '' }}" tabindex="-1" role="dialog" style="background: rgba(0,0,0,0.5)">
+    @if($showCreateModal)
+    <div class="modal fade show d-block" tabindex="-1" role="dialog" style="background: rgba(0,0,0,0.5)">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -179,13 +189,27 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label class="mb-1">Design Category <span class="text-danger">*</span></label>
-                                    <select class="form-control form-control-sm @error('category_id') is-invalid @enderror" wire:model.defer="category_id" wire:change="fillNameFromCategory($event.target.value)" required>
-                                        <option value="">Select Category</option>
-                                        @foreach($categories as $category)
-                                            <option value="{{ $category->id }}">{{ $category->category_name }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('category_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    <div id="ruhi-design-create-modal-anchor-category" class="d-none" data-s2-value="{{ $category_id }}"></div>
+                                    <input type="hidden" wire:model.live="category_id" id="ruhi-design-create-modal-hidden-category">
+                                    <div wire:ignore class="d-inline-block w-100" style="min-width: 0;">
+                                        <select
+                                            id="ruhi-design-modal-create-select-category"
+                                            class="form-control form-control-sm js-ruhi-master-select2"
+                                            style="width: 100%; min-width: 100%;"
+                                            data-s2-hidden="#ruhi-design-create-modal-hidden-category"
+                                            data-s2-anchor="#ruhi-design-create-modal-anchor-category"
+                                            data-s2-placeholder="Select Category"
+                                            data-s2-allow-clear="true"
+                                            data-s2-dropdown-parent="modal"
+                                            data-s2-dropdown-class="design-product-select2-dropdown"
+                                        >
+                                            <option value=""></option>
+                                            @foreach($categories as $category)
+                                                <option value="{{ $category->id }}">{{ $category->category_name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    @error('category_id') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                 </div>
                             </div>
                             <div class="col-md-5">
@@ -220,8 +244,10 @@
             </div>
         </div>
     </div>
+    @endif
 
-    <div class="modal fade {{ $showEditModal ? 'show d-block' : '' }}" tabindex="-1" role="dialog" style="background: rgba(0,0,0,0.5)">
+    @if($showEditModal)
+    <div class="modal fade show d-block" tabindex="-1" role="dialog" style="background: rgba(0,0,0,0.5)">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -234,13 +260,27 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label class="mb-1">Design Category <span class="text-danger">*</span></label>
-                                    <select class="form-control form-control-sm @error('category_id') is-invalid @enderror" wire:model.defer="category_id" wire:change="fillNameFromCategory($event.target.value)" required>
-                                        <option value="">Select Category</option>
-                                        @foreach($categories as $category)
-                                            <option value="{{ $category->id }}">{{ $category->category_name }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('category_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    <div id="ruhi-design-edit-modal-anchor-category" class="d-none" data-s2-value="{{ $category_id }}"></div>
+                                    <input type="hidden" wire:model.live="category_id" id="ruhi-design-edit-modal-hidden-category">
+                                    <div wire:ignore class="d-inline-block w-100" style="min-width: 0;">
+                                        <select
+                                            id="ruhi-design-modal-edit-select-category"
+                                            class="form-control form-control-sm js-ruhi-master-select2"
+                                            style="width: 100%; min-width: 100%;"
+                                            data-s2-hidden="#ruhi-design-edit-modal-hidden-category"
+                                            data-s2-anchor="#ruhi-design-edit-modal-anchor-category"
+                                            data-s2-placeholder="Select Category"
+                                            data-s2-allow-clear="true"
+                                            data-s2-dropdown-parent="modal"
+                                            data-s2-dropdown-class="design-product-select2-dropdown"
+                                        >
+                                            <option value=""></option>
+                                            @foreach($categories as $category)
+                                                <option value="{{ $category->id }}">{{ $category->category_name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    @error('category_id') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                 </div>
                             </div>
                             <div class="col-md-5">
@@ -277,6 +317,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     <div class="modal fade {{ $showImagePreviewModal ? 'show d-block' : '' }}" tabindex="-1" role="dialog" style="background: rgba(0,0,0,0.65)">
         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
@@ -300,5 +341,14 @@
             </div>
         </div>
     </div>
+
+    <style>
+        .select2-dropdown.design-product-select2-dropdown .select2-search--dropdown {
+            display: block !important;
+        }
+        .modal .js-ruhi-master-select2 + .select2-container {
+            width: 100% !important;
+        }
+    </style>
 </div>
 

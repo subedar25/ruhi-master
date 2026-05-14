@@ -26,6 +26,8 @@ class RuhiDesigns extends Component
     public ?string $existingPhoto1 = null;
     public string $previewImageUrl = '';
     public string $previewImageName = '';
+    /** Skip {@see fillNameFromCategory} once when hydrating edit form (avoid overwriting design name). */
+    public int $ignoreCategoryFillTicks = 0;
     private ?RuhiDesignService $ruhiDesigns = null;
 
     protected $queryString = [
@@ -70,6 +72,21 @@ class RuhiDesigns extends Component
         }
     }
 
+    public function updated($fullPath, $value): void
+    {
+        if ($fullPath !== 'category_id') {
+            return;
+        }
+
+        if ($this->ignoreCategoryFillTicks > 0) {
+            $this->ignoreCategoryFillTicks--;
+
+            return;
+        }
+
+        $this->fillNameFromCategory($value === null ? '' : (string) $value);
+    }
+
     public function deleteById(int $id): void
     {
         abort_unless((bool) (auth()->user()?->can('delete-ruhi-design') ?? false), 403);
@@ -98,6 +115,7 @@ class RuhiDesigns extends Component
         $this->resetValidation();
         $this->editId = $design->id;
         $this->design_name = (string) $design->design_name;
+        $this->ignoreCategoryFillTicks = 1;
         $this->category_id = (string) $design->category_id;
         $this->existingPhoto1 = $design->photo1;
         $this->photo1 = null;
@@ -202,6 +220,7 @@ class RuhiDesigns extends Component
         $this->category_id = '';
         $this->photo1 = null;
         $this->existingPhoto1 = null;
+        $this->ignoreCategoryFillTicks = 0;
     }
 
     private function service(): RuhiDesignService

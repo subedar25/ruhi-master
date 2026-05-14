@@ -3,8 +3,8 @@
 
     <div class="card">
         <div class="card-body p-0">
-            <div id="itemTableToolbar" class="d-flex flex-wrap align-items-center justify-content-between gap-2 px-3 pt-3 pb-2 border-bottom">
-                <div class="d-flex flex-wrap align-items-center" style="gap: .5rem;">
+            <div id="itemTableToolbar" class="d-flex flex-wrap align-items-center gap-2 px-3 pt-3 pb-2 border-bottom">
+                <div class="d-flex flex-wrap align-items-center flex-grow-1" style="gap: .5rem; min-width: 0;">
                     <div id="ruhi-items-anchor-item-type" class="d-none" data-s2-value="{{ $itemTypeId }}"></div>
                     <input type="hidden" wire:model.live="itemTypeId" id="ruhi-items-hidden-item-type">
                     <div wire:ignore class="d-inline-block" style="min-width: 220px;">
@@ -15,19 +15,28 @@
                             data-s2-hidden="#ruhi-items-hidden-item-type"
                             data-s2-anchor="#ruhi-items-anchor-item-type"
                             data-s2-placeholder="All Item Categories"
+                            data-s2-allow-clear="true"
                         >
-                            <option value="">All Item Categories</option>
+                            <option value=""></option>
                             @foreach($itemTypes as $type)
                                 <option value="{{ $type->id }}">{{ $type->item_type }}</option>
                             @endforeach
                         </select>
                     </div>
+
+                    <div class="search-input-wrapper flex-grow-1" style="max-width: 18rem; min-width: 9rem; position: relative;">
+                        <i class="fa fa-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#6c757d;pointer-events:none;"></i>
+                        <input type="search" wire:model.live.debounce.300ms="search" class="form-control search-input" style="padding-left:34px;" placeholder="Search item..." autocomplete="off">
+                    </div>
                 </div>
 
-                <div class="search-input-wrapper flex-grow-1" style="max-width: 18rem; min-width: 9rem; position: relative;">
-                    <i class="fa fa-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#6c757d;pointer-events:none;"></i>
-                    <input type="search" wire:model.live.debounce.300ms="search" class="form-control search-input" style="padding-left:34px;" placeholder="Search item..." autocomplete="off">
-                </div>
+                <button
+                    type="button"
+                    class="btn btn-primary btn-sm flex-shrink-0 ml-auto"
+                    onclick="document.getElementById('ruhiAddItemTrigger')?.click();"
+                >
+                    <i class="fa fa-plus"></i> Add Item
+                </button>
             </div>
 
             <div class="px-3 py-2 border-bottom">

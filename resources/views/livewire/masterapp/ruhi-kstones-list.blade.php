@@ -3,30 +3,40 @@
 
     <div class="card">
         <div class="card-body p-0">
-            <div id="kstoneTableToolbar" class="d-flex flex-wrap align-items-center justify-content-between gap-2 px-3 pt-3 pb-2 border-bottom">
-                <div class="d-flex flex-wrap align-items-center" style="gap: .5rem;">
+            <div id="kstoneTableToolbar" class="d-flex flex-wrap align-items-center gap-2 px-3 pt-3 pb-2 border-bottom">
+                <div class="d-flex flex-wrap align-items-center flex-grow-1" style="gap: .5rem; min-width: 0;">
+                    <div class="search-input-wrapper flex-grow-1" style="max-width: 18rem; min-width: 9rem; position: relative;">
+                        <i class="fa fa-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#6c757d;pointer-events:none;"></i>
+                        <input type="search" wire:model.live.debounce.300ms="search" class="form-control search-input" style="padding-left:34px;" placeholder="Search K Stone..." autocomplete="off">
+                    </div>
                     <div id="ruhi-kstones-anchor-color-filter" class="d-none" data-s2-value="{{ $colorFilterId }}"></div>
                     <input type="hidden" wire:model.live="colorFilterId" id="ruhi-kstones-hidden-color-filter">
-                    <div wire:ignore class="d-inline-block" style="min-width: 200px;">
+                    <div wire:ignore class="d-inline-block flex-shrink-0" style="width: 220px; min-width: 220px; max-width: 100%;">
                         <select
                             id="ruhi-kstones-select-color-filter"
                             class="form-control form-control-sm js-ruhi-master-select2"
-                            style="width: 100%; min-width: 200px;"
+                            style="width: 100%; min-width: 0;"
                             data-s2-hidden="#ruhi-kstones-hidden-color-filter"
                             data-s2-anchor="#ruhi-kstones-anchor-color-filter"
-                            data-s2-placeholder="All colors"
+                            data-s2-placeholder="All Colors"
+                            data-s2-allow-clear="true"
+                            aria-label="Filter by color"
                         >
-                            <option value="">All colors</option>
+                            <option value=""></option>
                             @foreach($colors as $c)
                                 <option value="{{ $c->id }}">{{ $c->name }}</option>
                             @endforeach
                         </select>
                     </div>
                 </div>
-                <div class="search-input-wrapper flex-grow-1" style="max-width: 18rem; min-width: 9rem; position: relative;">
-                    <i class="fa fa-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#6c757d;pointer-events:none;"></i>
-                    <input type="search" wire:model.live.debounce.300ms="search" class="form-control search-input" style="padding-left:34px;" placeholder="Search K Stone..." autocomplete="off">
-                </div>
+
+                <button
+                    type="button"
+                    class="btn btn-primary btn-sm flex-shrink-0 ml-auto"
+                    onclick="document.getElementById('ruhiAddKstoneTrigger')?.click();"
+                >
+                    <i class="fa fa-plus"></i> Add K Stone
+                </button>
             </div>
 
             <div class="px-3 py-2 border-bottom">
