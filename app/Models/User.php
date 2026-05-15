@@ -356,6 +356,21 @@ class User extends Authenticatable implements Auditable, TwoFactorAuthenticatabl
     }
 
     /**
+     * Persist {@see $last_selected_organization_id} with a direct row update so it reliably
+     * reaches the database (avoids cases where {@see save()} or auditing behaves unexpectedly).
+     */
+    public function persistLastSelectedOrganizationId(?int $organizationId): void
+    {
+        static::query()->whereKey($this->getKey())->update([
+            'last_selected_organization_id' => $organizationId,
+            'updated_at' => now(),
+        ]);
+
+        $this->setAttribute('last_selected_organization_id', $organizationId);
+        $this->syncOriginalAttribute('last_selected_organization_id');
+    }
+
+    /**
      * Database notifications (uses app model so custom scopes like forOrganization apply).
      */
     public function notifications(): MorphMany

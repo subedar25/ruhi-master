@@ -52,6 +52,13 @@ final class OrganizationSessionResolver
             return;
         }
 
+        // After POST /organization/switch the DB row is updated before this GET runs; reload so
+        // last_selected_organization_id is not stale on the in-memory model (avoids multi-org sync
+        // clearing session before we can hydrate from the user row).
+        if ((int) $request->session()->get('current_organization_id', 0) === 0) {
+            $user->refresh();
+        }
+
         $organizationIds = self::allowedOrganizationIds($user);
         $request->session()->put('user_organization_ids', $organizationIds);
 
@@ -66,9 +73,7 @@ final class OrganizationSessionResolver
 
         $fromUser = (int) ($user->last_selected_organization_id ?? 0);
         if ($fromUser > 0 && ! in_array($fromUser, $organizationIds, true)) {
-            $user->forceFill([
-                'last_selected_organization_id' => null,
-            ])->save();
+            $user->persistLastSelectedOrganizationId(null);
             $fromUser = 0;
         }
 
@@ -88,9 +93,7 @@ final class OrganizationSessionResolver
             $onlyId = (int) $organizationIds[0];
             $request->session()->put('current_organization_id', $onlyId);
             if ((int) ($user->last_selected_organization_id ?? 0) !== $onlyId) {
-                $user->forceFill([
-                    'last_selected_organization_id' => $onlyId,
-                ])->save();
+                $user->persistLastSelectedOrganizationId($onlyId);
             }
 
             return;

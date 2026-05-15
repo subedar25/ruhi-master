@@ -175,19 +175,20 @@ class AppServiceProvider extends ServiceProvider
                     ? Organization::orderBy('name')->get(['id', 'name', 'logo'])
                     : $user->organizations()->orderBy('name')->get(['organizations.id', 'organizations.name', 'organizations.logo']);
 
+                $allowedOrgIds = $organizations->pluck('id')->map(fn ($id) => (int) $id)->values()->all();
                 session([
-                    'user_organization_ids' => $organizations->pluck('id')->map(fn ($id) => (int) $id)->values()->all(),
+                    'user_organization_ids' => $allowedOrgIds,
                 ]);
 
                 $selectedId = (int) session('current_organization_id', 0);
-                if ($selectedId && ! $organizations->contains('id', $selectedId)) {
+                if ($selectedId > 0 && ! in_array($selectedId, $allowedOrgIds, true)) {
                     $selectedId = 0;
                     session()->forget('current_organization_id');
                 }
 
                 if (! $selectedId) {
                     $lastSelectedId = (int) ($user->last_selected_organization_id ?? 0);
-                    if ($lastSelectedId && $organizations->contains('id', $lastSelectedId)) {
+                    if ($lastSelectedId > 0 && in_array($lastSelectedId, $allowedOrgIds, true)) {
                         $selectedId = $lastSelectedId;
                         session(['current_organization_id' => $selectedId]);
                     }
@@ -199,7 +200,9 @@ class AppServiceProvider extends ServiceProvider
                     session(['current_organization_id' => $selectedId]);
                 }
 
-                $currentOrganization = $selectedId ? $organizations->firstWhere('id', $selectedId) : null;
+                $currentOrganization = $selectedId > 0
+                    ? $organizations->first(fn ($org) => (int) $org->getKey() === $selectedId)
+                    : null;
 
                 $view->with([
                     'orgSwitcherOrganizations' => $organizations,

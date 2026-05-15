@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Middleware;
 
 use App\Models\User;
+use App\Support\OrganizationReturnUrl;
 use App\Support\OrganizationSessionResolver;
 use Closure;
 use Illuminate\Http\Request;
@@ -27,7 +28,7 @@ final class EnforceOrganizationSelection
             return $next($request);
         }
 
-        if ($request->routeIs('masterapp.organization.select', 'logout')) {
+        if ($request->routeIs('masterapp.organization.select', 'masterapp.organization.switch', 'logout')) {
             return $next($request);
         }
 
@@ -45,11 +46,7 @@ final class EnforceOrganizationSelection
             return $next($request);
         }
 
-        $returnUrl = session('url.intended');
-        if (! is_string($returnUrl) || $returnUrl === '') {
-            $returnUrl = $request->getRequestUri();
-        }
-        $request->session()->put('organization_select_return_url', $returnUrl);
+        OrganizationReturnUrl::captureForPicker($request);
 
         return redirect()->route('masterapp.organization.select');
     }

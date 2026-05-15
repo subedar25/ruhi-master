@@ -4,10 +4,12 @@ namespace App\Http\Controllers\MasterApp;
 
 use App\Http\Controllers\Controller;
 use App\Models\Organization;
+use App\Support\OrganizationReturnUrl;
 use App\Support\OrganizationSessionResolver;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class OrganizationContextController extends Controller
@@ -26,9 +28,12 @@ class OrganizationContextController extends Controller
         }
 
         $currentId = (int) session('current_organization_id', 0);
-        if ($currentId > 0 && $organizations->contains('id', $currentId)) {
+        $allowedIds = $organizations->pluck('id')->map(fn ($id) => (int) $id)->all();
+        if ($currentId > 0 && in_array($currentId, $allowedIds, true)) {
             return redirect()->route('masterapp.dashboard');
         }
+
+        OrganizationReturnUrl::captureForPicker($request);
 
         return view('masterapp.organization.select', [
             'organizations' => $organizations,
@@ -54,16 +59,19 @@ class OrganizationContextController extends Controller
             abort(403, 'You do not have access to this organization.');
         }
 
-        session(['current_organization_id' => $organizationId]);
-        session([
-            'user_organization_ids' => $isSystemUser
+        $request->session()->put('current_organization_id', $organizationId);
+        $request->session()->put(
+            'user_organization_ids',
+            $isSystemUser
                 ? Organization::orderBy('name')->pluck('id')->map(fn ($id) => (int) $id)->values()->all()
                 : $user->organizations()->orderBy('name')->pluck('organizations.id')->map(fn ($id) => (int) $id)->values()->all(),
-        ]);
+        );
 
-        $user->forceFill([
-            'last_selected_organization_id' => $organizationId,
-        ])->save();
+        $user->persistLastSelectedOrganizationId($organizationId);
+
+        Auth::setUser($user->fresh());
+
+        $request->session()->save();
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -77,33 +85,14 @@ class OrganizationContextController extends Controller
 
     private function redirectAfterOrganizationSwitch(Request $request): RedirectResponse
     {
-        $return = $request->session()->pull('organization_select_return_url');
-        if (is_string($return) && $return !== '' && $this->isSafeInternalPath($return)) {
-            return redirect()->to($return);
+        $headers = ['Cache-Control' => 'no-store, no-cache, must-revalidate'];
+
+        $returnPath = OrganizationReturnUrl::pullAllowedPath($request);
+        if ($returnPath !== null) {
+            return redirect()->to($returnPath, 303)->withHeaders($headers);
         }
 
-        return redirect()->back();
-    }
-
-    /**
-     * Only allow same-application paths (relative URI) to avoid open redirects.
-     */
-    private function isSafeInternalPath(string $pathOrUrl): bool
-    {
-        if (str_starts_with($pathOrUrl, '//')) {
-            return false;
-        }
-
-        if (str_starts_with($pathOrUrl, '/')) {
-            return true;
-        }
-
-        $appUrl = rtrim((string) config('app.url'), '/');
-        if ($appUrl !== '' && str_starts_with($pathOrUrl, $appUrl.'/')) {
-            return true;
-        }
-
-        return false;
+        return redirect()->to(OrganizationReturnUrl::dashboardPath(), 303)->withHeaders($headers);
     }
 }
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use App\Support\OrganizationModule;
 use App\Support\OrganizationSessionResolver;
 use Closure;
@@ -13,6 +14,14 @@ class EnsureOrganizationHasModule
     public function handle(Request $request, Closure $next, string $moduleSlug): Response
     {
         OrganizationSessionResolver::sync($request);
+
+        $user = $request->user();
+        if ($user instanceof User && ($user->user_type ?? '') !== 'systemuser') {
+            if ((int) $request->session()->get('current_organization_id', 0) === 0) {
+                $user->refresh();
+                OrganizationSessionResolver::sync($request);
+            }
+        }
 
         if (($request->user()?->user_type ?? '') === 'systemuser') {
             return $next($request);
