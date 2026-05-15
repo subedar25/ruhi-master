@@ -28,15 +28,14 @@
                             @endforeach
                         </select>
                     </div>
+                    <button
+                        type="button"
+                        class="btn btn-primary btn-sm flex-shrink-0"
+                        onclick="document.getElementById('ruhiAddItemTrigger')?.click();"
+                    >
+                        <i class="fa fa-plus"></i> Add Item
+                    </button>
                 </div>
-
-                <button
-                    type="button"
-                    class="btn btn-primary btn-sm flex-shrink-0 ml-auto"
-                    onclick="document.getElementById('ruhiAddItemTrigger')?.click();"
-                >
-                    <i class="fa fa-plus"></i> Add Item
-                </button>
             </div>
 
             <div class="px-3 py-2 border-bottom">

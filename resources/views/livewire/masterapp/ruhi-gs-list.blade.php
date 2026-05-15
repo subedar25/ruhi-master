@@ -9,15 +9,14 @@
                         <i class="fa fa-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#6c757d;pointer-events:none;"></i>
                         <input type="search" wire:model.live.debounce.300ms="search" class="form-control search-input" style="padding-left:34px;" placeholder="Search GS..." autocomplete="off">
                     </div>
+                    <button
+                        type="button"
+                        class="btn btn-primary btn-sm flex-shrink-0"
+                        onclick="document.getElementById('ruhiAddGsTrigger')?.click();"
+                    >
+                        <i class="fa fa-plus"></i> Add GS
+                    </button>
                 </div>
-
-                <button
-                    type="button"
-                    class="btn btn-primary btn-sm flex-shrink-0 ml-auto"
-                    onclick="document.getElementById('ruhiAddGsTrigger')?.click();"
-                >
-                    <i class="fa fa-plus"></i> Add GS
-                </button>
             </div>
 
             <div class="px-3 py-2 border-bottom">
