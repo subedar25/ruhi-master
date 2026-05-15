@@ -4,12 +4,37 @@ namespace App\Http\Controllers\MasterApp;
 
 use App\Http\Controllers\Controller;
 use App\Models\Organization;
+use App\Support\OrganizationSessionResolver;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class OrganizationContextController extends Controller
 {
+    public function select(Request $request): View|RedirectResponse
+    {
+        $user = $request->user();
+        if (! $user) {
+            return redirect()->route('login.view');
+        }
+
+        $organizations = OrganizationSessionResolver::allowedOrganizations($user);
+
+        if ($organizations->count() <= 1) {
+            return redirect()->route('masterapp.dashboard');
+        }
+
+        $currentId = (int) session('current_organization_id', 0);
+        if ($currentId > 0 && $organizations->contains('id', $currentId)) {
+            return redirect()->route('masterapp.dashboard');
+        }
+
+        return view('masterapp.organization.select', [
+            'organizations' => $organizations,
+        ]);
+    }
+
     public function switch(Request $request): JsonResponse|RedirectResponse
     {
         $validated = $request->validate([
@@ -47,7 +72,38 @@ class OrganizationContextController extends Controller
             ]);
         }
 
+        return $this->redirectAfterOrganizationSwitch($request);
+    }
+
+    private function redirectAfterOrganizationSwitch(Request $request): RedirectResponse
+    {
+        $return = $request->session()->pull('organization_select_return_url');
+        if (is_string($return) && $return !== '' && $this->isSafeInternalPath($return)) {
+            return redirect()->to($return);
+        }
+
         return redirect()->back();
+    }
+
+    /**
+     * Only allow same-application paths (relative URI) to avoid open redirects.
+     */
+    private function isSafeInternalPath(string $pathOrUrl): bool
+    {
+        if (str_starts_with($pathOrUrl, '//')) {
+            return false;
+        }
+
+        if (str_starts_with($pathOrUrl, '/')) {
+            return true;
+        }
+
+        $appUrl = rtrim((string) config('app.url'), '/');
+        if ($appUrl !== '' && str_starts_with($pathOrUrl, $appUrl.'/')) {
+            return true;
+        }
+
+        return false;
     }
 }
 

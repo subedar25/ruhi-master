@@ -4,6 +4,8 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\CheckUserActive;
+use App\Http\Middleware\EnforceOrganizationSelection;
+use App\Http\Middleware\ResolveOrganizationSession;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -18,6 +20,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // Register CheckUserActive middleware for web routes
         $middleware->appendToGroup('web', [
             CheckUserActive::class,
+            ResolveOrganizationSession::class,
+            EnforceOrganizationSelection::class,
             // CheckUserRoleStatus::class,
         ]);
 

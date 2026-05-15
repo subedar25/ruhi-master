@@ -115,6 +115,8 @@ Route::prefix('master-app')
         Route::put('/changepassword', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
         Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+        Route::get('/organization/select', [OrganizationContextController::class, 'select'])
+            ->name('organization.select');
         Route::post('/organization/switch', [OrganizationContextController::class, 'switch'])
             ->name('organization.switch');
         Route::get('/users', [UserController::class, 'index'])

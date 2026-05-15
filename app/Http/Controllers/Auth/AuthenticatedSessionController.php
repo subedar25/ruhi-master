@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\Organization;
+use App\Support\OrganizationSessionResolver;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -73,38 +73,6 @@ class AuthenticatedSessionController extends Controller
 
     private function initializeOrganizationSession(Request $request): void
     {
-        $user = $request->user();
-        if (! $user) {
-            return;
-        }
-
-        $isSystemUser = ($user->user_type ?? '') === 'systemuser';
-        $organizationIds = $isSystemUser
-            ? Organization::orderBy('name')->pluck('id')->map(fn ($id) => (int) $id)->values()->all()
-            : $user->organizations()->orderBy('name')->pluck('organizations.id')->map(fn ($id) => (int) $id)->values()->all();
-
-        $request->session()->put('user_organization_ids', $organizationIds);
-
-        $selectedOrganizationId = (int) ($user->last_selected_organization_id ?? 0);
-        if ($selectedOrganizationId && ! in_array($selectedOrganizationId, $organizationIds, true)) {
-            $selectedOrganizationId = 0;
-        }
-
-        if (! $selectedOrganizationId && ! empty($organizationIds)) {
-            $selectedOrganizationId = (int) $organizationIds[0];
-        }
-
-        if (! $selectedOrganizationId) {
-            $request->session()->forget('current_organization_id');
-            return;
-        }
-
-        $request->session()->put('current_organization_id', $selectedOrganizationId);
-
-        if ((int) ($user->last_selected_organization_id ?? 0) !== $selectedOrganizationId) {
-            $user->forceFill([
-                'last_selected_organization_id' => $selectedOrganizationId,
-            ])->save();
-        }
+        OrganizationSessionResolver::sync($request);
     }
 }

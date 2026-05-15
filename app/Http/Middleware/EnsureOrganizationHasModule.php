@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Support\OrganizationModule;
+use App\Support\OrganizationSessionResolver;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -11,6 +12,8 @@ class EnsureOrganizationHasModule
 {
     public function handle(Request $request, Closure $next, string $moduleSlug): Response
     {
+        OrganizationSessionResolver::sync($request);
+
         if (($request->user()?->user_type ?? '') === 'systemuser') {
             return $next($request);
         }
