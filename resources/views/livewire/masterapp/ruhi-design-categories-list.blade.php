@@ -19,33 +19,6 @@
                 </div>
             </div>
 
-            <div class="px-3 py-2 border-bottom">
-                <div class="show_page_align">
-                    <div class="dataTables_info">
-                        @if($categories->total() > 0)
-                            Showing {{ $categories->firstItem() }} to {{ $categories->lastItem() }} of {{ $categories->total() }}
-                        @else
-                            Nothing to show
-                        @endif
-                    </div>
-                    <div class="length_pagination d-flex flex-wrap align-items-center">
-                        <div class="dataTables_length mr-3">
-                            <label class="mb-0">
-                                Show
-                                <select wire:model.live="perPage" class="form-control form-control-sm d-inline-block" style="width:auto; min-width:4.5rem;">
-                                    @foreach([20, 10, 15, 25, 50, 100] as $n)
-                                        <option value="{{ $n }}">{{ $n }}</option>
-                                    @endforeach
-                                </select>
-                            </label>
-                        </div>
-                        <div class="dataTables_paginate paging_simple_numbers pagination-links" style="max-width: 100%; overflow-x: auto; white-space: nowrap;">
-                            {{ $categories->links() }}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <div class="table-responsive">
                 <table class="table table-bordered table-hover table-sm mb-0">
                     <thead>
