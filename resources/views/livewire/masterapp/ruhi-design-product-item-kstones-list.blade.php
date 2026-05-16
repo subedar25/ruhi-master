@@ -3,42 +3,18 @@
 
     <div class="card">
         <div class="card-body p-0">
-            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 px-3 pt-3 pb-2 border-bottom">
-                <div class="search-input-wrapper flex-grow-1" style="max-width: 18rem; min-width: 9rem; position: relative;">
-                    <i class="fa fa-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#6c757d;pointer-events:none;"></i>
-                    <input type="search" wire:model.live.debounce.300ms="search" class="form-control search-input" style="padding-left:34px;" placeholder="Search..." autocomplete="off">
+            <div id="designProductKstoneTableToolbar" class="d-flex flex-wrap align-items-center gap-2 px-3 pt-3 pb-2 border-bottom">
+                <div class="d-flex flex-wrap align-items-center flex-grow-1" style="gap: .5rem; min-width: 0;">
+                    <div class="search-input-wrapper flex-grow-1" style="max-width: 18rem; min-width: 9rem; position: relative;">
+                        <i class="fa fa-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#6c757d;pointer-events:none;"></i>
+                        <input type="search" wire:model.live.debounce.300ms="search" class="form-control search-input" style="padding-left:34px;" placeholder="Search..." autocomplete="off">
+                    </div>
+                    <button type="button" class="btn btn-primary btn-sm flex-shrink-0" wire:click="openCreateModal">
+                        <i class="fa fa-plus mr-1"></i> Add
+                    </button>
                 </div>
-                <button type="button" class="btn btn-primary btn-sm" wire:click="openCreateModal">
-                    <i class="fa fa-plus mr-1"></i> Add
-                </button>
             </div>
 
-            <div class="px-3 py-2 border-bottom">
-                <div class="show_page_align">
-                    <div class="dataTables_info">
-                        @if($rows->total() > 0)
-                            Showing {{ $rows->firstItem() }} to {{ $rows->lastItem() }} of {{ $rows->total() }}
-                        @else
-                            Nothing to show
-                        @endif
-                    </div>
-                    <div class="length_pagination d-flex flex-wrap align-items-center">
-                        <div class="dataTables_length mr-3">
-                            <label class="mb-0">
-                                Show
-                                <select wire:model.live="perPage" class="form-control form-control-sm d-inline-block" style="width:auto; min-width:4.5rem;">
-                                    @foreach([20, 10, 15, 25, 50, 100] as $n)
-                                        <option value="{{ $n }}">{{ $n }}</option>
-                                    @endforeach
-                                </select>
-                            </label>
-                        </div>
-                        <div class="dataTables_paginate paging_simple_numbers pagination-links" style="max-width: 100%; overflow-x: auto; white-space: nowrap;">
-                            {{ $rows->links() }}
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <div class="table-responsive">
                 <table class="table table-bordered table-sm mb-0">
@@ -82,7 +58,34 @@
                 </table>
             </div>
         </div>
+        <div class="card-footer py-3 clearfix border-top design-product-section-footer">
+            <div class="show_page_align invoice-livewire-pagination">
+                <div class="dataTables_info">
+                    @if($rows->total() > 0)
+                        Showing {{ $rows->firstItem() }} to {{ $rows->lastItem() }} of {{ $rows->total() }}
+                    @else
+                        Nothing to show
+                    @endif
+                </div>
+                <div class="length_pagination d-flex flex-wrap align-items-center">
+                    <div class="dataTables_length">
+                        <label class="mb-0 d-inline-flex align-items-center" style="gap: .35rem;">
+                            Show
+                            <select wire:model.live="perPage" class="form-control form-control-sm d-inline-block" style="width:auto; min-width:4.5rem;">
+                                @foreach([20, 10, 15, 25, 50, 100] as $n)
+                                    <option value="{{ $n }}">{{ $n }}</option>
+                                @endforeach
+                            </select>
+                        </label>
+                    </div>
+                    <div class="dataTables_paginate paging_simple_numbers pagination-links mb-0" style="max-width: 100%; overflow-x: auto; white-space: nowrap;">
+                        {{ $rows->links() }}
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
 
     <div class="modal fade {{ $showCreateModal ? 'show d-block' : '' }}" tabindex="-1" role="dialog" style="background: rgba(0,0,0,0.5)">
         <div class="modal-dialog modal-lg" role="document">

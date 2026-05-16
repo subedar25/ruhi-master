@@ -43,14 +43,7 @@
         <div class="card mb-3">
             <div class="card-header d-flex align-items-center">
                 <h6 class="mb-0">{{ $block['type']->item_type }} (Total: {{ $block['total'] }})</h6>
-                <div class="ml-auto d-flex align-items-center" style="gap: .5rem;">
-                    <label class="mb-0 small text-muted">Show</label>
-                    <select class="form-control form-control-sm" style="width:auto; min-width:4.5rem;" wire:model.live="perPageByType.{{ $block['type']->id }}">
-                        @foreach([20, 10, 15, 25, 50, 100] as $n)
-                            <option value="{{ $n }}">{{ $n }}</option>
-                        @endforeach
-                        <option value="all">All</option>
-                    </select>
+                <div class="ml-auto">
                     <button type="button" class="btn btn-outline-primary btn-sm" wire:click="openCreateModal({{ $block['type']->id }})">
                         <i class="fa fa-plus mr-1"></i> Add
                     </button>
@@ -140,8 +133,32 @@
                     </tbody>
                 </table>
             </div>
-            <div class="card-footer py-2">
-                {{ $block['rows']->links() }}
+            <div class="card-footer py-3 clearfix border-top design-product-section-footer">
+                <div class="show_page_align invoice-livewire-pagination">
+                    <div class="dataTables_info">
+                        @if($block['rows']->total() > 0)
+                            Showing {{ $block['rows']->firstItem() }} to {{ $block['rows']->lastItem() }} of {{ $block['rows']->total() }}
+                        @else
+                            Nothing to show
+                        @endif
+                    </div>
+                    <div class="length_pagination d-flex flex-wrap align-items-center">
+                        <div class="dataTables_length">
+                            <label class="mb-0 d-inline-flex align-items-center" style="gap: .35rem;">
+                                Show
+                                <select class="form-control form-control-sm d-inline-block" style="width:auto; min-width:4.5rem;" wire:model.live="perPageByType.{{ $block['type']->id }}">
+                                    @foreach([20, 10, 15, 25, 50, 100] as $n)
+                                        <option value="{{ $n }}">{{ $n }}</option>
+                                    @endforeach
+                                    <option value="all">All</option>
+                                </select>
+                            </label>
+                        </div>
+                        <div class="dataTables_paginate paging_simple_numbers pagination-links mb-0" style="max-width: 100%; overflow-x: auto; white-space: nowrap;">
+                            {{ $block['rows']->links() }}
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     @endforeach
@@ -435,6 +452,30 @@
         }
         .modal .js-ruhi-master-select2 + .select2-container {
             width: 100% !important;
+        }
+        .design-product-section-footer .show_page_align.invoice-livewire-pagination {
+            margin-top: 0;
+            align-items: center;
+        }
+        .design-product-section-footer .length_pagination {
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .design-product-section-footer .dataTables_length {
+            float: none;
+            margin: 0;
+        }
+        .design-product-section-footer .dataTables_paginate {
+            margin-left: 0;
+        }
+        @media screen and (max-width: 767px) {
+            .design-product-section-footer .show_page_align.invoice-livewire-pagination {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .design-product-section-footer .length_pagination {
+                width: 100%;
+            }
         }
     </style>
 </div>

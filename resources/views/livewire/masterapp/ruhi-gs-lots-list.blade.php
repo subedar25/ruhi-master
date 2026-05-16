@@ -1,8 +1,8 @@
 <div>
     <div class="card">
         <div class="card-body p-0">
-            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 px-3 pt-3 pb-2 border-bottom">
-                <div class="d-flex flex-wrap align-items-center" style="gap:8px;">
+            <div id="gsLotsTableToolbar" class="d-flex flex-wrap align-items-center gap-2 px-3 pt-3 pb-2 border-bottom">
+                <div class="d-flex flex-wrap align-items-center flex-grow-1" style="gap: .5rem; min-width: 0;">
                     @error('lotFilterId')
                         <div class="w-100 order-last">
                             <div class="alert alert-danger py-2 px-3 mb-0 small">{{ $message }}</div>
@@ -31,6 +31,12 @@
                             @endforeach
                         </select>
                     </div>
+                    <button type="button" class="btn btn-primary btn-sm flex-shrink-0 text-nowrap" wire:click="openAddLotModal">
+                        <i class="fa fa-plus mr-1"></i> Add Lots
+                    </button>
+                    <button type="button" class="btn btn-success btn-sm flex-shrink-0 text-nowrap" wire:click="openAddItemModal">
+                        <i class="fa fa-plus mr-1"></i> Add Item in Lot
+                    </button>
                     @can('delete-ruhi-gs-lot')
                         @if($lotFilterId)
                             <button
@@ -44,14 +50,6 @@
                             </button>
                         @endif
                     @endcan
-                </div>
-                <div class="d-flex flex-wrap align-items-center" style="gap:8px;">
-                <button type="button" class="btn btn-primary btn-sm" wire:click="openAddLotModal">
-                    <i class="fa fa-plus mr-1"></i> Add Lots
-                </button>
-                <button type="button" class="btn btn-success btn-sm" wire:click="openAddItemModal">
-                    <i class="fa fa-plus mr-1"></i> Add Item in Lot
-                </button>
                 </div>
             </div>
 

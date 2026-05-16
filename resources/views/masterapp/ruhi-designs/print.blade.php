@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Design Product Print</title>
+    <title>List Design Items for Design ({{ $design->design_name }})</title>
     <style>
         body { font-family: Arial, sans-serif; color: #222; margin: 20px; }
         .print-actions { margin-bottom: 12px; }
         .print-btn { padding: 6px 10px; border: 1px solid #444; background: #fff; cursor: pointer; }
-        .title { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
-        .subtitle { font-size: 16px; margin-bottom: 12px; }
+        .title { font-size: 24px; font-weight: 700; margin-bottom: 12px; }
         .summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; border: 1px solid #ccc; padding: 10px; margin-bottom: 16px; }
         .summary .label { font-size: 16px; color: #666; }
         .summary .value { font-size: 16px; font-weight: 600; margin-top: 2px; }
@@ -34,8 +33,7 @@
 
     <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
         <div>
-            <div class="title">Design Product</div>
-            <div class="subtitle">List Design Items for Design "{{ $design->design_name }}"</div>
+            <div class="title">List Design Items for Design ({{ $design->design_name }})</div>
         </div>
         <div style="font-size:16px; white-space:nowrap; margin-top:6px;">
             Date: {{ now()->format('d-m-Y') }}
