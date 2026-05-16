@@ -259,19 +259,13 @@ table.dataTable.nowrap td {
   padding: 0.2rem 0.75rem;
 }
 
+.pagination-links .page-item.active .page-link,
 .page-item.active .page-link {
   z-index: 1;
-  color: #042da9;
-  background-color: white;
-  border-color: #042da9;
-}
-
-.page-item.active .page-link {
-  z-index: 1;
-  color: #042da9;
-  background-color: white;
-  border-color: #042da9;
-
+  color: #fff !important;
+  background-color: #042da9 !important;
+  border-color: #042da9 !important;
+  font-weight: 600;
 }
 
 .dataTables_length label {
