@@ -380,9 +380,9 @@
             font-size: 0.75rem;
             font-weight: 600;
             line-height: 1.35;
-            color: #0c5460;
-            background: #e8f6f8;
-            border: 1px solid #bee5eb;
+            color: #495057;
+            background: #e9ecef;
+            border: 1px solid #ced4da;
             border-radius: 0.25rem;
             text-decoration: none;
             text-align: left;
@@ -393,44 +393,44 @@
 
         a.item-design-chip:hover,
         a.item-design-chip:focus {
-            color: #004085;
-            background: #d1ecf1;
-            border-color: #86cfda;
+            color: #212529;
+            background: #dee2e6;
+            border-color: #adb5bd;
             text-decoration: none;
         }
 
         .item-design-chip--deleted {
-            color: #721c24;
-            background: #f8e8ea;
-            border-color: #f1c2c7;
+            color: #6c757d;
+            background: #e2e3e5;
+            border-color: #ced4da;
         }
 
         a.item-design-chip--deleted:hover,
         a.item-design-chip--deleted:focus {
-            color: #491217;
-            background: #f5d6da;
-            border-color: #e8a8b0;
+            color: #495057;
+            background: #d6d8db;
+            border-color: #adb5bd;
         }
 
         .item-design-chip--more {
             color: #495057;
-            background: #f1f3f5;
-            border-color: #dee2e6;
+            background: #dee2e6;
+            border-color: #ced4da;
             cursor: help;
         }
 
         .item-design-chip--less {
             color: #495057;
-            background: #f1f3f5;
-            border-color: #dee2e6;
+            background: #dee2e6;
+            border-color: #ced4da;
             cursor: pointer;
         }
 
         .item-design-chip--more:hover,
         .item-design-chip--less:hover {
             color: #212529;
-            background: #e9ecef;
-            border-color: #ced4da;
+            background: #d6d8db;
+            border-color: #adb5bd;
         }
 
         button.item-design-chip {
