@@ -76,7 +76,7 @@
                                         <span class="item-designs-empty text-muted">—</span>
                                     @else
                                         <div
-                                            class="item-designs-chips"
+                                            class="item-designs-list"
                                             aria-label="Designs using this item"
                                             x-data="{ expanded: false }"
                                         >
@@ -362,21 +362,22 @@
             padding-bottom: 0.45rem;
         }
 
-        .item-designs-chips {
+        .item-designs-list {
             display: flex;
-            flex-wrap: wrap;
-            align-items: flex-start;
-            gap: 0.35rem;
-            max-width: 22rem;
-            line-height: 1.3;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.3rem;
+            min-width: 8rem;
+            max-width: 16rem;
+            line-height: 1.35;
         }
 
         .item-design-chip {
-            display: inline-flex;
-            align-items: center;
-            max-width: 100%;
-            padding: 0.15rem 0.5rem;
-            font-size: 0.6875rem;
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+            padding: 0.2rem 0.55rem;
+            font-size: 0.75rem;
             font-weight: 600;
             line-height: 1.35;
             color: #0c5460;
@@ -384,9 +385,9 @@
             border: 1px solid #bee5eb;
             border-radius: 0.25rem;
             text-decoration: none;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            text-align: left;
+            white-space: normal;
+            word-break: break-word;
             transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
         }
 
