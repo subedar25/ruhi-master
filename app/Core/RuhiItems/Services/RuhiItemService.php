@@ -5,6 +5,7 @@ namespace App\Core\RuhiItems\Services;
 use App\Models\RuhiItemType;
 use App\Models\RuhiProduct;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
 class RuhiItemService
@@ -12,36 +13,16 @@ class RuhiItemService
     public function paginateForList(string $search, string $itemTypeId, int $perPage, bool $includeDeleted = false): LengthAwarePaginator
     {
         $query = RuhiProduct::query()
-            ->with([
-                'itemType',
-                'designProducts.design' => function ($designQuery) {
-                    $designQuery
-                        ->withTrashed()
-                        ->orderByRaw("LEFT(design_name, LOCATE('-', design_name))")
-                        ->orderByRaw("CAST(SUBSTRING(design_name, LOCATE('-', design_name) + 1) AS SIGNED)")
-                        ->orderBy('design_name');
-                },
-            ])
+            ->with($this->listEagerLoads())
             ->withCount('itemKstones');
+
         if ($includeDeleted) {
             $query->withTrashed();
         }
 
         $term = trim((string) $search);
         if ($term !== '') {
-            $query->where(function ($q) use ($term) {
-                $q->where('product_name', 'like', "%{$term}%")
-                    ->orWhere('product_desc', 'like', "%{$term}%")
-                    ->orWhereHas('itemType', function ($itemTypeQuery) use ($term) {
-                        $itemTypeQuery->where('item_type', 'like', "%{$term}%");
-                    });
-
-                if (ctype_digit($term)) {
-                    $q->orWhere('id', (int) $term);
-                } else {
-                    $q->orWhere('id', 'like', "%{$term}%");
-                }
-            });
+            $this->applySearchFilters($query, $term);
         }
 
         if ($itemTypeId !== '') {
@@ -53,6 +34,54 @@ class RuhiItemService
             ->orderByRaw("CAST(SUBSTRING(product_name, LOCATE('-', product_name) + 1) AS SIGNED)")
             ->paginate($perPage)
             ->onEachSide(1);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function listEagerLoads(): array
+    {
+        return [
+            'itemType:id,item_type',
+            'designProducts' => function ($designProductQuery) {
+                $designProductQuery->select(['id', 'design_id', 'product_id']);
+            },
+            'designProducts.design' => function ($designQuery) {
+                $designQuery
+                    ->withTrashed()
+                    ->select(['id', 'design_name', 'deleted_at'])
+                    ->orderByRaw("LEFT(design_name, LOCATE('-', design_name))")
+                    ->orderByRaw("CAST(SUBSTRING(design_name, LOCATE('-', design_name) + 1) AS SIGNED)")
+                    ->orderBy('design_name');
+            },
+        ];
+    }
+
+    private function applySearchFilters(Builder $query, string $term): void
+    {
+        $productTable = (new RuhiProduct)->getTable();
+
+        $query->where(function (Builder $q) use ($term, $productTable) {
+            $q->where("{$productTable}.product_name", 'like', "%{$term}%")
+                ->orWhere("{$productTable}.product_desc", 'like', "%{$term}%")
+                ->orWhereExists(function ($sub) use ($term, $productTable) {
+                    $sub->from('r_item_type as it')
+                        ->whereColumn('it.id', "{$productTable}.product_type")
+                        ->where('it.item_type', 'like', "%{$term}%");
+                })
+                ->orWhereExists(function ($sub) use ($term, $productTable) {
+                    $sub->from('r_design_products as dp')
+                        ->join('r_design as d', 'd.id', '=', 'dp.design_id')
+                        ->whereColumn('dp.product_id', "{$productTable}.id")
+                        ->where('d.design_name', 'like', "%{$term}%");
+                });
+
+            if (ctype_digit($term)) {
+                $q->orWhere("{$productTable}.id", (int) $term);
+            } else {
+                $q->orWhere("{$productTable}.id", 'like', "%{$term}%");
+            }
+        });
     }
 
     public function listTypes(): Collection
@@ -87,4 +116,3 @@ class RuhiItemService
         return RuhiProduct::withTrashed()->where('id', $id)->restore();
     }
 }
-

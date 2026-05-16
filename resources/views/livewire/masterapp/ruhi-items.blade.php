@@ -7,7 +7,7 @@
                 <div class="d-flex flex-wrap align-items-center flex-grow-1" style="gap: .5rem; min-width: 0;">
                     <div class="search-input-wrapper flex-grow-1" style="max-width: 18rem; min-width: 9rem; position: relative;">
                         <i class="fa fa-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#6c757d;pointer-events:none;"></i>
-                        <input type="search" wire:model.live.debounce.300ms="search" class="form-control search-input" style="padding-left:34px;" placeholder="Search item..." autocomplete="off">
+                        <input type="search" wire:model.live.debounce.500ms="search" class="form-control search-input" style="padding-left:34px;" placeholder="Search item or design..." autocomplete="off">
                     </div>
                     <div id="ruhi-items-anchor-item-type" class="d-none" data-s2-value="{{ $itemTypeId }}"></div>
                     <input type="hidden" wire:model.live="itemTypeId" id="ruhi-items-hidden-item-type">
@@ -69,45 +69,61 @@
                                             ->unique('design_id')
                                             ->map(fn ($row) => $row->design);
                                         $designsVisibleLimit = 4;
-                                        $designsHiddenCount = max(0, $designsUsed->count() - $designsVisibleLimit);
+                                        $designsTotalCount = $designsUsed->count();
+                                        $designsHiddenCount = max(0, $designsTotalCount - $designsVisibleLimit);
                                         $designsHiddenNames = $designsUsed->skip($designsVisibleLimit)->pluck('design_name')->implode(', ');
+                                        $designSearchTerm = trim($search);
+                                        $designNameMatchesSearch = static function ($design) use ($designSearchTerm): bool {
+                                            if ($designSearchTerm === '') {
+                                                return false;
+                                            }
+
+                                            return stripos((string) $design->design_name, $designSearchTerm) !== false;
+                                        };
                                     @endphp
                                     @if($designsUsed->isEmpty())
                                         <span class="item-designs-empty text-muted">—</span>
                                     @else
                                         <div
-                                            class="item-designs-list"
-                                            aria-label="Designs using this item"
+                                            class="item-designs-wrap{{ $designsHiddenCount > 0 ? ' item-designs-wrap--collapsible' : '' }}"
                                             x-data="{ expanded: false }"
                                         >
+                                            @if($designsHiddenCount > 0)
+                                                <button
+                                                    type="button"
+                                                    class="item-designs-toggle"
+                                                    title="{{ $designsHiddenNames }}"
+                                                    aria-label="Toggle all {{ $designsTotalCount }} designs"
+                                                    @click.prevent="expanded = !expanded"
+                                                >
+                                                    <span x-show="!expanded">+{{ $designsTotalCount }}</span>
+                                                    <span x-show="expanded" x-cloak>−{{ $designsTotalCount }}</span>
+                                                </button>
+                                            @endif
+                                            <div class="item-designs-list" aria-label="Designs using this item">
                                             @foreach($designsUsed as $design)
+                                                @php
+                                                    $designMatchesSearch = $designNameMatchesSearch($design);
+                                                    $designNameHtml = e($design->design_name);
+                                                    if ($designMatchesSearch) {
+                                                        $designNameHtml = preg_replace(
+                                                            '/(' . preg_quote($designSearchTerm, '/') . ')/iu',
+                                                            '<mark class="item-design-match-text">$1</mark>',
+                                                            $designNameHtml
+                                                        );
+                                                    }
+                                                @endphp
                                                 <a
                                                     href="{{ route('masterapp.ruhi-designs.products', $design->id) }}"
-                                                    class="item-design-chip{{ $design->trashed() ? ' item-design-chip--deleted' : '' }}"
+                                                    class="item-design-chip{{ $design->trashed() ? ' item-design-chip--deleted' : '' }}{{ $designMatchesSearch ? ' item-design-chip--match' : '' }}"
                                                     title="{{ $design->trashed() ? 'Deleted design — ' : '' }}Open {{ $design->design_name }}"
                                                     @if($designsHiddenCount > 0 && $loop->index >= $designsVisibleLimit)
                                                         x-show="expanded"
                                                         x-cloak
                                                     @endif
-                                                >{{ $design->design_name }}</a>
+                                                >{!! $designNameHtml !!}</a>
                                             @endforeach
-                                            @if($designsHiddenCount > 0)
-                                                <button
-                                                    type="button"
-                                                    class="item-design-chip item-design-chip--more"
-                                                    title="{{ $designsHiddenNames }}"
-                                                    x-show="!expanded"
-                                                    x-cloak
-                                                    @click.prevent="expanded = true"
-                                                >+{{ $designsHiddenCount }} more</button>
-                                                <button
-                                                    type="button"
-                                                    class="item-design-chip item-design-chip--less"
-                                                    x-show="expanded"
-                                                    x-cloak
-                                                    @click.prevent="expanded = false"
-                                                >Show less</button>
-                                            @endif
+                                            </div>
                                         </div>
                                     @endif
                                 </td>
@@ -362,13 +378,51 @@
             padding-bottom: 0.45rem;
         }
 
+        .item-designs-wrap {
+            position: relative;
+            min-width: 8rem;
+            max-width: 16rem;
+        }
+
+        .item-designs-wrap--collapsible {
+            padding-right: 2.5rem;
+        }
+
+        .item-designs-toggle {
+            position: absolute;
+            top: 0;
+            right: 0;
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 1.75rem;
+            height: 1.15rem;
+            padding: 0 0.25rem;
+            font-size: 0.6875rem;
+            font-weight: 700;
+            line-height: 1;
+            color: #495057;
+            background: #dee2e6;
+            border: 1px solid #ced4da;
+            border-radius: 0.2rem;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .item-designs-toggle:hover,
+        .item-designs-toggle:focus {
+            color: #212529;
+            background: #ced4da;
+            border-color: #adb5bd;
+            outline: none;
+        }
+
         .item-designs-list {
             display: flex;
             flex-direction: column;
             align-items: stretch;
             gap: 0.3rem;
-            min-width: 8rem;
-            max-width: 16rem;
             line-height: 1.35;
         }
 
@@ -412,29 +466,32 @@
             border-color: #adb5bd;
         }
 
-        .item-design-chip--more {
+        .item-design-chip--match {
+            color: #004085;
+            background: #fff3cd;
+            border-color: #ffc107;
+            box-shadow: 0 0 0 1px rgba(255, 193, 7, 0.35);
+        }
+
+        a.item-design-chip--match:hover,
+        a.item-design-chip--match:focus {
+            color: #002752;
+            background: #ffe69c;
+            border-color: #e0a800;
+        }
+
+        .item-design-chip--match.item-design-chip--deleted {
             color: #495057;
-            background: #dee2e6;
-            border-color: #ced4da;
-            cursor: help;
+            background: #fff3cd;
+            border-color: #ffc107;
         }
 
-        .item-design-chip--less {
-            color: #495057;
-            background: #dee2e6;
-            border-color: #ced4da;
-            cursor: pointer;
-        }
-
-        .item-design-chip--more:hover,
-        .item-design-chip--less:hover {
-            color: #212529;
-            background: #d6d8db;
-            border-color: #adb5bd;
-        }
-
-        button.item-design-chip {
-            font-family: inherit;
+        .item-design-match-text {
+            padding: 0 0.1em;
+            color: inherit;
+            background: rgba(255, 193, 7, 0.55);
+            border-radius: 0.15rem;
+            font-weight: 700;
         }
 
         [x-cloak] {
