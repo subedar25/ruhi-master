@@ -44,7 +44,7 @@
                         <tr>
                             <th style="width: 70px; white-space: nowrap;">S. No.</th>
                             <th>Name</th>
-                            <th>Design Name</th>
+                            <th class="item-designs-col">Designs</th>
                             <th>Weight</th>
                             <th>Image</th>
                             <th>Type</th>
@@ -62,15 +62,54 @@
                                         <span class="badge badge-danger ml-1">Deleted</span>
                                     @endif
                                 </td>
-                                <td>
+                                <td class="item-designs-cell">
                                     @php
-                                        $designNames = $item->designProducts
-                                            ->pluck('design.design_name')
-                                            ->filter()
-                                            ->unique()
-                                            ->values();
+                                        $designsUsed = $item->designProducts
+                                            ->filter(fn ($row) => $row->design !== null)
+                                            ->unique('design_id')
+                                            ->map(fn ($row) => $row->design);
+                                        $designsVisibleLimit = 4;
+                                        $designsHiddenCount = max(0, $designsUsed->count() - $designsVisibleLimit);
+                                        $designsHiddenNames = $designsUsed->skip($designsVisibleLimit)->pluck('design_name')->implode(', ');
                                     @endphp
-                                    {{ $designNames->isNotEmpty() ? $designNames->implode(', ') : '-' }}
+                                    @if($designsUsed->isEmpty())
+                                        <span class="item-designs-empty text-muted">—</span>
+                                    @else
+                                        <div
+                                            class="item-designs-chips"
+                                            aria-label="Designs using this item"
+                                            x-data="{ expanded: false }"
+                                        >
+                                            @foreach($designsUsed as $design)
+                                                <a
+                                                    href="{{ route('masterapp.ruhi-designs.products', $design->id) }}"
+                                                    class="item-design-chip{{ $design->trashed() ? ' item-design-chip--deleted' : '' }}"
+                                                    title="{{ $design->trashed() ? 'Deleted design — ' : '' }}Open {{ $design->design_name }}"
+                                                    @if($designsHiddenCount > 0 && $loop->index >= $designsVisibleLimit)
+                                                        x-show="expanded"
+                                                        x-cloak
+                                                    @endif
+                                                >{{ $design->design_name }}</a>
+                                            @endforeach
+                                            @if($designsHiddenCount > 0)
+                                                <button
+                                                    type="button"
+                                                    class="item-design-chip item-design-chip--more"
+                                                    title="{{ $designsHiddenNames }}"
+                                                    x-show="!expanded"
+                                                    x-cloak
+                                                    @click.prevent="expanded = true"
+                                                >+{{ $designsHiddenCount }} more</button>
+                                                <button
+                                                    type="button"
+                                                    class="item-design-chip item-design-chip--less"
+                                                    x-show="expanded"
+                                                    x-cloak
+                                                    @click.prevent="expanded = false"
+                                                >Show less</button>
+                                            @endif
+                                        </div>
+                                    @endif
                                 </td>
                                 <td>{{ $item->weight }}</td>
                                 <td>
@@ -310,5 +349,99 @@
             </div>
         </div>
     </div>
-</div>
 
+    <style>
+        .item-designs-col {
+            min-width: 12rem;
+            width: 22%;
+        }
+
+        .item-designs-cell {
+            vertical-align: top;
+            padding-top: 0.45rem;
+            padding-bottom: 0.45rem;
+        }
+
+        .item-designs-chips {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            gap: 0.35rem;
+            max-width: 22rem;
+            line-height: 1.3;
+        }
+
+        .item-design-chip {
+            display: inline-flex;
+            align-items: center;
+            max-width: 100%;
+            padding: 0.15rem 0.5rem;
+            font-size: 0.6875rem;
+            font-weight: 600;
+            line-height: 1.35;
+            color: #0c5460;
+            background: #e8f6f8;
+            border: 1px solid #bee5eb;
+            border-radius: 0.25rem;
+            text-decoration: none;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        }
+
+        a.item-design-chip:hover,
+        a.item-design-chip:focus {
+            color: #004085;
+            background: #d1ecf1;
+            border-color: #86cfda;
+            text-decoration: none;
+        }
+
+        .item-design-chip--deleted {
+            color: #721c24;
+            background: #f8e8ea;
+            border-color: #f1c2c7;
+        }
+
+        a.item-design-chip--deleted:hover,
+        a.item-design-chip--deleted:focus {
+            color: #491217;
+            background: #f5d6da;
+            border-color: #e8a8b0;
+        }
+
+        .item-design-chip--more {
+            color: #495057;
+            background: #f1f3f5;
+            border-color: #dee2e6;
+            cursor: help;
+        }
+
+        .item-design-chip--less {
+            color: #495057;
+            background: #f1f3f5;
+            border-color: #dee2e6;
+            cursor: pointer;
+        }
+
+        .item-design-chip--more:hover,
+        .item-design-chip--less:hover {
+            color: #212529;
+            background: #e9ecef;
+            border-color: #ced4da;
+        }
+
+        button.item-design-chip {
+            font-family: inherit;
+        }
+
+        [x-cloak] {
+            display: none !important;
+        }
+
+        .item-designs-empty {
+            font-size: 0.875rem;
+        }
+    </style>
+</div>
