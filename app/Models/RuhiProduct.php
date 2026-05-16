@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -38,6 +39,12 @@ class RuhiProduct extends Model
     public function designProducts(): HasMany
     {
         return $this->hasMany(RuhiDesignProduct::class, 'product_id', 'id');
+    }
+
+    public function designs(): BelongsToMany
+    {
+        return $this->belongsToMany(RuhiDesign::class, 'r_design_products', 'product_id', 'design_id')
+            ->distinct();
     }
 }
 

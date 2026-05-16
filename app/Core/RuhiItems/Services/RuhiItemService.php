@@ -12,7 +12,16 @@ class RuhiItemService
     public function paginateForList(string $search, string $itemTypeId, int $perPage, bool $includeDeleted = false): LengthAwarePaginator
     {
         $query = RuhiProduct::query()
-            ->with('itemType')
+            ->with([
+                'itemType',
+                'designProducts.design' => function ($designQuery) {
+                    $designQuery
+                        ->withTrashed()
+                        ->orderByRaw("LEFT(design_name, LOCATE('-', design_name))")
+                        ->orderByRaw("CAST(SUBSTRING(design_name, LOCATE('-', design_name) + 1) AS SIGNED)")
+                        ->orderBy('design_name');
+                },
+            ])
             ->withCount('itemKstones');
         if ($includeDeleted) {
             $query->withTrashed();

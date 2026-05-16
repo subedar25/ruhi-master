@@ -44,6 +44,7 @@
                         <tr>
                             <th style="width: 70px; white-space: nowrap;">S. No.</th>
                             <th>Name</th>
+                            <th>Design Name</th>
                             <th>Weight</th>
                             <th>Image</th>
                             <th>Type</th>
@@ -60,6 +61,16 @@
                                     @if($item->deleted_at)
                                         <span class="badge badge-danger ml-1">Deleted</span>
                                     @endif
+                                </td>
+                                <td>
+                                    @php
+                                        $designNames = $item->designProducts
+                                            ->pluck('design.design_name')
+                                            ->filter()
+                                            ->unique()
+                                            ->values();
+                                    @endphp
+                                    {{ $designNames->isNotEmpty() ? $designNames->implode(', ') : '-' }}
                                 </td>
                                 <td>{{ $item->weight }}</td>
                                 <td>
@@ -116,7 +127,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center">No items found.</td>
+                                <td colspan="8" class="text-center">No items found.</td>
                             </tr>
                         @endforelse
                     </tbody>
