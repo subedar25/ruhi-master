@@ -88,15 +88,6 @@
             @endif
         </h5>
 
-        <p class="mb-2">
-            <span class="font-weight-bold">Design Name</span>
-            @if($report['design_names_csv'] !== '')
-                &nbsp;{{ $report['design_names_csv'] }}
-            @else
-                <span class="text-muted">&mdash;</span>
-            @endif
-        </p>
-
         <div class="table-responsive d-inline-block w-100" style="max-width: 72rem;">
             <table class="table table-bordered table-sm mb-0 ruhi-casting-report-table w-100" style="table-layout: fixed;">
                 <thead>

@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GS Wise Lot Wise item report</title>
+    <title>GS Wise Lot Wise item report @if(trim((string) $gs->name) !== '') ({{ $gs->name }}) @endif</title>
     <style>
         body { font-family: Arial, sans-serif; color: #222; margin: 18px; font-size: 16px; }
         .actions { margin-bottom: 12px; }
         .print-btn { padding: 6px 10px; border: 1px solid #444; background: #fff; cursor: pointer; }
-        .title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+        .title { font-size: 18px; font-weight: 700; margin-bottom: 14px; }
         .date-right { float: right; font-size: 16px; font-weight: 500; }
-        .subtitle { margin-bottom: 14px; color: #555; }
-        .wrap { display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch; }
+        .wrap { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; }
         .lot-card {
             flex: 1 1 260px;
             max-width: calc(33.333% - 10px);
@@ -58,8 +57,7 @@
         <button type="button" class="print-btn" onclick="window.print()">Print / Save PDF</button>
     </div>
 
-    <div class="title"><span class="date-right">Date: {{ now()->format('d-m-Y') }}</span>GS Wise Lot Wise item report</div>
-    <div class="subtitle">{{ $gs->name }}</div>
+    <div class="title"><span class="date-right">Date: {{ now()->format('d-m-Y') }}</span>GS Wise Lot Wise item report @if(trim((string) $gs->name) !== '') ({{ $gs->name }}) @endif</div>
 
     @if($blocks->isEmpty())
         <p>No lots found for this GS.</p>

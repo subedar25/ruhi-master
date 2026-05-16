@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GS Wise Collet Report</title>
+    <title>GS Wise Collet Report @if(trim((string) ($report['gs_name'] ?? '')) !== '') ({{ trim((string) ($report['gs_name'] ?? '')) }}) @endif</title>
     <style>
         body { font-family: Arial, sans-serif; color: #222; margin: 18px; font-size: 16px; }
         .actions { margin-bottom: 12px; }
         .print-btn { padding: 6px 10px; border: 1px solid #444; background: #fff; cursor: pointer; }
-        .title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+        .title { font-size: 18px; font-weight: 700; margin-bottom: 14px; }
         .date-right { float: right; font-size: 16px; font-weight: 500; }
-        .subtitle { margin-bottom: 14px; color: #555; }
         table { width: 100%; border-collapse: collapse; font-size: 16px; table-layout: auto; }
         th, td { border: 1px solid #ddd; padding: 4px 6px; }
         th { background: #fafafa; font-weight: 700; text-align: left; white-space: nowrap; }
@@ -31,12 +30,7 @@
         <button type="button" class="print-btn" onclick="window.print()">Print / Save PDF</button>
     </div>
 
-    <div class="title"><span class="date-right">Date: {{ now()->format('d-m-Y') }}</span>GS Wise Collet Report</div>
-    <div class="subtitle">
-        @if($report['gs_name'] !== '')
-            {{ $report['gs_name'] }}
-        @endif
-    </div>
+    <div class="title"><span class="date-right">Date: {{ now()->format('d-m-Y') }}</span>GS Wise Collet Report @if(trim((string) ($report['gs_name'] ?? '')) !== '') ({{ trim((string) ($report['gs_name'] ?? '')) }}) @endif</div>
 
     <table>
         <thead>

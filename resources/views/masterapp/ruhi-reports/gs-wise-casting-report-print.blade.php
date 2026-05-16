@@ -3,17 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GS Wise Casting Report</title>
+    <title>GS Wise Casting Report @if(trim((string) ($report['gs_name'] ?? '')) !== '') ({{ trim((string) ($report['gs_name'] ?? '')) }}) @endif</title>
     <style>
         body { font-family: Arial, sans-serif; color: #222; margin: 18px; font-size: 16px; }
         .actions { margin-bottom: 12px; }
         .print-btn { padding: 6px 10px; border: 1px solid #444; background: #fff; cursor: pointer; }
-        .title-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+        .title-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
         .title { font-size: 18px; font-weight: 700; margin-bottom: 0; }
         .title-date { font-size: 16px; color: #555; text-align: right; white-space: nowrap; }
-        .subtitle { margin-bottom: 10px; color: #555; }
-        .design-line { margin-bottom: 14px; }
-        .design-line strong { font-weight: 700; }
         table { width: 100%; max-width: 72rem; border-collapse: collapse; font-size: 16px; table-layout: fixed; }
         th, td { border: 1px solid #ddd; padding: 6px 8px; }
         th { background: #fafafa; font-weight: 700; text-align: left; }
@@ -36,22 +33,8 @@
     </div>
 
     <div class="title-row">
-        <div class="title">GS Wise Casting Report</div>
+        <div class="title">GS Wise Casting Report @if(trim((string) ($report['gs_name'] ?? '')) !== '') ({{ trim((string) ($report['gs_name'] ?? '')) }}) @endif</div>
         <div class="title-date">Date: {{ now()->format('d-m-Y') }}</div>
-    </div>
-    <div class="subtitle">
-        @if($report['gs_name'] !== '' || $report['lot_name'] !== '')
-            ({{ $report['gs_name'] }}@if($report['gs_name'] !== '' && $report['lot_name'] !== ''){{ ', ' }}@endif{{ $report['lot_name'] }})
-        @endif
-    </div>
-
-    <div class="design-line">
-        <strong>Design Name</strong>
-        @if($report['design_names_csv'] !== '')
-            &nbsp;{{ $report['design_names_csv'] }}
-        @else
-            &mdash;
-        @endif
     </div>
 
     <table>

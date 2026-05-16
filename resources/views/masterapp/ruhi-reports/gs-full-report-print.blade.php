@@ -2,25 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    @php $g = trim((string) ($report['gs_name'] ?? '')); @endphp
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>
         @if(!empty($section) && $section === 'kundanfull')
-            GS Wise Kundanfull Report
+            GS Wise Kundanfull Report @if($g !== '') ({{ $g }}) @endif
         @elseif(!empty($section) && $section === 'pulkifull')
-            GS Wise Pulkifull Report
+            GS Wise Pulkifull Report @if($g !== '') ({{ $g }}) @endif
         @elseif(!empty($section) && $section === 'addfull')
-            GS Wise Addfull Report
+            GS Wise Addfull Report @if($g !== '') ({{ $g }}) @endif
         @else
-            GS Full Report
+            GS Full Report @if($g !== '') ({{ $g }}) @endif
         @endif
     </title>
     <style>
         body { font-family: Arial, sans-serif; color: #222; margin: 18px; font-size: 16px; }
         .actions { margin-bottom: 12px; }
         .print-btn { padding: 6px 10px; border: 1px solid #444; background: #fff; cursor: pointer; }
-        .page-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+        .page-title { font-size: 18px; font-weight: 700; margin-bottom: 14px; }
         .date-right { float: right; font-size: 16px; font-weight: 500; }
-        .subtitle { margin-bottom: 16px; color: #555; }
         .section-title { font-size: 16px; font-weight: 700; margin: 20px 0 8px; }
         table { width: 100%; max-width: 72rem; border-collapse: collapse; font-size: 16px; margin-bottom: 8px; }
         th, td { border: 1px solid #ddd; padding: 4px 6px; }
@@ -44,8 +44,6 @@
         <button type="button" class="print-btn" onclick="window.print()">Print / Save PDF</button>
     </div>
 
-    @php $g = $report['gs_name']; @endphp
-
     <div class="page-title">
         <span class="date-right">Date: {{ now()->format('d-m-Y') }}</span>
         @if(!empty($section) && $section === 'kundanfull')
@@ -55,12 +53,7 @@
         @elseif(!empty($section) && $section === 'addfull')
             GS Wise Addfull Report @if($g !== '') ({{ $g }}) @endif
         @else
-            GS Full Report
-        @endif
-    </div>
-    <div class="subtitle">
-        @if($report['gs_name'] !== '')
-            {{ $report['gs_name'] }}
+            GS Full Report @if($g !== '') ({{ $g }}) @endif
         @endif
     </div>
 

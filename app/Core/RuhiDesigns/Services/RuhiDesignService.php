@@ -31,7 +31,13 @@ class RuhiDesignService
             $query->where('category_id', (int) $categoryId);
         }
 
-        return $query->orderByDesc('id')->paginate($perPage)->onEachSide(1);
+        return $query
+            ->orderByRaw("LEFT(design_name, LOCATE('-', design_name))")
+            ->orderByRaw("CAST(SUBSTRING(design_name, LOCATE('-', design_name) + 1) AS SIGNED)")
+            ->orderBy('design_name')
+            ->orderBy('id')
+            ->paginate($perPage)
+            ->onEachSide(1);
     }
 
     public function listCategories(): Collection

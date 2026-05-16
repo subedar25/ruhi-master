@@ -58,8 +58,6 @@
         <button type="button" class="print-btn" onclick="window.print()">Print / Save PDF</button>
     </div>
 
-    <div class="section-title" style="margin-bottom: 10px;"><span class="date-right">Date: {{ now()->format('d-m-Y') }}</span>GS Wise Detail Report of Each Item</div>
-
     @foreach($report['blocks'] as $block)
         <div class="block design-detail">
             <div class="design-detail-title">

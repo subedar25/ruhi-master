@@ -92,14 +92,14 @@
                     return ((int) ($a['lot']->id ?? 0)) <=> ((int) ($b['lot']->id ?? 0));
                 })->values();
             @endphp
-            <div class="row mx-0">
+            <div class="row mx-0 align-items-start">
                 @foreach($sortedBlocks as $block)
                     @php
                         /** @var \App\Models\RuhiSlot $lot */
                         $lot = $block['lot'];
                     @endphp
-                    <div class="col-12 col-sm-6 col-lg-6 col-xl-4 mb-3 px-2 d-flex">
-                        <div class="card flex-fill mb-0 w-100 ruhi-lot-block-card">
+                    <div class="col-12 col-sm-6 col-lg-6 col-xl-4 mb-3 px-2">
+                        <div class="card mb-0 w-100 ruhi-lot-block-card">
                             <div class="card-header py-2 px-2 d-flex flex-nowrap align-items-center justify-content-between">
                                 <div class="font-weight-bold small text-truncate mr-2" style="min-width: 0; flex: 1 1 auto;" title="{{ $lot->slot_name }}">{{ $lot->slot_name }}</div>
                                 <div class="small text-nowrap flex-shrink-0">Total Collate: <strong>{{ (int) round((float) $block['total_collate']) }}</strong></div>
